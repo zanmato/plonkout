@@ -1,0 +1,192 @@
+{
+  "workout": {
+    "title": "Workouts",
+    "new": "New Workout",
+    "edit": "Edit Workout",
+    "save": "Save",
+    "saving": "Saving...",
+    "duplicate": "Duplicate Workout",
+    "delete": "Delete Workout",
+    "name": "Workout Name",
+    "started": "Started",
+    "ended": "Ended",
+    "notes": "Notes",
+    "addSet": "Add Set",
+    "addExercise": "Add Exercise",
+    "namePlaceholder": "Workout name (optional)",
+    "notesPlaceholder": "Workout notes (optional)",
+    "deleteConfirm": "Delete this workout? This cannot be undone.",
+    "removeExerciseConfirm": "Remove this exercise?",
+    "duplicateError": "Error duplicating workout",
+    "deleteError": "Error deleting workout",
+    "saveError": "Error saving workout",
+    "saveSuccess": "Workout saved successfully",
+    "templateSaved": "Workout template saved",
+    "loadError": "Error loading workout",
+    "copyName": "Copy",
+    "saveAsTemplate": "Save as template",
+    "unnamed": "Unnamed workout",
+    "loading": "Loading...",
+    "workoutCount": "{count} workout | {count} workouts",
+    "summary": {
+      "noExercises": "No exercises",
+      "singleExercise": "{totalSets} sets of {exerciseName}",
+      "multipleExercises": "{totalSets} sets of {exerciseCount} exercises"
+    }
+  },
+  "exercise": {
+    "set": "Set",
+    "weight": "Weight",
+    "rpe": "RPE",
+    "reps": "Reps",
+    "arm": "Arm",
+    "notes": "Notes",
+    "statsComingSoon": "Exercise stats coming soon!",
+    "newWeightRecord": "New weight record!",
+    "newRepRecord": "New rep record!",
+    "previousBest": "prev",
+    "percentOfMax": "% of max",
+    "time": "Time",
+    "distance": "Distance",
+    "selector": {
+      "title": "Select Exercise",
+      "new": "+ New",
+      "search": "Search exercises...",
+      "loading": "Loading exercises...",
+      "noResults": "No exercises found",
+      "singleArm": "Single arm",
+      "bothArms": "Both arms",
+      "newExercise": "New Exercise",
+      "name": "Name",
+      "namePlaceholder": "Exercise name",
+      "muscleGroup": "Muscle Group",
+      "muscleGroupPlaceholder": "e.g., Wrist, Forearm, Bicep",
+      "singleArmLabel": "Single arm exercise",
+      "create": "Create",
+      "loadError": "Error loading exercises",
+      "createError": "Error creating exercise",
+      "defaultMuscleGroup": "General"
+    },
+    "arms": {
+      "left": "Left",
+      "right": "Right",
+      "both": "Both"
+    },
+    "muscleGroups": {
+      "shoulders": "Shoulders",
+      "legs": "Legs",
+      "biceps": "Biceps",
+      "triceps": "Triceps",
+      "chest": "Chest",
+      "abs": "Abs",
+      "back": "Back",
+      "forearm": "Forearm",
+      "cardio": "Cardio"
+    },
+    "types": {
+      "strength": "Strength",
+      "cardio": "Cardio"
+    }
+  },
+  "statistics": {
+    "title": "Statistics",
+    "loading": "Loading statistics...",
+    "noData": "No workout data available",
+    "cards": {
+      "totalWorkouts": "Total Workouts",
+      "avgDuration": "Avg Duration",
+      "totalSets": "Total Sets",
+      "exercisesUsed": "Exercises Used"
+    },
+    "charts": {
+      "workoutsPerMonth": "Workouts per Month",
+      "durationTrends": "Workout Duration Trends",
+      "mostUsedExercises": "Most Used Exercises",
+      "exerciseVolume": "Exercise Volume (Top 5)",
+      "workouts": "Workouts",
+      "duration": "Duration (minutes)",
+      "minutes": "Minutes"
+    },
+    "loadError": "Error loading workouts"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "weightUnit": "Weight Unit",
+    "theme": "Theme",
+    "exerciseDisplay": "Exercise Display",
+    "themes": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    },
+    "units": {
+      "kg": "Kilograms (kg)",
+      "lbs": "Pounds (lbs)"
+    },
+    "exerciseDisplays": {
+      "reps": "Reps",
+      "time": "Time"
+    },
+    "languages": {
+      "en": "English",
+      "sv": "Svenska",
+      "de": "Deutsch",
+      "es": "Español"
+    },
+    "appInfo": {
+      "title": "App Information",
+      "version": "Version",
+      "versionNumber": "1.0.0",
+      "build": "Build",
+      "storageUsed": "Storage Used",
+      "calculating": "Calculating...",
+      "storageError": "Error calculating",
+      "bytes": "{size} bytes",
+      "kb": "{size} KB",
+      "mb": "{size} MB"
+    },
+    "dataManagement": {
+      "title": "Data Management",
+      "export": "Export Data",
+      "exportDescription": "Download your workout data as JSON",
+      "clear": "Clear All Data",
+      "clearWarning": "This cannot be undone",
+      "exportError": "Error exporting data",
+      "clearConfirm": "Are you sure you want to clear all data? This will delete all workouts, exercises, and settings. This cannot be undone.",
+      "clearFinalWarning": "This is your final warning. All data will be permanently deleted. Are you absolutely sure?",
+      "clearSuccess": "All data has been cleared. The app will now reload.",
+      "clearError": "Error clearing data. Please try again."
+    },
+    "loadError": "Error loading settings"
+  },
+  "templates": {
+    "noTemplates": "No workout templates",
+    "noTemplatesDescription": "Create templates to quickly start workouts",
+    "loadError": "Error loading templates",
+    "startError": "Error starting workout from template",
+    "deleteSuccess": "Template deleted successfully",
+    "deleteError": "Error deleting template",
+    "summary": {
+      "singleExercise": "{totalSets} sets of {exerciseName}",
+      "multipleExercises": "{totalSets} sets of {exerciseCount} exercises"
+    }
+  },
+  "tabs": {
+    "templates": "Workouts",
+    "log": "Log",
+    "statistics": "Statistics",
+    "settings": "Settings"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "dateSeparator": "-",
+    "areYouSure": "Are you sure?",
+    "duration": {
+      "hours": "h",
+      "minutes": "m"
+    }
+  }
+}

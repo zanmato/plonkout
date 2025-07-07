@@ -1,0 +1,192 @@
+{
+  "workout": {
+    "title": "Träningspass",
+    "new": "Nytt träningspass",
+    "edit": "Redigera träningspass",
+    "save": "Spara",
+    "saving": "Sparar...",
+    "duplicate": "Duplicera träningspass",
+    "delete": "Ta bort träningspass",
+    "name": "Träningspassets namn",
+    "started": "Startad",
+    "ended": "Avslutad",
+    "notes": "Anteckningar",
+    "addSet": "Lägg till set",
+    "addExercise": "Lägg till övning",
+    "namePlaceholder": "Träningspassets namn (valfritt)",
+    "notesPlaceholder": "Anteckningar för träningspass (valfritt)",
+    "deleteConfirm": "Ta bort detta träningspass? Detta kan inte ångras.",
+    "removeExerciseConfirm": "Ta bort denna övning?",
+    "duplicateError": "Fel vid duplicering av träningspass",
+    "deleteError": "Fel vid borttagning av träningspass",
+    "saveError": "Fel vid sparning av träningspass",
+    "saveSuccess": "Träningspass sparat framgångsrikt",
+    "templateSaved": "Träningspassmall sparad",
+    "loadError": "Fel vid laddning av träningspass",
+    "copyName": "Kopia",
+    "saveAsTemplate": "Spara som mall",
+    "unnamed": "Namnlöst träningspass",
+    "loading": "Laddar...",
+    "workoutCount": "{count} träningspass | {count} träningspass",
+    "summary": {
+      "noExercises": "Inga övningar",
+      "singleExercise": "{totalSets} set av {exerciseName}",
+      "multipleExercises": "{totalSets} set av {exerciseCount} övningar"
+    }
+  },
+  "exercise": {
+    "set": "Set",
+    "weight": "Vikt",
+    "rpe": "RPE",
+    "reps": "Reps",
+    "time": "Tid",
+    "distance": "Distans",
+    "arm": "Arm",
+    "notes": "Anteckningar",
+    "statsComingSoon": "Övningsstatistik kommer snart!",
+    "newWeightRecord": "Nytt viktrekord!",
+    "newRepRecord": "Nytt reprekord!",
+    "previousBest": "föregående",
+    "percentOfMax": "% av max",
+    "selector": {
+      "title": "Välj övning",
+      "new": "+ Ny",
+      "search": "Sök övningar...",
+      "loading": "Laddar övningar...",
+      "noResults": "Inga övningar hittades",
+      "singleArm": "En arm",
+      "bothArms": "Båda armarna",
+      "newExercise": "Ny övning",
+      "name": "Namn",
+      "namePlaceholder": "Övningens namn",
+      "muscleGroup": "Muskelgrupp",
+      "muscleGroupPlaceholder": "t.ex., Handled, Underarm, Biceps",
+      "singleArmLabel": "Övning för en arm",
+      "create": "Skapa",
+      "loadError": "Fel vid laddning av övningar",
+      "createError": "Fel vid skapande av övning",
+      "defaultMuscleGroup": "Allmänt"
+    },
+    "arms": {
+      "left": "Vänster",
+      "right": "Höger",
+      "both": "Båda"
+    },
+    "muscleGroups": {
+      "shoulders": "Axlar",
+      "legs": "Ben",
+      "biceps": "Biceps",
+      "triceps": "Triceps",
+      "chest": "Bröst",
+      "abs": "Mage",
+      "back": "Rygg",
+      "forearm": "Underarm",
+      "cardio": "Kardio"
+    },
+    "types": {
+      "strength": "Styrka",
+      "cardio": "Kardio"
+    }
+  },
+  "statistics": {
+    "title": "Statistik",
+    "loading": "Laddar statistik...",
+    "noData": "Ingen träningsdata tillgänglig",
+    "cards": {
+      "totalWorkouts": "Totala träningspass",
+      "avgDuration": "Genomsnittlig varaktighet",
+      "totalSets": "Totala set",
+      "exercisesUsed": "Övningar använda"
+    },
+    "charts": {
+      "workoutsPerMonth": "Träningspass per månad",
+      "durationTrends": "Varaktighetstrender",
+      "mostUsedExercises": "Mest använda övningar",
+      "exerciseVolume": "Övningsvolym (Topp 5)",
+      "workouts": "Träningspass",
+      "duration": "Varaktighet (minuter)",
+      "minutes": "Minuter"
+    },
+    "loadError": "Fel vid laddning av träningspass"
+  },
+  "settings": {
+    "title": "Inställningar",
+    "language": "Språk",
+    "weightUnit": "Viktenhet",
+    "theme": "Tema",
+    "exerciseDisplay": "Övningsvisning",
+    "themes": {
+      "light": "Ljust",
+      "dark": "Mörkt",
+      "system": "System"
+    },
+    "exerciseDisplays": {
+      "reps": "Reps",
+      "time": "Tid"
+    },
+    "units": {
+      "kg": "Kilogram (kg)",
+      "lbs": "Pund (lbs)"
+    },
+    "languages": {
+      "en": "Engelska",
+      "sv": "Svenska",
+      "de": "Tyska",
+      "es": "Spanska"
+    },
+    "appInfo": {
+      "title": "Appinformation",
+      "version": "Version",
+      "versionNumber": "1.0.0",
+      "build": "Build",
+      "storageUsed": "Lagring använd",
+      "calculating": "Beräknar...",
+      "storageError": "Fel vid beräkning",
+      "bytes": "{size} bytes",
+      "kb": "{size} KB",
+      "mb": "{size} MB"
+    },
+    "dataManagement": {
+      "title": "Datahantering",
+      "export": "Exportera data",
+      "exportDescription": "Ladda ner din träningsdata som JSON",
+      "clear": "Rensa all data",
+      "clearWarning": "Detta kan inte ångras",
+      "exportError": "Fel vid export av data",
+      "clearConfirm": "Är du säker på att du vill rensa all data? Detta kommer att ta bort alla träningspass, övningar och inställningar. Detta kan inte ångras.",
+      "clearFinalWarning": "Detta är din sista varning. All data kommer att tas bort permanent. Är du absolut säker?",
+      "clearSuccess": "All data har rensats. Appen kommer nu att laddas om.",
+      "clearError": "Fel vid rensning av data. Vänligen försök igen."
+    },
+    "loadError": "Fel vid laddning av inställningar"
+  },
+  "templates": {
+    "noTemplates": "Inga träningsmallar",
+    "noTemplatesDescription": "Skapa mallar för att snabbt starta träningspass",
+    "loadError": "Fel vid laddning av mallar",
+    "startError": "Fel vid start av träningspass från mall",
+    "deleteSuccess": "Mall borttagen framgångsrikt",
+    "deleteError": "Fel vid borttagning av mall",
+    "summary": {
+      "singleExercise": "{totalSets} set av {exerciseName}",
+      "multipleExercises": "{totalSets} set av {exerciseCount} övningar"
+    }
+  },
+  "tabs": {
+    "templates": "Träningspass",
+    "log": "Logg",
+    "statistics": "Statistik",
+    "settings": "Inställningar"
+  },
+  "common": {
+    "cancel": "Avbryt",
+    "today": "Idag",
+    "yesterday": "Igår",
+    "dateSeparator": "-",
+    "areYouSure": "Är du säker?",
+    "duration": {
+      "hours": "t",
+      "minutes": "m"
+    }
+  }
+}

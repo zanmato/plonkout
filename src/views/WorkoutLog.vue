@@ -1,0 +1,317 @@
+<template>
+  <div class="workout-log h-full flex flex-col">
+    <!-- Header -->
+    <NeoHeader :title="t('workout.title')">
+      <template #right>
+        <NeoButton
+          @click="addWorkout"
+          variant="primary"
+          size="sm"
+          class="rounded-full w-10 h-10 !px-0 !py-0"
+        >
+          <template #icon>
+            <span class="material-icons">add</span>
+          </template>
+        </NeoButton>
+      </template>
+    </NeoHeader>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-hidden mt-4">
+      <div v-if="loading" class="flex items-center justify-center h-32">
+        <div class="text-gray-500">{{ t("workout.loading") }}</div>
+      </div>
+
+      <div
+        v-else-if="flattenedItems.length === 0"
+        class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl mb-5 shadow-brutal"
+      >
+        <div class="text-base font-bold text-nb-text">
+          {{ t("workouts.noWorkouts") }}
+        </div>
+      </div>
+
+      <DynamicScroller
+        v-else
+        :items="flattenedItems"
+        :min-item-size="70"
+        class="h-full pb-4"
+      >
+        <template v-slot="{ item, index, active }">
+          <DynamicScrollerItem
+            :item="item"
+            :active="active"
+            :size-dependencies="[item.type]"
+            :data-index="index"
+            class="px-4"
+          >
+            <!-- Month header -->
+            <div
+              v-if="item.type === 'header'"
+              class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl mb-5 shadow-brutal"
+            >
+              <div class="text-base font-bold text-nb-text">
+                {{ item.monthYear }}
+              </div>
+              <div
+                class="bg-purple-300 text-black px-3 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
+              >
+                {{ t("workout.workoutCount", { count: item.count }) }}
+              </div>
+            </div>
+
+            <!-- Workout item -->
+            <div
+              v-else
+              class="bg-gray-200 border-3 border-black dark:bg-zinc-700 dark:text-white rounded-xl p-5 mb-4 cursor-pointer shadow-brutal transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
+              @click="editWorkout(item.id)"
+            >
+              <div class="flex justify-between items-start mb-4">
+                <div
+                  class="bg-purple-300 text-black px-2.5 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
+                >
+                  {{ formatWorkoutDate(item.started) }}
+                </div>
+                <div
+                  v-if="item.ended"
+                  class="bg-nb-overlay text-black px-2.5 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
+                >
+                  {{ getWorkoutDuration(item) }}
+                </div>
+              </div>
+              <div class="text-lg font-bold dark:text-white text-black mb-2">
+                {{ item.name }}
+              </div>
+              <div
+                class="text-sm dark:text-white text-black opacity-80 leading-relaxed"
+              >
+                {{ getWorkoutSummary(item) }}
+              </div>
+            </div>
+          </DynamicScrollerItem>
+        </template>
+      </DynamicScroller>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useI18n } from "vue-i18n";
+import { useHead } from "@unhead/vue";
+import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
+import { getWorkouts, initializeDefaultExercises } from "@/utils/database.js";
+import NeoButton from "@/components/NeoButton.vue";
+import NeoHeader from "@/components/NeoHeader.vue";
+
+const router = useRouter();
+const { t, d } = useI18n();
+
+// Set page title
+useHead({
+  title: () => `${t('workout.title')} - Plonkout`
+});
+const workouts = ref([]);
+const loading = ref(true);
+
+/**
+ * Group workouts by month and year
+ * @returns {Array} Array of grouped workouts
+ */
+const groupedWorkouts = computed(() => {
+  const groups = {};
+
+  workouts.value.forEach((workout) => {
+    const date = new Date(workout.started);
+    const monthYear = d(date, "month");
+
+    if (!groups[monthYear]) {
+      groups[monthYear] = {
+        monthYear,
+        workouts: [],
+        sortDate: date,
+      };
+    } else {
+      // Update sortDate to ensure it's the newest date in this group
+      if (date > groups[monthYear].sortDate) {
+        groups[monthYear].sortDate = date;
+      }
+    }
+
+    groups[monthYear].workouts.push(workout);
+  });
+
+  // Sort groups by date (newest first) and workouts within groups by date (newest first)
+  return Object.values(groups)
+    .sort((a, b) => b.sortDate - a.sortDate)
+    .map((group) => ({
+      ...group,
+      workouts: group.workouts.sort(
+        (a, b) => new Date(b.started) - new Date(a.started)
+      ),
+    }));
+});
+
+/**
+ * Flatten grouped workouts for virtual scrolling
+ * @returns {Array} Array of items (headers and workouts)
+ */
+const flattenedItems = computed(() => {
+  const items = [];
+
+  groupedWorkouts.value.forEach((group) => {
+    // Add month header
+    items.push({
+      id: `header-${group.monthYear}`,
+      type: "header",
+      monthYear: group.monthYear,
+      count: group.workouts.length,
+    });
+
+    // Add workouts
+    group.workouts.forEach((workout) => {
+      items.push({
+        ...workout,
+        type: "workout",
+      });
+    });
+  });
+
+  return items;
+});
+
+/**
+ * Load workouts from database
+ */
+async function loadWorkouts() {
+  try {
+    loading.value = true;
+    const data = await getWorkouts();
+    // Sort workouts by started date (newest first)
+    workouts.value = data.sort(
+      (a, b) => new Date(b.started) - new Date(a.started)
+    );
+  } catch (error) {
+    console.error(t("workout.loadError"), error);
+  } finally {
+    loading.value = false;
+  }
+}
+
+/**
+ * Navigate to add new workout
+ */
+function addWorkout() {
+  router.push("/workout");
+}
+
+/**
+ * Navigate to edit existing workout
+ * @param {number} id - Workout ID
+ */
+function editWorkout(id) {
+  router.push(`/workout/${id}`);
+}
+
+/**
+ * Format workout date for display
+ * @param {string|Date} date - The workout date
+ * @returns {string} Formatted date string
+ */
+function formatWorkoutDate(date) {
+  const workoutDate = new Date(date);
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+
+  if (workoutDate.toDateString() === today.toDateString()) {
+    return t("common.today");
+  } else if (workoutDate.toDateString() === yesterday.toDateString()) {
+    return t("common.yesterday");
+  } else {
+    return d(workoutDate, "short");
+  }
+}
+
+/**
+ * Get workout summary (exercises and sets)
+ * @param {Object} workout - The workout object
+ * @returns {string} Summary string
+ */
+function getWorkoutSummary(workout) {
+  if (!workout.exercises || workout.exercises.length === 0) {
+    return t("workout.summary.noExercises");
+  }
+
+  const totalSets = workout.exercises.reduce((total, exercise) => {
+    return (
+      total +
+      (exercise.sets
+        ? exercise.sets.filter((set) => set.type !== "warmup").length
+        : 0)
+    );
+  }, 0);
+
+  if (workout.exercises.length === 1) {
+    return t("workout.summary.singleExercise", {
+      totalSets,
+      exerciseName: workout.exercises[0].name,
+    });
+  } else {
+    return t("workout.summary.multipleExercises", {
+      totalSets,
+      exerciseCount: workout.exercises.length,
+    });
+  }
+}
+
+/**
+ * Get workout duration as localized string
+ * @param {Object} workout - The workout object
+ * @returns {string|null} Duration string like "3h 30m" or null
+ */
+function getWorkoutDuration(workout) {
+  if (!workout.started || !workout.ended) {
+    return null;
+  }
+
+  const start = new Date(workout.started);
+  const end = new Date(workout.ended);
+  const diffMs = end - start;
+  const diffMins = Math.round(diffMs / (1000 * 60));
+
+  if (diffMins <= 0) {
+    return null;
+  }
+
+  const hours = Math.floor(diffMins / 60);
+  const minutes = diffMins % 60;
+
+  if (hours > 0 && minutes > 0) {
+    return `${hours}${t("common.duration.hours")} ${minutes}${t(
+      "common.duration.minutes"
+    )}`;
+  } else if (hours > 0) {
+    return `${hours}${t("common.duration.hours")}`;
+  } else {
+    return `${minutes}${t("common.duration.minutes")}`;
+  }
+}
+
+onMounted(async () => {
+  await initializeDefaultExercises();
+  await loadWorkouts();
+});
+</script>
+
+<style scoped>
+/* Virtual scroller styling */
+:deep(.virtual-list) {
+  height: 100%;
+}
+
+:deep(.virtual-list-item) {
+  padding-bottom: 0.5rem;
+}
+</style>
