@@ -9,7 +9,10 @@
     <VoltToast />
 
     <!-- Bottom tab navigation -->
-    <nav class="border-t-2 border-black bg-white dark:bg-zinc-800 dark:text-white safe-area-bottom" style="box-shadow: 0 -4px 0px black;">
+    <nav
+      class="border-t-2 border-black bg-white dark:bg-zinc-800 dark:text-white safe-area-bottom"
+      style="box-shadow: 0 -4px 0px black"
+    >
       <div class="flex justify-around gap-3 items-center p-3">
         <router-link
           v-for="tab in tabs"
@@ -44,7 +47,7 @@ const currentTheme = ref("system");
 // Set up base head configuration with title template
 useHead({
   title: "Plonkout",
-  titleTemplate: (title) => title ? `${title} - Plonkout` : "Plonkout",
+  titleTemplate: (title) => (title ? `${title} - Plonkout` : "Plonkout"),
   meta: [
     {
       name: "description",
@@ -113,7 +116,7 @@ function getThemeColor() {
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   // Return dark theme color or light theme color
-  return isDark ? "#18181b" : "#8B5CF6";
+  return isDark ? "#0a0a0a" : "#8B5CF6";
 }
 
 /**
@@ -169,7 +172,7 @@ onMounted(() => {
 
 <style scoped>
 .app-container {
-  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
 }
