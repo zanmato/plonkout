@@ -82,7 +82,10 @@
       "chest": "Bröst",
       "abs": "Mage",
       "back": "Rygg",
-      "forearm": "Underarm"
+      "forearm": "Underarm",
+      "wrist": "Handled",
+      "hand": "Hand",
+      "side": "Sida"
     },
     "types": {
       "strength": "Styrka",

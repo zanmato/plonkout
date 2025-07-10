@@ -204,7 +204,7 @@ async function loadWorkouts() {
  * Navigate to add new workout
  */
 function addWorkout() {
-  router.push("/workout");
+  router.push({ name: 'workout-edit' });
 }
 
 /**
@@ -212,7 +212,7 @@ function addWorkout() {
  * @param {number} id - Workout ID
  */
 function editWorkout(id) {
-  router.push(`/workout/${id}`);
+  router.push({ name: 'workout-edit', params: { id: id.toString() } });
 }
 
 /**

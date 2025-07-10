@@ -493,7 +493,7 @@ async function saveWorkout() {
     // Update the workout ID and navigate if it's a new workout
     if (isNew.value) {
       workout.value.id = id;
-      router.replace(`/workout/${id}`);
+      router.replace({ name: 'workout-edit', params: { id: id.toString() } });
     }
   } catch (error) {
     console.error("Error saving workout:", error);
@@ -847,7 +847,7 @@ async function duplicateWorkout() {
 
   try {
     const id = await saveWorkoutToDB(duplicatedWorkout);
-    router.push(`/workout/${id}`);
+    router.push({ name: 'workout-edit', params: { id: id.toString() } });
   } catch (error) {
     console.error("Error duplicating workout:", error);
     showError(t("workout.duplicateError"));
@@ -893,7 +893,7 @@ async function deleteWorkoutConfirmed() {
 
   try {
     await deleteWorkout(parseInt(props.id));
-    router.push("/log");
+    router.push({ name: 'log' });
   } catch (error) {
     console.error("Error deleting workout:", error);
     showError(t("workout.deleteError"));
@@ -904,7 +904,7 @@ async function deleteWorkoutConfirmed() {
  * Go back to workout list
  */
 function goBack() {
-  router.push("/log");
+  router.push({ name: 'log' });
 }
 
 onMounted(async () => {

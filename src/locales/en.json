@@ -83,7 +83,10 @@
       "chest": "Chest",
       "abs": "Abs",
       "back": "Back",
-      "forearm": "Forearm"
+      "forearm": "Forearm",
+      "wrist": "Wrist",
+      "hand": "Hand",
+      "side": "Side"
     },
     "types": {
       "strength": "Strength",

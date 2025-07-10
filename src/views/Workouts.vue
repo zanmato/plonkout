@@ -131,7 +131,7 @@ async function loadTemplates() {
  * Navigate to create new template
  */
 function addTemplate() {
-  router.push("/workout");
+  router.push({ name: 'workout-edit' });
 }
 
 /**
@@ -157,7 +157,7 @@ async function startWorkout(template) {
     };
 
     const id = await saveWorkoutToDB(newWorkout);
-    router.push(`/workout/${id}`);
+    router.push({ name: 'workout-edit', params: { id: id.toString() } });
   } catch (error) {
     console.error("Error starting workout:", error);
     showError(t("templates.startError"));
@@ -169,7 +169,7 @@ async function startWorkout(template) {
  * @param {number} templateId - ID of template to edit
  */
 function editTemplate(templateId) {
-  router.push(`/template/${templateId}`);
+  router.push({ name: 'template-edit', params: { id: templateId.toString() } });
 }
 
 /**
