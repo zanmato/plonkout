@@ -4,62 +4,6 @@ import { nextTick } from "vue";
 import Settings from "@/views/Settings.vue";
 import { getSetting, saveSetting, getWorkouts } from "@/utils/database.js";
 
-// Mock vue-i18n
-const mockT = vi.fn((key, params) => {
-  const translations = {
-    "settings.title": "Settings",
-    "settings.language": "Language",
-    "settings.weightUnit": "Weight Unit",
-    "settings.theme": "Theme",
-    "settings.exerciseDisplay": "Exercise Display",
-    "settings.themes.light": "Light",
-    "settings.themes.dark": "Dark",
-    "settings.themes.system": "System",
-    "settings.units.kg": "Kilograms (kg)",
-    "settings.units.lbs": "Pounds (lbs)",
-    "settings.exerciseDisplays.reps": "Reps",
-    "settings.exerciseDisplays.time": "Time",
-    "settings.languages.en": "English",
-    "settings.languages.sv": "Svenska",
-    "settings.languages.de": "Deutsch",
-    "settings.languages.es": "Español",
-    "settings.appInfo.title": "App Information",
-    "settings.appInfo.version": "Version",
-    "settings.appInfo.versionNumber": "1.0.0",
-    "settings.appInfo.build": "Build",
-    "settings.appInfo.storageUsed": "Storage Used",
-    "settings.appInfo.calculating": "Calculating...",
-    "settings.appInfo.storageError": "Error calculating",
-    "settings.appInfo.bytes": params ? `${params.size} bytes` : "bytes",
-    "settings.appInfo.kb": params ? `${params.size} KB` : "KB",
-    "settings.appInfo.mb": params ? `${params.size} MB` : "MB",
-    "settings.dataManagement.title": "Data Management",
-    "settings.dataManagement.export": "Export Data",
-    "settings.dataManagement.exportDescription":
-      "Download your workout data as JSON",
-    "settings.dataManagement.clear": "Clear All Data",
-    "settings.dataManagement.clearWarning": "This cannot be undone",
-    "settings.dataManagement.exportError": "Error exporting data",
-    "settings.dataManagement.clearConfirm":
-      "Are you sure you want to clear all data? This will delete all workouts, exercises, and settings. This cannot be undone.",
-    "settings.dataManagement.clearFinalWarning":
-      "This is your final warning. All data will be permanently deleted. Are you absolutely sure?",
-    "settings.dataManagement.clearSuccess":
-      "All data has been cleared. The app will now reload.",
-    "settings.dataManagement.clearError":
-      "Error clearing data. Please try again.",
-    "settings.loadError": "Error loading settings",
-  };
-
-  return translations[key] || key;
-});
-
-vi.mock("vue-i18n", () => ({
-  useI18n: () => ({
-    t: mockT,
-    locale: { value: "en" },
-  }),
-}));
 
 // Mock useToast composable
 const mockShowSuccess = vi.fn();

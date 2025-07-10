@@ -1,66 +1,114 @@
-import { vi } from 'vitest'
-import { config } from '@vue/test-utils'
+import { vi } from "vitest";
+import { config } from "@vue/test-utils";
+import { createHead } from "@unhead/vue/client";
+import { createI18n } from "vue-i18n";
+
+// Import actual locale files
+import en from "@/locales/en.json";
+import sv from "@/locales/sv.json";
 
 // Mock database module
-vi.mock('@/utils/database.js', async () => {
-  const mocks = await import('./mocks/database.js')
-  return mocks
-})
+vi.mock("@/utils/database.js", async () => {
+  const mocks = await import("./mocks/database.js");
+  return mocks;
+});
+
+const mockIntersectionObserver = vi.fn();
+mockIntersectionObserver.mockReturnValue({
+  observe: () => null,
+  unobserve: () => null,
+  disconnect: () => null,
+});
+window.IntersectionObserver = mockIntersectionObserver;
 
 // Mock PrimeVue Toast
-vi.mock('primevue/usetoast', () => ({
+vi.mock("primevue/usetoast", () => ({
   useToast: () => ({
     add: vi.fn(),
     removeGroup: vi.fn(),
-    removeAllGroups: vi.fn()
-  })
-}))
+    removeAllGroups: vi.fn(),
+  }),
+}));
 
 // Mock vue-router
-const mockPush = vi.fn()
-const mockReplace = vi.fn()
+const mockPush = vi.fn();
+const mockReplace = vi.fn();
 
-vi.mock('vue-router', () => ({
+vi.mock("vue-router", () => ({
   useRouter: () => ({
     push: mockPush,
     replace: mockReplace,
     go: vi.fn(),
     back: vi.fn(),
-    forward: vi.fn()
+    forward: vi.fn(),
   }),
   useRoute: () => ({
     params: {},
     query: {},
-    path: '/',
-    name: 'test'
-  })
-}))
+    path: "/",
+    name: "test",
+  }),
+}));
 
 // Mock global confirm and alert functions
-global.confirm = vi.fn(() => true)
-global.alert = vi.fn()
+global.confirm = vi.fn(() => true);
+global.alert = vi.fn();
+
+// Create head instance for tests
+const head = createHead();
+
+// Create actual i18n instance for tests
+const i18n = createI18n({
+  locale: "en",
+  fallbackLocale: "en",
+  legacy: false,
+  datetimeFormats: {
+    sv: {
+      long: {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      },
+      short: {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      },
+      month: {
+        month: "long",
+        year: "numeric",
+      },
+    },
+    en: {
+      long: {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+      },
+      short: {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      },
+      month: {
+        month: "long",
+        year: "numeric",
+      },
+    },
+  },
+  messages: {
+    en,
+    sv,
+  },
+});
 
 // Global test utilities
-config.global.mocks = {
-  $t: (key, params) => {
-    const translations = {
-      'workouts.title': 'Workouts',
-      'workout.loading': 'Loading...',
-      'workouts.noWorkouts': 'No workouts yet',
-      'statistics.title': 'Statistics',
-      'statistics.loading': 'Loading statistics...',
-      'statistics.noData': 'No workout data available',
-      'settings.title': 'Settings'
-    }
-    
-    const translated = translations[key] || key
-    if (params) {
-      return translated.replace(/\{(\w+)\}/g, (match, paramKey) => params[paramKey] || match)
-    }
-    return translated
-  },
-  $d: (date) => date?.toLocaleDateString() || ''
-}
+config.global.plugins = [head, i18n];
+config.global.mocks = {};
 
 // Export router mocks for test use
-export { mockPush, mockReplace }
+export { mockPush, mockReplace };
