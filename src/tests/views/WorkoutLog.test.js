@@ -134,8 +134,8 @@ describe("WorkoutLog.vue", () => {
       // Workout1 (newer, id: 2): 2 exercises (Hook Training + Side Pressure)
       // Hook Training: 1 warmup + 1 regular = 1 regular set
       // Side Pressure: 1 regular set
-      // Total: 2 regular sets, 2 exercises
-      expect(summary1).toBe("2 sets of 2 exercises");
+      // Now shows per-exercise summaries
+      expect(summary1).toBe("1 sets of Hook Training\n1 sets of Side Pressure");
 
       // Workout2 (older, id: 1): 1 exercise (Wrist Curl), 2 regular sets
       expect(summary2).toBe("2 sets of Wrist Curl");

@@ -245,26 +245,24 @@ function getWorkoutSummary(workout) {
     return t("workout.summary.noExercises");
   }
 
-  const totalSets = workout.exercises.reduce((total, exercise) => {
-    return (
-      total +
-      (exercise.sets
-        ? exercise.sets.filter((set) => set.type !== "warmup").length
-        : 0)
-    );
-  }, 0);
-
-  if (workout.exercises.length === 1) {
+  // Create a summary for each exercise showing individual set counts
+  const exerciseSummaries = workout.exercises.map((exercise) => {
+    const regularSets = exercise.sets
+      ? exercise.sets.filter((set) => set.type !== "warmup").length
+      : 0;
+    
+    if (regularSets === 0) {
+      return null; // Skip exercises with no regular sets
+    }
+    
+    // Always use singleExercise format since we're showing per-exercise summaries
     return t("workout.summary.singleExercise", {
-      totalSets,
-      exerciseName: workout.exercises[0].name,
+      totalSets: regularSets,
+      exerciseName: exercise.name,
     });
-  } else {
-    return t("workout.summary.multipleExercises", {
-      totalSets,
-      exerciseCount: workout.exercises.length,
-    });
-  }
+  }).filter(Boolean); // Remove null entries
+
+  return exerciseSummaries.join('\n');
 }
 
 /**
