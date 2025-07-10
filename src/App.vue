@@ -9,7 +9,7 @@
     <VoltToast />
 
     <!-- Bottom tab navigation -->
-    <nav class="neo-tab-bar dark:bg-zinc-800 dark:text-white safe-area-bottom">
+    <nav class="border-t-2 border-black bg-white dark:bg-zinc-800 dark:text-white safe-area-bottom" style="box-shadow: 0 -4px 0px black;">
       <div class="flex justify-around gap-3 items-center p-3">
         <router-link
           v-for="tab in tabs"
@@ -41,9 +41,10 @@ import VoltToast from "@/volt/Toast.vue";
 const { t, locale } = useI18n();
 const currentTheme = ref("system");
 
-// Set up base head configuration
+// Set up base head configuration with title template
 useHead({
   title: "Plonkout",
+  titleTemplate: (title) => title ? `${title} - Plonkout` : "Plonkout",
   meta: [
     {
       name: "description",
@@ -112,7 +113,7 @@ function getThemeColor() {
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   // Return dark theme color or light theme color
-  return isDark ? "#18181b" : "#88AAEE";
+  return isDark ? "#18181b" : "#8B5CF6";
 }
 
 /**

@@ -19,7 +19,7 @@ vi.mock('vue-chartjs', () => ({
 }))
 
 // Mock vue-i18n
-const mockT = vi.fn((key, params) => {
+const mockT = vi.fn((key, _params) => {
   const translations = {
     'statistics.title': 'Statistics',
     'statistics.loading': 'Loading statistics...',

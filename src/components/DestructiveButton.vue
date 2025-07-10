@@ -22,6 +22,7 @@
 
 <script setup>
 import { ref, onUnmounted } from "vue";
+import { useI18n } from "vue-i18n";
 import NeoButton from "./NeoButton.vue";
 
 const props = defineProps({
@@ -63,6 +64,7 @@ const props = defineProps({
 });
 
 const emit = defineEmits(["confirm"]);
+const { t } = useI18n();
 
 const isConfirming = ref(false);
 let timeoutId = null;

@@ -153,7 +153,6 @@
 }
 
 @layer utilities {
-
   .text-align-last-center {
     text-align-last: center;
   }
@@ -174,24 +173,6 @@
 
   .hide-scrollbar::-webkit-scrollbar {
     display: none;
-  }
-
-  /* Neobrutalism base utilities */
-  .neo-base {
-    border: 2px solid var(--border-primary);
-    background-color: var(--bg-primary);
-    color: var(--text-primary);
-    font-weight: 600;
-    transition: all 0.1s ease-in-out;
-  }
-
-  .neo-shadow {
-    box-shadow: var(--shadow-offset) var(--shadow-offset) 0px var(--shadow-color);
-  }
-
-  .neo-shadow-hover:hover {
-    transform: translate(-2px, -2px);
-    box-shadow: calc(var(--shadow-offset) + 2px) calc(var(--shadow-offset) + 2px) 0px var(--shadow-color);
   }
 
   /* Custom utility classes */
@@ -222,53 +203,9 @@
   .border-secondary {
     border-color: var(--border-secondary);
   }
-
-  /* Typography utilities */
-  .neo-text {
-    color: var(--text-secondary);
-    font-weight: 500;
-  }
-
-  .neo-text-muted {
-    color: var(--text-muted);
-    font-weight: 400;
-  }
-
-  .neo-heading-1 {
-    font-size: 2rem;
-    font-weight: 800;
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-  }
-
-  .neo-heading-2 {
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.75rem;
-  }
-
-  .neo-heading-3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
-  }
 }
 
 @layer components {
-  /* Dumbbell background pattern utility - Material Icons style */
-  .bg-dumbbell-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='rgba(136, 170, 238, 0.3)'%3E%3C!-- Main dumbbell --%3E%3Cellipse cx='12' cy='28' rx='7' ry='10'/%3E%3Cellipse cx='44' cy='28' rx='7' ry='10'/%3E%3Crect x='19' y='26' width='18' height='4' rx='2'/%3E%3Crect x='17' y='24' width='4' height='8' rx='2'/%3E%3Crect x='35' y='24' width='4' height='8' rx='2'/%3E%3C/g%3E%3Cg fill='rgba(136, 170, 238, 0.04)' transform='rotate(45 28 28)'%3E%3C!-- Rotated smaller dumbbell --%3E%3Cellipse cx='20' cy='28' rx='4' ry='6'/%3E%3Cellipse cx='36' cy='28' rx='4' ry='6'/%3E%3Crect x='24' y='26.5' width='8' height='3' rx='1.5'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 56px 56px;
-  }
-  
-  /* Subtle dumbbell pattern with different opacity */
-  .bg-dumbbell-subtle {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56' viewBox='0 0 56 56'%3E%3Cg fill='rgba(136, 170, 238, 0.015)'%3E%3C!-- Main dumbbell --%3E%3Cellipse cx='12' cy='28' rx='7' ry='10'/%3E%3Cellipse cx='44' cy='28' rx='7' ry='10'/%3E%3Crect x='19' y='26' width='18' height='4' rx='2'/%3E%3Crect x='17' y='24' width='4' height='8' rx='2'/%3E%3Crect x='35' y='24' width='4' height='8' rx='2'/%3E%3C/g%3E%3Cg fill='rgba(136, 170, 238, 0.008)' transform='rotate(45 28 28)'%3E%3C!-- Rotated smaller dumbbell --%3E%3Cellipse cx='20' cy='28' rx='4' ry='6'/%3E%3Cellipse cx='36' cy='28' rx='4' ry='6'/%3E%3Crect x='24' y='26.5' width='8' height='3' rx='1.5'/%3E%3C/g%3E%3C/svg%3E");
-    background-size: 56px 56px;
-  }
-  
   .m-icon {
     font-family: 'Material Icons';
     font-weight: normal;
@@ -292,7 +229,7 @@
   
   .floating-input,
   .floating-textarea {
-    @apply w-full px-4 py-3 pt-6 bg-nb-bg border-3 border-nb-border rounded-lg text-nb-text placeholder-transparent focus:outline-none focus:ring-0 focus:border-nb-main transition-colors duration-200;
+    @apply w-full px-4 py-3 pt-6 bg-nb-bg border-3 border-nb-border rounded-lg text-black placeholder-transparent focus:outline-none focus:ring-0 focus:border-nb-main transition-colors duration-200;
   }
   
   .floating-textarea {
@@ -300,7 +237,7 @@
   }
   
   .floating-label {
-    @apply absolute left-4 top-2 text-xs font-medium text-nb-text opacity-70 transition-all duration-200 pointer-events-none;
+    @apply absolute left-4 top-2 text-xs font-medium text-black opacity-70 transition-all duration-200 pointer-events-none;
   }
   
   /* When input has value or is focused, keep label in floating position */
@@ -324,6 +261,65 @@
   .floating-input[type="datetime-local"] + .floating-label {
     @apply top-2 text-xs opacity-70;
   }
+  
+  /* Datetime-specific fixes for consistent floating labels */
+  .datetime-fixed {
+    @apply pt-6 pb-3;
+  }
+  
+  .datetime-label-fixed {
+    @apply top-2 text-xs opacity-70;
+    transform: none !important;
+  }
+  
+  /* Override any state-based label positioning for datetime inputs */
+  .datetime-fixed:focus + .datetime-label-fixed,
+  .datetime-fixed:not(:placeholder-shown) + .datetime-label-fixed,
+  .datetime-fixed:placeholder-shown:not(:focus) + .datetime-label-fixed {
+    @apply top-2 text-xs opacity-70;
+    transform: none !important;
+  }
+  
+  /* iOS Safari specific fixes */
+  @supports (-webkit-touch-callout: none) {
+    .datetime-fixed {
+      padding-top: 1.75rem !important;
+      padding-bottom: 0.75rem !important;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+    
+    .datetime-label-fixed {
+      top: 0.5rem !important;
+      left: 1rem !important;
+      font-size: 0.75rem !important;
+      line-height: 1rem !important;
+      opacity: 0.7 !important;
+      transform: none !important;
+      pointer-events: none !important;
+    }
+    
+    /* Ensure label stays in position on iOS regardless of input state */
+    .datetime-fixed:focus + .datetime-label-fixed,
+    .datetime-fixed:not(:placeholder-shown) + .datetime-label-fixed,
+    .datetime-fixed:placeholder-shown + .datetime-label-fixed {
+      top: 0.5rem !important;
+      left: 1rem !important;
+      font-size: 0.75rem !important;
+      line-height: 1rem !important;
+      opacity: 0.7 !important;
+      transform: none !important;
+    }
+  }
+  
+  /* Fix width issues on mobile devices */
+  @media screen and (max-width: 768px) {
+    .datetime-fixed {
+      font-size: 16px; /* Prevents zoom on iOS */
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+  }
   /* Tab bar styles */
   .tab-bar {
     background: rgba(255, 255, 255, 0.8);
@@ -336,128 +332,5 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* Neobrutalism components */
-  .neo-card {
-    @reference neo-base neo-shadow neo-shadow-hover;
-    border-radius: 8px;
-    padding: 1rem;
-  }
-
-  .neo-button {
-    @reference neo-base neo-shadow neo-shadow-hover;
-    border-radius: 6px;
-    padding: 0.75rem 1.5rem;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
-    min-height: 44px;
-  }
-
-  .neo-button:active {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px var(--shadow-color);
-  }
-
-  .neo-button-primary {
-    @reference neo-button;
-    background-color: var(--bg-info);
-    color: white;
-    border-color: var(--border-primary);
-  }
-
-  .neo-button-accent {
-    @reference neo-button;
-    background-color: var(--bg-accent);
-    color: var(--text-primary);
-  }
-
-  .neo-button-danger {
-    @reference neo-button;
-    background-color: var(--bg-danger);
-    color: white;
-    border-color: var(--border-primary);
-  }
-
-  .neo-button-success {
-    @reference neo-button;
-    background-color: var(--bg-success);
-    color: white;
-    border-color: var(--border-primary);
-  }
-
-  .neo-input {
-    @reference neo-base;
-    border-radius: 6px;
-    padding: 0.75rem;
-    min-height: 44px;
-    background-color: var(--bg-primary);
-  }
-
-  .neo-input:focus {
-    outline: none;
-    transform: translate(-1px, -1px);
-    box-shadow: calc(var(--shadow-offset) + 1px) calc(var(--shadow-offset) + 1px) 0px var(--shadow-color);
-  }
-
-  .neo-select {
-    @reference neo-input;
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23000' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
-    background-position: right 0.5rem center;
-    background-repeat: no-repeat;
-    background-size: 1.5em 1.5em;
-    padding-right: 2.5rem;
-  }
-
-  .neo-textarea {
-    @reference neo-input;
-    resize: vertical;
-    min-height: 100px;
-  }
-
-  .neo-tab-bar {
-    @reference neo-base;
-    border-top: 2px solid var(--border-primary);
-    border-left: none;
-    border-right: none;
-    border-bottom: none;
-    background-color: var(--bg-primary);
-    border-radius: 0;
-    box-shadow: 0 -4px 0px var(--shadow-color);
-  }
-
-  .neo-header {
-    @reference neo-base;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    border-bottom: 2px solid var(--border-primary);
-    border-radius: 0;
-    background-color: var(--bg-primary);
-    font-weight: 700;
-    font-size: 1.125rem;
-  }
-
-  .neo-list-item {
-    @reference neo-base neo-shadow-hover;
-    margin-bottom: 0.5rem;
-    border-radius: 6px;
-    padding: 1rem;
-    cursor: pointer;
-    background-color: var(--bg-secondary);
-  }
-
-  .neo-stats-card {
-    @reference neo-card;
-    text-align: center;
-    background-color: var(--bg-tertiary);
-  }
-
-  .neo-chart-container {
-    @reference neo-card;
-    padding: 1.5rem;
-  }
+  /* Neobrutalism components - removed, using NeoButton, NeoPanel etc. components directly */
 }

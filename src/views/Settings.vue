@@ -7,8 +7,8 @@
     <div class="flex-1 p-4">
       <NeoPanel>
         <!-- Language Setting -->
-        <div>
-          <h3 class="neo-heading-3">{{ t("settings.language") }}</h3>
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.language") }}</h3>
           <VoltSelect
             v-model="currentLocale"
             @change="changeLanguage"
@@ -20,8 +20,8 @@
         </div>
 
         <!-- Theme Setting -->
-        <div>
-          <h3 class="neo-heading-3">{{ t("settings.theme") }}</h3>
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.theme") }}</h3>
           <SelectButton
             v-model="theme"
             @change="saveTheme"
@@ -33,8 +33,8 @@
         </div>
 
         <!-- Weight Unit Setting -->
-        <div>
-          <h3 class="neo-heading-3">{{ t("settings.weightUnit") }}</h3>
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.weightUnit") }}</h3>
           <SelectButton
             v-model="weightUnit"
             @change="saveWeightUnit"
@@ -45,54 +45,54 @@
           />
         </div>
 
-        <!-- Exercise Display Setting -->
-        <div>
-          <h3 class="neo-heading-3">{{ t("settings.exerciseDisplay") }}</h3>
+        <!-- Distance Unit Setting -->
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.distanceUnit") }}</h3>
           <SelectButton
-            v-model="exerciseDisplay"
-            @change="saveExerciseDisplay"
-            :options="exerciseDisplayOptions"
+            v-model="distanceUnit"
+            @change="saveDistanceUnit"
+            :options="distanceUnitOptions"
             optionLabel="label"
             optionValue="value"
             class="w-full"
           />
         </div>
 
+
         <!-- Data Management -->
-        <div>
-          <h3 class="neo-heading-3">
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
             {{ t("settings.dataManagement.title") }}
           </h3>
           <div class="space-y-3">
-            <button
+            <NeoButton
               @click="exportData"
-              class="neo-list-item w-full text-left flex items-center justify-between"
+              variant="secondary"
+              full-width
+              class="text-left"
             >
-              <div>
+              <template #icon>
+                <span class="material-icons">download</span>
+              </template>
+              <div class="flex flex-col">
                 <div class="font-medium">
                   {{ t("settings.dataManagement.export") }}
                 </div>
-                <div class="text-sm neo-text-muted">
+                <div class="text-sm text-gray-600 dark:text-gray-400">
                   {{ t("settings.dataManagement.exportDescription") }}
                 </div>
               </div>
-              <span class="material-icons w-5 h-5 text-gray-400">download</span>
-            </button>
+            </NeoButton>
 
-            <button
+            <DestructiveButton
               @click="confirmClearData"
-              class="neo-button-danger w-full text-left flex items-center justify-between"
+              :confirm-text="t('settings.dataManagement.clear')"
+              full-width
             >
-              <div>
-                <div class="font-medium">
-                  {{ t("settings.dataManagement.clear") }}
-                </div>
-                <div class="text-sm text-red-500">
-                  {{ t("settings.dataManagement.clearWarning") }}
-                </div>
-              </div>
-              <span class="material-icons w-5 h-5">delete</span>
-            </button>
+              <template #icon>
+                <span class="material-icons">delete</span>
+              </template>
+            </DestructiveButton>
           </div>
         </div>
       </NeoPanel>
@@ -108,6 +108,8 @@ import { getSetting, saveSetting, getWorkouts } from "@/utils/database.js";
 import { useToast } from "@/composables/useToast.js";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
+import NeoButton from "@/components/NeoButton.vue";
+import DestructiveButton from "@/components/DestructiveButton.vue";
 import VoltSelect from "@/volt/Select.vue";
 import SelectButton from "@/volt/SelectButton.vue";
 
@@ -116,13 +118,13 @@ const { showSuccess, showError } = useToast();
 
 // Set page title
 useHead({
-  title: () => `${t('settings.title')} - Plonkout`
+  title: () => t("settings.title"),
 });
 
 const currentLocale = ref("en");
 const weightUnit = ref("kg");
+const distanceUnit = ref("km");
 const theme = ref("system");
-const exerciseDisplay = ref("reps");
 const storageUsed = ref("");
 
 // Options for Select and SelectButton components
@@ -144,10 +146,11 @@ const weightUnitOptions = ref([
   { value: "lbs", label: t("settings.units.lbs") },
 ]);
 
-const exerciseDisplayOptions = ref([
-  { value: "reps", label: t("settings.exerciseDisplays.reps") },
-  { value: "time", label: t("settings.exerciseDisplays.time") },
+const distanceUnitOptions = ref([
+  { value: "km", label: t("settings.units.km") },
+  { value: "miles", label: t("settings.units.miles") },
 ]);
+
 
 onMounted(() => {
   storageUsed.value = t("settings.appInfo.calculating");
@@ -170,11 +173,12 @@ async function saveWeightUnit() {
 }
 
 /**
- * Save exercise display preference
+ * Save distance unit preference
  */
-async function saveExerciseDisplay() {
-  await saveSetting("exerciseDisplay", exerciseDisplay.value);
+async function saveDistanceUnit() {
+  await saveSetting("distanceUnit", distanceUnit.value);
 }
+
 
 /**
  * Save theme preference and apply it
@@ -289,14 +293,13 @@ async function loadSettings() {
   try {
     const savedLocale = await getSetting("locale", "en");
     const savedWeightUnit = await getSetting("weightUnit", "kg");
+    const savedDistanceUnit = await getSetting("distanceUnit", "km");
     const savedTheme = await getSetting("theme", "system");
-    const savedExerciseDisplay = await getSetting("exerciseDisplay", "reps");
-
     currentLocale.value = savedLocale;
     locale.value = savedLocale;
     weightUnit.value = savedWeightUnit;
+    distanceUnit.value = savedDistanceUnit;
     theme.value = savedTheme;
-    exerciseDisplay.value = savedExerciseDisplay;
 
     applyTheme();
   } catch (error) {

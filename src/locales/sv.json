@@ -27,6 +27,7 @@
     "saveAsTemplate": "Spara som mall",
     "unnamed": "Namnlöst träningspass",
     "loading": "Laddar...",
+    "noWorkouts": "Inga träningspass",
     "workoutCount": "{count} träningspass | {count} träningspass",
     "summary": {
       "noExercises": "Inga övningar",
@@ -61,6 +62,7 @@
       "namePlaceholder": "Övningens namn",
       "muscleGroup": "Muskelgrupp",
       "muscleGroupPlaceholder": "t.ex., Handled, Underarm, Biceps",
+      "exerciseType": "Övningstyp",
       "singleArmLabel": "Övning för en arm",
       "create": "Skapa",
       "loadError": "Fel vid laddning av övningar",
@@ -80,8 +82,7 @@
       "chest": "Bröst",
       "abs": "Mage",
       "back": "Rygg",
-      "forearm": "Underarm",
-      "cardio": "Kardio"
+      "forearm": "Underarm"
     },
     "types": {
       "strength": "Styrka",
@@ -113,6 +114,7 @@
     "title": "Inställningar",
     "language": "Språk",
     "weightUnit": "Viktenhet",
+    "distanceUnit": "Distansenhet",
     "theme": "Tema",
     "exerciseDisplay": "Övningsvisning",
     "themes": {
@@ -126,7 +128,9 @@
     },
     "units": {
       "kg": "Kilogram (kg)",
-      "lbs": "Pund (lbs)"
+      "lbs": "Pund (lbs)",
+      "km": "Kilometer (km)",
+      "miles": "Engelska mil (mi)"
     },
     "languages": {
       "en": "Engelska",

@@ -1,7 +1,7 @@
-import { openDB } from 'idb'
+import { openDB } from "idb";
 
-const DB_NAME = 'PlonkoutDB'
-const DB_VERSION = 2
+const DB_NAME = "PlonkoutDB";
+const DB_VERSION = 2;
 
 /**
  * Initialize the IndexedDB database
@@ -11,42 +11,42 @@ async function initDB() {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       // Workouts store
-      if (!db.objectStoreNames.contains('workouts')) {
-        const workoutStore = db.createObjectStore('workouts', {
-          keyPath: 'id',
-          autoIncrement: true
-        })
-        workoutStore.createIndex('date', 'started')
+      if (!db.objectStoreNames.contains("workouts")) {
+        const workoutStore = db.createObjectStore("workouts", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+        workoutStore.createIndex("date", "started");
       }
 
       // Exercises store (predefined exercises)
-      if (!db.objectStoreNames.contains('exercises')) {
-        const exerciseStore = db.createObjectStore('exercises', {
-          keyPath: 'id',
-          autoIncrement: true
-        })
-        exerciseStore.createIndex('name', 'name')
-        exerciseStore.createIndex('muscleGroup', 'muscleGroup')
+      if (!db.objectStoreNames.contains("exercises")) {
+        const exerciseStore = db.createObjectStore("exercises", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+        exerciseStore.createIndex("name", "name");
+        exerciseStore.createIndex("muscleGroup", "muscleGroup");
       }
 
       // Settings store
-      if (!db.objectStoreNames.contains('settings')) {
-        db.createObjectStore('settings', {
-          keyPath: 'key'
-        })
+      if (!db.objectStoreNames.contains("settings")) {
+        db.createObjectStore("settings", {
+          keyPath: "key",
+        });
       }
 
       // Workout templates store
-      if (!db.objectStoreNames.contains('workout_templates')) {
-        const templateStore = db.createObjectStore('workout_templates', {
-          keyPath: 'id',
-          autoIncrement: true
-        })
-        templateStore.createIndex('created', 'created')
-        templateStore.createIndex('name', 'name')
+      if (!db.objectStoreNames.contains("workout_templates")) {
+        const templateStore = db.createObjectStore("workout_templates", {
+          keyPath: "id",
+          autoIncrement: true,
+        });
+        templateStore.createIndex("created", "created");
+        templateStore.createIndex("name", "name");
       }
-    }
-  })
+    },
+  });
 }
 
 /**
@@ -54,8 +54,8 @@ async function initDB() {
  * @returns {Promise<Array>} Array of workout objects
  */
 export async function getWorkouts() {
-  const db = await initDB()
-  return db.getAllFromIndex('workouts', 'date')
+  const db = await initDB();
+  return db.getAllFromIndex("workouts", "date");
 }
 
 /**
@@ -64,8 +64,8 @@ export async function getWorkouts() {
  * @returns {Promise<Object|undefined>} The workout object or undefined
  */
 export async function getWorkout(id) {
-  const db = await initDB()
-  return db.get('workouts', id)
+  const db = await initDB();
+  return db.get("workouts", id);
 }
 
 /**
@@ -74,16 +74,19 @@ export async function getWorkout(id) {
  * @returns {Promise<number>} The workout ID
  */
 export async function saveWorkout(workout) {
-  const db = await initDB()
+  const db = await initDB();
   if (workout.id) {
-    await db.put('workouts', workout)
-    return workout.id
+    await db.put("workouts", workout);
+    return workout.id;
   } else {
-    return db.add('workouts', {
-      ...workout,
+    // Remove id field for new workouts to avoid IndexedDB key validation errors
+    // eslint-disable-next-line no-unused-vars
+    const { id, ...workoutData } = workout;
+    return db.add("workouts", {
+      ...workoutData,
       created: new Date(),
-      updated: new Date()
-    })
+      updated: new Date(),
+    });
   }
 }
 
@@ -93,8 +96,8 @@ export async function saveWorkout(workout) {
  * @returns {Promise<void>}
  */
 export async function deleteWorkout(id) {
-  const db = await initDB()
-  return db.delete('workouts', id)
+  const db = await initDB();
+  return db.delete("workouts", id);
 }
 
 /**
@@ -102,8 +105,8 @@ export async function deleteWorkout(id) {
  * @returns {Promise<Array>} Array of exercise objects
  */
 export async function getExercises() {
-  const db = await initDB()
-  return db.getAll('exercises')
+  const db = await initDB();
+  return db.getAll("exercises");
 }
 
 /**
@@ -112,12 +115,12 @@ export async function getExercises() {
  * @returns {Promise<number>} The exercise ID
  */
 export async function saveExercise(exercise) {
-  const db = await initDB()
+  const db = await initDB();
   if (exercise.id) {
-    await db.put('exercises', exercise)
-    return exercise.id
+    await db.put("exercises", exercise);
+    return exercise.id;
   } else {
-    return db.add('exercises', exercise)
+    return db.add("exercises", exercise);
   }
 }
 
@@ -128,9 +131,9 @@ export async function saveExercise(exercise) {
  * @returns {Promise<*>} The setting value
  */
 export async function getSetting(key, defaultValue = null) {
-  const db = await initDB()
-  const setting = await db.get('settings', key)
-  return setting ? setting.value : defaultValue
+  const db = await initDB();
+  const setting = await db.get("settings", key);
+  return setting ? setting.value : defaultValue;
 }
 
 /**
@@ -140,8 +143,8 @@ export async function getSetting(key, defaultValue = null) {
  * @returns {Promise<void>}
  */
 export async function saveSetting(key, value) {
-  const db = await initDB()
-  return db.put('settings', { key, value })
+  const db = await initDB();
+  return db.put("settings", { key, value });
 }
 
 /**
@@ -149,97 +152,499 @@ export async function saveSetting(key, value) {
  * @returns {Promise<void>}
  */
 export async function initializeDefaultExercises() {
-  const exercises = await getExercises()
+  const exercises = await getExercises();
   if (exercises.length === 0) {
     const defaultExercises = [
       // Armwrestling specific exercises
-      { name: 'Wrist Curl', muscleGroup: 'Forearm', singleArm: true },
-      { name: 'Pronation Curl', muscleGroup: 'Forearm', singleArm: true },
-      { name: 'Supination Curl', muscleGroup: 'Forearm', singleArm: true },
-      { name: 'Side Pressure', muscleGroup: 'Shoulders', singleArm: true },
-      { name: 'Hook Training', muscleGroup: 'Forearm', singleArm: true },
-      { name: 'Top Roll Training', muscleGroup: 'Forearm', singleArm: true },
-      { name: 'Cable Hammer Curl', muscleGroup: 'Biceps', singleArm: true },
-      
+      {
+        name: "Wrist Curl",
+        muscleGroup: "Forearm",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Pronation Curl",
+        muscleGroup: "Forearm",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Supination Curl",
+        muscleGroup: "Forearm",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Side Pressure",
+        muscleGroup: "Shoulders",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Hook Training",
+        muscleGroup: "Forearm",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Top Roll Training",
+        muscleGroup: "Forearm",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Cable Hammer Curl",
+        muscleGroup: "Biceps",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+
       // Chest exercises
-      { name: 'Bench Press', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Incline Bench Press', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Decline Bench Press', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Close Grip Bench Press', muscleGroup: 'Triceps', singleArm: false },
-      { name: 'Dumbbell Press', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Incline Dumbbell Press', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Chest Fly', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Push-ups', muscleGroup: 'Chest', singleArm: false },
-      { name: 'Dips', muscleGroup: 'Chest', singleArm: false },
-      
+      {
+        name: "Bench Press",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Incline Bench Press",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Decline Bench Press",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Close Grip Bench Press",
+        muscleGroup: "Triceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Dumbbell Press",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Incline Dumbbell Press",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Chest Fly",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Push-ups",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Dips",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+
       // Back exercises
-      { name: 'Deadlift', muscleGroup: 'Back', singleArm: false },
-      { name: 'Sumo Deadlift', muscleGroup: 'Back', singleArm: false },
-      { name: 'Romanian Deadlift', muscleGroup: 'Back', singleArm: false },
-      { name: 'Bent Over Row', muscleGroup: 'Back', singleArm: false },
-      { name: 'T-Bar Row', muscleGroup: 'Back', singleArm: false },
-      { name: 'Cable Row', muscleGroup: 'Back', singleArm: false },
-      { name: 'Lat Pulldown', muscleGroup: 'Back', singleArm: false },
-      { name: 'Pull-ups', muscleGroup: 'Back', singleArm: false },
-      { name: 'Chin-ups', muscleGroup: 'Back', singleArm: false },
-      { name: 'Single Arm Row', muscleGroup: 'Back', singleArm: true },
-      
+      {
+        name: "Deadlift",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Sumo Deadlift",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Romanian Deadlift",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Bent Over Row",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "T-Bar Row",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Cable Row",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Lat Pulldown",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Pull-ups",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Chin-ups",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Single Arm Row",
+        muscleGroup: "Back",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+
       // Shoulder exercises
-      { name: 'Shoulder Press', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Overhead Press', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Dumbbell Shoulder Press', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Lateral Raise', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Front Raise', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Rear Delt Fly', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Upright Row', muscleGroup: 'Shoulders', singleArm: false },
-      { name: 'Shrugs', muscleGroup: 'Shoulders', singleArm: false },
-      
+      {
+        name: "Shoulder Press",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Overhead Press",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Dumbbell Shoulder Press",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Lateral Raise",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Front Raise",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Rear Delt Fly",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Upright Row",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Shrugs",
+        muscleGroup: "Shoulders",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+
       // Leg exercises
-      { name: 'Squat', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Front Squat', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Bulgarian Split Squat', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Leg Press', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Leg Curl', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Leg Extension', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Calf Raise', muscleGroup: 'Legs', singleArm: false },
-      { name: 'Lunges', muscleGroup: 'Legs', singleArm: false },
-      
+      {
+        name: "Squat",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Front Squat",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Bulgarian Split Squat",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Leg Press",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Leg Curl",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Leg Extension",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Calf Raise",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Lunges",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+
       // Biceps exercises
-      { name: 'Bicep Curl', muscleGroup: 'Biceps', singleArm: false },
-      { name: 'Hammer Curl', muscleGroup: 'Biceps', singleArm: false },
-      { name: 'Preacher Curl', muscleGroup: 'Biceps', singleArm: false },
-      { name: 'Cable Curl', muscleGroup: 'Biceps', singleArm: false },
-      { name: 'Concentration Curl', muscleGroup: 'Biceps', singleArm: true },
-      
+      {
+        name: "Bicep Curl",
+        muscleGroup: "Biceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Hammer Curl",
+        muscleGroup: "Biceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Preacher Curl",
+        muscleGroup: "Biceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Cable Curl",
+        muscleGroup: "Biceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Concentration Curl",
+        muscleGroup: "Biceps",
+        singleArm: true,
+        type: "strength",
+        displayType: "reps",
+      },
+
       // Triceps exercises
-      { name: 'Tricep Extension', muscleGroup: 'Triceps', singleArm: false },
-      { name: 'Overhead Tricep Extension', muscleGroup: 'Triceps', singleArm: false },
-      { name: 'Tricep Pushdown', muscleGroup: 'Triceps', singleArm: false },
-      { name: 'Diamond Push-ups', muscleGroup: 'Triceps', singleArm: false },
-      
-      // Core/Abs exercises
-      { name: 'Plank', muscleGroup: 'Abs', singleArm: false },
-      { name: 'Crunches', muscleGroup: 'Abs', singleArm: false },
-      { name: 'Russian Twists', muscleGroup: 'Abs', singleArm: false },
-      { name: 'Leg Raises', muscleGroup: 'Abs', singleArm: false },
-      { name: 'Mountain Climbers', muscleGroup: 'Abs', singleArm: false },
-      { name: 'Dead Bug', muscleGroup: 'Abs', singleArm: false },
-      
-      // Cardio exercises
-      { name: 'Running', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Walking', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Jogging', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Cycling', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Rowing Machine', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Elliptical', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Swimming', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Jumping Jacks', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'Burpees', muscleGroup: 'Cardio', singleArm: false },
-      { name: 'High Knees', muscleGroup: 'Cardio', singleArm: false },
-    ]
-    
+      {
+        name: "Tricep Extension",
+        muscleGroup: "Triceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Overhead Tricep Extension",
+        muscleGroup: "Triceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Tricep Pushdown",
+        muscleGroup: "Triceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Diamond Push-ups",
+        muscleGroup: "Triceps",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+
+      // Core/Abs exercises (mix of reps and time-based)
+      {
+        name: "Plank",
+        muscleGroup: "Abs",
+        singleArm: false,
+        type: "strength",
+        displayType: "time",
+      },
+      {
+        name: "Crunches",
+        muscleGroup: "Abs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Russian Twists",
+        muscleGroup: "Abs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Leg Raises",
+        muscleGroup: "Abs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+      {
+        name: "Mountain Climbers",
+        muscleGroup: "Abs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Dead Bug",
+        muscleGroup: "Abs",
+        singleArm: false,
+        type: "strength",
+        displayType: "reps",
+      },
+
+      // Cardio exercises (typically time-based)
+      {
+        name: "Running",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Walking",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Jogging",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Cycling",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Rowing Machine",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Elliptical",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Swimming",
+        muscleGroup: "Back",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+      {
+        name: "Jumping Jacks",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "reps",
+      },
+      {
+        name: "Burpees",
+        muscleGroup: "Chest",
+        singleArm: false,
+        type: "cardio",
+        displayType: "reps",
+      },
+      {
+        name: "High Knees",
+        muscleGroup: "Legs",
+        singleArm: false,
+        type: "cardio",
+        displayType: "time",
+      },
+    ];
+
     for (const exercise of defaultExercises) {
-      await saveExercise(exercise)
+      await saveExercise(exercise);
     }
   }
 }
@@ -249,8 +654,8 @@ export async function initializeDefaultExercises() {
  * @returns {Promise<Array>} Array of template objects
  */
 export async function getWorkoutTemplates() {
-  const db = await initDB()
-  return db.getAllFromIndex('workout_templates', 'created')
+  const db = await initDB();
+  return db.getAllFromIndex("workout_templates", "created");
 }
 
 /**
@@ -259,8 +664,8 @@ export async function getWorkoutTemplates() {
  * @returns {Promise<Object|null>} The template object or null if not found
  */
 export async function getWorkoutTemplate(id) {
-  const db = await initDB()
-  return db.get('workout_templates', id)
+  const db = await initDB();
+  return db.get("workout_templates", id);
 }
 
 /**
@@ -269,18 +674,18 @@ export async function getWorkoutTemplate(id) {
  * @returns {Promise<number>} The template ID
  */
 export async function saveWorkoutTemplate(template) {
-  const db = await initDB()
+  const db = await initDB();
   const templateData = {
     ...template,
     created: template.created || new Date(),
-    updated: new Date()
-  }
-  
+    updated: new Date(),
+  };
+
   if (template.id) {
-    await db.put('workout_templates', templateData)
-    return template.id
+    await db.put("workout_templates", templateData);
+    return template.id;
   } else {
-    return db.add('workout_templates', templateData)
+    return db.add("workout_templates", templateData);
   }
 }
 
@@ -290,6 +695,6 @@ export async function saveWorkoutTemplate(template) {
  * @returns {Promise<void>}
  */
 export async function deleteWorkoutTemplate(id) {
-  const db = await initDB()
-  return db.delete('workout_templates', id)
+  const db = await initDB();
+  return db.delete("workout_templates", id);
 }

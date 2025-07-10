@@ -22,14 +22,14 @@
         <div class="text-gray-500">{{ t("workout.loading") }}</div>
       </div>
 
-      <div
+      <NeoPanel
         v-else-if="flattenedItems.length === 0"
-        class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl mb-5 shadow-brutal"
+        class="text-center mx-4"
       >
-        <div class="text-base font-bold text-nb-text">
-          {{ t("workouts.noWorkouts") }}
+        <div class="text-base font-bold text-black dark:text-white mb-2">
+          {{ t("workout.noWorkouts") }}
         </div>
-      </div>
+      </NeoPanel>
 
       <DynamicScroller
         v-else
@@ -50,7 +50,7 @@
               v-if="item.type === 'header'"
               class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl mb-5 shadow-brutal"
             >
-              <div class="text-base font-bold text-nb-text">
+              <div class="text-base font-bold text-black">
                 {{ item.monthYear }}
               </div>
               <div
@@ -63,7 +63,7 @@
             <!-- Workout item -->
             <div
               v-else
-              class="bg-gray-200 border-3 border-black dark:bg-zinc-700 dark:text-white rounded-xl p-5 mb-4 cursor-pointer shadow-brutal transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
+              class="bg-white border-3 border-black dark:bg-zinc-700 dark:text-white rounded-xl p-5 mb-4 cursor-pointer shadow-brutal transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
               @click="editWorkout(item.id)"
             >
               <div class="flex justify-between items-start mb-4">
@@ -104,13 +104,14 @@ import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import { getWorkouts, initializeDefaultExercises } from "@/utils/database.js";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
+import NeoPanel from "@/components/NeoPanel.vue";
 
 const router = useRouter();
 const { t, d } = useI18n();
 
 // Set page title
 useHead({
-  title: () => `${t('workout.title')} - Plonkout`
+  title: () => t("workout.title"),
 });
 const workouts = ref([]);
 const loading = ref(true);

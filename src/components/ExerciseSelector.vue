@@ -1,16 +1,20 @@
 <template>
   <div
     @click="$emit('close')"
-    class="fixed inset-0 bg-black bg-opacity-25 dark:bg-black dark:bg-opacity-50 z-50 flex items-end justify-center"
+    class="fixed inset-0 z-50 flex items-end justify-center"
+    style="background-color: rgba(0, 0, 0, 0.4)"
   >
     <NeoPanel
       @click.stop
       class="w-full max-w-md max-h-96 flex flex-col safe-area-bottom"
+      data-testid="exercise-selector-content"
     >
       <!-- Header -->
       <div class="p-4 border-b-2 border-nb-border">
         <div class="flex items-center justify-between">
-          <h3 class="neo-heading-3">{{ t("exercise.selector.title") }}</h3>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("exercise.selector.title") }}
+          </h3>
           <NeoButton
             @click="showNewExerciseForm = true"
             variant="primary"
@@ -37,13 +41,16 @@
 
       <!-- Exercise List -->
       <div class="flex-1 overflow-auto p-4">
-        <div v-if="loading" class="text-center py-8 text-nb-text opacity-70">
+        <div
+          v-if="loading"
+          class="text-center py-8 text-black dark:text-white opacity-70"
+        >
           {{ t("exercise.selector.loading") }}
         </div>
 
         <div
           v-else-if="filteredExercises.length === 0"
-          class="text-center py-8 text-nb-text opacity-70"
+          class="text-center py-8 text-black dark:text-white opacity-70"
         >
           {{ t("exercise.selector.noResults") }}
         </div>
@@ -54,8 +61,13 @@
             :key="group.muscleGroup"
             class="space-y-2"
           >
-            <h4 class="text-sm font-bold text-nb-text opacity-70 uppercase tracking-wider px-1">
-              {{ t(`exercise.muscleGroups.${group.muscleGroup.toLowerCase()}`) || group.muscleGroup }}
+            <h4
+              class="text-sm font-bold text-black dark:text-white opacity-70 uppercase tracking-wider px-1"
+            >
+              {{
+                t(`exercise.muscleGroups.${group.muscleGroup.toLowerCase()}`) ||
+                group.muscleGroup
+              }}
             </h4>
             <div class="space-y-2">
               <button
@@ -64,14 +76,24 @@
                 @click="selectExercise(exercise)"
                 class="w-full text-left p-3 bg-nb-overlay border-2 border-nb-border rounded-lg shadow-brutal-sm hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all duration-200"
               >
-                <div class="font-bold text-nb-text">{{ exercise.name }}</div>
-                <div class="text-sm text-nb-text opacity-70">
+                <div class="font-bold text-white dark:text-black">
+                  {{ exercise.name }}
+                </div>
+                <div
+                  class="text-sm text-white dark:text-black opacity-70 flex items-center justify-between"
+                >
                   <span class="text-xs">
                     {{
                       exercise.singleArm
                         ? t("exercise.selector.singleArm")
                         : t("exercise.selector.bothArms")
                     }}
+                  </span>
+                  <span
+                    v-if="exercise.type"
+                    class="text-xs px-2 py-1 bg-nb-border rounded text-black dark:text-white"
+                  >
+                    {{ t(`exercise.types.${exercise.type}`) }}
                   </span>
                 </div>
               </button>
@@ -92,10 +114,11 @@
     <div
       v-if="showNewExerciseForm"
       @click="showNewExerciseForm = false"
-      class="fixed inset-0 bg-black bg-opacity-25 dark:bg-black dark:bg-opacity-50 z-60 flex items-center justify-center p-4"
+      class="fixed inset-0 z-60 flex items-center justify-center p-4"
+      style="background-color: rgba(0, 0, 0, 0.4)"
     >
       <NeoPanel @click.stop class="w-full max-w-sm" padding="lg">
-        <h3 class="neo-heading-3 mb-6">
+        <h3 class="text-xl font-semibold text-black dark:text-white mb-2 mb-6">
           {{ t("exercise.selector.newExercise") }}
         </h3>
 
@@ -114,7 +137,9 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-nb-text mb-2">
+            <label
+              class="block text-sm font-medium text-black dark:text-white mb-2"
+            >
               {{ t("exercise.selector.muscleGroup") }}
             </label>
             <VoltSelect
@@ -127,7 +152,40 @@
             />
           </div>
 
-          <div class="flex items-center space-x-3">
+          <div>
+            <label
+              class="block text-sm font-medium text-black dark:text-white mb-2"
+            >
+              {{ t("exercise.selector.exerciseType") }}
+            </label>
+            <VoltSelect
+              v-model="newExercise.type"
+              :options="exerciseTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+            />
+          </div>
+
+          <div>
+            <label
+              class="block text-sm font-medium text-black dark:text-white mb-2"
+            >
+              {{ t("exercise.selector.displayType") }}
+            </label>
+            <VoltSelect
+              v-model="newExercise.displayType"
+              :options="displayTypeOptions"
+              optionLabel="label"
+              optionValue="value"
+              class="w-full"
+            />
+          </div>
+
+          <div
+            v-if="newExercise.type !== 'cardio'"
+            class="flex items-center space-x-3"
+          >
             <input
               v-model="newExercise.singleArm"
               type="checkbox"
@@ -136,7 +194,7 @@
             />
             <label
               for="exercise-single-arm"
-              class="text-sm font-medium text-nb-text"
+              class="text-sm font-medium text-black dark:text-white"
             >
               {{ t("exercise.selector.singleArmLabel") }}
             </label>
@@ -187,6 +245,8 @@ const newExercise = ref({
   name: "",
   muscleGroup: "",
   singleArm: true,
+  type: "strength",
+  displayType: "reps",
 });
 
 // Predefined muscle group options
@@ -199,7 +259,18 @@ const muscleGroupOptions = computed(() => [
   { value: "Abs", label: t("exercise.muscleGroups.abs") },
   { value: "Back", label: t("exercise.muscleGroups.back") },
   { value: "Forearm", label: t("exercise.muscleGroups.forearm") },
-  { value: "Cardio", label: t("exercise.muscleGroups.cardio") },
+]);
+
+// Exercise type options
+const exerciseTypeOptions = computed(() => [
+  { value: "strength", label: t("exercise.types.strength") },
+  { value: "cardio", label: t("exercise.types.cardio") },
+]);
+
+// Display type options
+const displayTypeOptions = computed(() => [
+  { value: "reps", label: t("exercise.displayTypes.reps") },
+  { value: "time", label: t("exercise.displayTypes.time") },
 ]);
 
 /**
@@ -223,13 +294,13 @@ const filteredExercises = computed(() => {
  */
 const groupedExercises = computed(() => {
   const groups = {};
-  
-  filteredExercises.value.forEach(exercise => {
+
+  filteredExercises.value.forEach((exercise) => {
     const muscleGroup = exercise.muscleGroup;
     if (!groups[muscleGroup]) {
       groups[muscleGroup] = {
         muscleGroup,
-        exercises: []
+        exercises: [],
       };
     }
     groups[muscleGroup].exercises.push(exercise);
@@ -238,9 +309,9 @@ const groupedExercises = computed(() => {
   // Sort groups by muscle group name and exercises within each group by name
   return Object.values(groups)
     .sort((a, b) => a.muscleGroup.localeCompare(b.muscleGroup))
-    .map(group => ({
+    .map((group) => ({
       ...group,
-      exercises: group.exercises.sort((a, b) => a.name.localeCompare(b.name))
+      exercises: group.exercises.sort((a, b) => a.name.localeCompare(b.name)),
     }));
 });
 
@@ -276,9 +347,13 @@ async function createExercise() {
     const exerciseData = {
       name: newExercise.value.name.trim(),
       muscleGroup:
-        newExercise.value.muscleGroup ||
-        muscleGroupOptions.value[0].value,
-      singleArm: newExercise.value.singleArm,
+        newExercise.value.muscleGroup || muscleGroupOptions.value[0].value,
+      singleArm:
+        newExercise.value.type === "cardio"
+          ? false
+          : newExercise.value.singleArm,
+      type: newExercise.value.type,
+      displayType: newExercise.value.displayType,
     };
 
     const id = await saveExercise(exerciseData);
@@ -292,6 +367,8 @@ async function createExercise() {
       name: "",
       muscleGroup: "",
       singleArm: true,
+      type: "strength",
+      displayType: "reps",
     };
     showNewExerciseForm.value = false;
   } catch (error) {

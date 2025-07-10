@@ -3,7 +3,13 @@
     <!-- Header -->
     <NeoHeader :title="t('tabs.templates')">
       <template #right>
-        <NeoButton @click="addTemplate" variant="primary" size="sm" icon-only>
+        <NeoButton
+          @click="addTemplate"
+          variant="primary"
+          size="sm"
+          class="rounded-full w-10 h-10 !px-0 !py-0"
+          icon-only
+        >
           <template #icon>
             <span class="material-icons">add</span>
           </template>
@@ -97,7 +103,7 @@ const { showSuccess, showError } = useToast();
 
 // Set page title
 useHead({
-  title: () => `${t('tabs.templates')} - Plonkout`
+  title: () => t("tabs.templates"),
 });
 
 const templates = ref([]);

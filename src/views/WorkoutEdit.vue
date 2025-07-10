@@ -3,7 +3,12 @@
     <!-- Header -->
     <NeoHeader>
       <template #left>
-        <NeoButton @click="goBack" variant="primary" size="sm">
+        <NeoButton
+          @click="goBack"
+          variant="primary"
+          size="sm"
+          data-testid="back-button"
+        >
           <template #icon>
             <span class="material-icons">arrow_back</span>
           </template>
@@ -30,7 +35,7 @@
         <!-- Auto-save indicator -->
         <div
           v-if="saving"
-          class="flex items-center space-x-2 text-sm font-semibold text-nb-text bg-nb-bg border-2 border-nb-border rounded-md px-3 py-1 shadow-brutal-sm"
+          class="flex items-center space-x-2 text-sm font-semibold text-black dark:text-white bg-nb-bg border-2 border-nb-border rounded-md px-3 py-1 shadow-brutal-sm"
         >
           <div
             class="w-3 h-3 border-2 border-nb-text border-t-transparent rounded-full animate-spin"
@@ -44,7 +49,8 @@
     <div
       v-if="showContextMenu"
       @click="showContextMenu = false"
-      class="fixed inset-0 bg-black bg-opacity-25 z-50 flex items-end justify-center"
+      class="fixed inset-0 z-50 flex items-end justify-center"
+      style="background-color: rgba(0, 0, 0, 0.4)"
     >
       <NeoPanel @click.stop class="w-full max-w-md safe-area-bottom">
         <div class="space-y-3">
@@ -60,12 +66,16 @@
             </template>
             {{ t("workout.duplicate") }}
           </NeoButton>
-          <NeoButton @click="confirmDelete" variant="danger" full-width>
+          <DestructiveButton
+            @confirm="deleteWorkoutConfirmed"
+            :confirm-text="t('workout.delete')"
+            full-width
+          >
             <template #icon>
               <span class="material-icons">delete</span>
             </template>
             {{ t("workout.delete") }}
-          </NeoButton>
+          </DestructiveButton>
         </div>
         <NeoButton
           @click="showContextMenu = false"
@@ -104,9 +114,12 @@
                 v-model="startedDatetime"
                 type="datetime-local"
                 id="workout-started"
-                class="floating-input"
+                class="floating-input datetime-fixed"
               />
-              <label for="workout-started" class="floating-label">
+              <label
+                for="workout-started"
+                class="floating-label datetime-label-fixed"
+              >
                 {{ t("workout.started") }}
               </label>
             </div>
@@ -116,9 +129,12 @@
                 v-model="endedDatetime"
                 type="datetime-local"
                 id="workout-ended"
-                class="floating-input"
+                class="floating-input datetime-fixed"
               />
-              <label for="workout-ended" class="floating-label">
+              <label
+                for="workout-ended"
+                class="floating-label datetime-label-fixed"
+              >
                 {{ t("workout.ended") }}
               </label>
             </div>
@@ -177,174 +193,84 @@
             </div>
 
             <div class="flex flex-col gap-3">
-              <div
-                v-for="(set, setIndex) in exercise.sets"
-                :key="setIndex"
-                class="bg-nb-overlay border-2 border-nb-border rounded-lg p-4 shadow-brutal-sm"
-              >
-                <div class="flex items-center justify-between mb-3">
-                  <!-- Set Number -->
-                  <button
-                    @click="toggleSetType(exerciseIndex, setIndex)"
-                    :class="[
-                      'w-8 h-8 border-2 border-nb-border rounded-full flex items-center justify-center text-sm font-bold shadow-brutal-sm',
-                      set.type === 'warmup'
-                        ? 'bg-orange-500 text-white'
-                        : 'bg-purple-400 text-black',
-                    ]"
-                  >
-                    {{ getSetNumber(exercise.sets, setIndex, exercise, set) }}
-                  </button>
+              <!-- Use Cardio Set Editor for cardio exercises -->
+              <template v-if="exercise.type === 'cardio'">
+                <CardioSetEditor
+                  v-for="(set, setIndex) in exercise.sets"
+                  :key="`cardio-${setIndex}`"
+                  :set="set"
+                  :exercise="exercise"
+                  :set-number="
+                    getSetNumber(exercise.sets, setIndex, exercise, set)
+                  "
+                  :distance-unit="distanceUnit"
+                  :rpe-options="rpeOptions"
+                  @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
+                  @update:distance="
+                    updateSetField(exerciseIndex, setIndex, 'distance', $event)
+                  "
+                  @update:time="
+                    updateSetField(exerciseIndex, setIndex, 'time', $event)
+                  "
+                  @update:rpe="
+                    updateSetField(exerciseIndex, setIndex, 'rpe', $event)
+                  "
+                  @update:notes="
+                    updateSetField(exerciseIndex, setIndex, 'notes', $event)
+                  "
+                />
+              </template>
 
-                  <!-- Weight, Reps, RPE, and Arm -->
-                  <div class="flex gap-4">
-                    <div class="flex flex-col items-center text-center">
-                      <div class="relative flex items-center">
-                        <input
-                          v-model.number="set.weight"
-                          type="number"
-                          step="0.5"
-                          class="text-base font-bold text-nb-text bg-transparent border-none text-center w-16 focus:outline-none"
-                          placeholder="0"
-                        />
-                      </div>
-                      <div class="text-xs font-medium text-nb-text opacity-70">
-                        {{ weightUnit }}
-
-                        <span
-                          v-if="
-                            set.weight &&
-                            isWeightRecord(exercise.name, set.weight, set.arm)
-                          "
-                          class="text-yellow-500 text-sm ml-1 m-icon"
-                          :title="t('exercise.newWeightRecord')"
-                        >
-                          star
-                        </span>
-                      </div>
-                    </div>
-                    <div class="flex flex-col items-center text-center">
-                      <div class="relative flex items-center">
-                        <input
-                          v-if="exerciseDisplay === 'reps'"
-                          v-model.number="set.reps"
-                          type="number"
-                          class="text-base font-bold text-nb-text bg-transparent border-none text-center w-16 focus:outline-none"
-                          placeholder="0"
-                        />
-                        <input
-                          v-else
-                          v-model="set.time"
-                          type="text"
-                          class="text-base font-bold text-nb-text bg-transparent border-none text-center w-16 focus:outline-none"
-                          placeholder="0:00"
-                        />
-                      </div>
-                      <div class="text-xs font-medium">
-                        <template v-if="exerciseDisplay === 'reps'">
-                          <template
-                            v-if="
-                              set.weight &&
-                              getPreviousReps(exercise.name, set.weight, set.arm)
-                            "
-                          >
-                            {{ t("exercise.reps") }} ({{ t("exercise.previousBest") }}:
-                            {{
-                              getPreviousReps(exercise.name, set.weight, set.arm)
-                            }})
-                          </template>
-                          <template v-else> {{ t("exercise.reps") }} </template>
-                          <span
-                            v-if="
-                              set.reps &&
-                              set.weight &&
-                              isRepRecord(
-                                exercise.name,
-                                set.weight,
-                                set.reps,
-                                set.arm
-                              )
-                            "
-                            class="text-yellow-500 text-sm ml-1 m-icon"
-                            :title="t('exercise.newRepRecord')"
-                          >
-                            star
-                          </span>
-                        </template>
-                        <template v-else>
-                          {{ t("exercise.time") }}
-                        </template>
-                      </div>
-                    </div>
-                    <div class="flex flex-col items-center text-center">
-                      <select
-                        v-model="set.rpe"
-                        class="text-base font-bold text-nb-text bg-transparent border-none text-align-last-center w-16 focus:outline-none appearance-none"
-                      >
-                        <option value="">-</option>
-                        <option
-                          v-for="rpe in rpeOptions"
-                          :key="rpe"
-                          :value="rpe"
-                        >
-                          {{ rpe.replace("RPE ", "") }}
-                        </option>
-                      </select>
-                      <div class="text-xs font-medium text-nb-text opacity-70">
-                        RPE
-                      </div>
-                    </div>
-                    <div
-                      v-if="exercise.singleArm"
-                      class="flex flex-col items-center text-center"
-                    >
-                      <select
-                        v-model="set.arm"
-                        class="text-base font-bold text-nb-text bg-transparent text-align-last-center border-none text-center w-16 focus:outline-none appearance-none"
-                      >
-                        <option value="">-</option>
-                        <option value="left">
-                          {{ t("exercise.arms.left") }}
-                        </option>
-                        <option value="right">
-                          {{ t("exercise.arms.right") }}
-                        </option>
-                        <option value="both">
-                          {{ t("exercise.arms.both") }}
-                        </option>
-                      </select>
-                      <div
-                        class="text-xs font-medium text-nb-text opacity-70 lowercase"
-                      >
-                        {{ t("exercise.arm") }}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Notes and % of max Row -->
-                <div class="flex gap-3 items-center">
-                  <!-- % of max -->
-                  <div class="flex flex-col items-center text-center">
-                    <div class="text-base font-bold text-nb-text">
-                      {{ getMaxPercentage(exercise.name, set.weight, set.arm) }}
-                    </div>
-                    <div class="text-xs font-medium text-nb-text opacity-70">
-                      {{ t("exercise.percentOfMax") }}
-                    </div>
-                  </div>
-
-                  <!-- Notes -->
-                  <div class="flex flex-col flex-1">
-                    <input
-                      v-model="set.notes"
-                      type="text"
-                      class="bg-white border-2 border-nb-border rounded-md px-2 py-1 text-sm font-medium text-nb-text focus:outline-none"
-                      :placeholder="t('exercise.notes')"
-                    />
-                  </div>
-                </div>
-              </div>
+              <!-- Use Strength Set Editor for strength exercises -->
+              <template v-else>
+                <StrengthSetEditor
+                  v-for="(set, setIndex) in exercise.sets"
+                  :key="`strength-${setIndex}`"
+                  :set="set"
+                  :exercise="exercise"
+                  :set-number="
+                    getSetNumber(exercise.sets, setIndex, exercise, set)
+                  "
+                  :weight-unit="weightUnit"
+                  :is-weight-record="
+                    set.weight &&
+                    isWeightRecord(exercise.name, set.weight, set.arm)
+                  "
+                  :is-rep-record="
+                    set.reps &&
+                    set.weight &&
+                    isRepRecord(exercise.name, set.weight, set.reps, set.arm)
+                  "
+                  :previous-reps="
+                    set.weight
+                      ? getPreviousReps(exercise.name, set.weight, set.arm)
+                      : null
+                  "
+                  :max-percentage="
+                    getMaxPercentage(exercise.name, set.weight, set.arm)
+                  "
+                  :rpe-options="rpeOptions"
+                  @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
+                  @update:weight="
+                    updateSetField(exerciseIndex, setIndex, 'weight', $event)
+                  "
+                  @update:reps="
+                    updateSetField(exerciseIndex, setIndex, 'reps', $event)
+                  "
+                  @update:time="
+                    updateSetField(exerciseIndex, setIndex, 'time', $event)
+                  "
+                  @update:rpe="
+                    updateSetField(exerciseIndex, setIndex, 'rpe', $event)
+                  "
+                  @update:arm="
+                    updateSetField(exerciseIndex, setIndex, 'arm', $event)
+                  "
+                  @update:notes="
+                    updateSetField(exerciseIndex, setIndex, 'notes', $event)
+                  "
+                />
+              </template>
             </div>
 
             <!-- Add Set Button -->
@@ -366,6 +292,7 @@
             variant="primary"
             size="lg"
             full-width
+            data-testid="add-exercise-button"
           >
             <template #icon>
               <span class="material-icons">add</span>
@@ -403,26 +330,20 @@ import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
 import DestructiveButton from "@/components/DestructiveButton.vue";
+import StrengthSetEditor from "@/components/StrengthSetEditor.vue";
+import CardioSetEditor from "@/components/CardioSetEditor.vue";
 import { useToast } from "@/composables/useToast.js";
 
 const router = useRouter();
 const { t } = useI18n();
 const { showSuccess, showError, showInfo } = useToast();
 
-// Set dynamic page title
-useHead({
-  title: () => {
-    const workoutName = workout.value.name || t('workout.unnamed');
-    const prefix = isNew.value ? t('workout.new') : t('workout.edit');
-    return `${prefix}${isNew.value ? '' : `: ${workoutName}`} - Plonkout`;
-  }
-});
-
 const props = defineProps({
   id: String,
 });
 
 const workout = ref({
+  id: null,
   name: "",
   started: new Date(),
   ended: null,
@@ -435,7 +356,7 @@ const showContextMenu = ref(false);
 const showExerciseSelector = ref(false);
 const allWorkouts = ref([]);
 const weightUnit = ref("kg");
-const exerciseDisplay = ref("reps");
+const distanceUnit = ref("km");
 const isInitialLoad = ref(true);
 let saveTimeout = null;
 
@@ -453,6 +374,15 @@ const rpeOptions = [
 ];
 
 const isNew = computed(() => !props.id);
+
+// Set dynamic page title
+useHead({
+  title: () => {
+    const workoutName = workout.value.name || t("workout.unnamed");
+    const prefix = isNew.value ? t("workout.new") : t("workout.edit");
+    return `${prefix}${isNew.value ? "" : `: ${workoutName}`}`;
+  },
+});
 
 /**
  * Computed property for started datetime input
@@ -520,14 +450,14 @@ async function loadWeightUnit() {
 }
 
 /**
- * Load exercise display setting
+ * Load distance unit setting
  */
-async function loadExerciseDisplay() {
+async function loadDistanceUnit() {
   try {
-    const display = await getSetting("exerciseDisplay", "reps");
-    exerciseDisplay.value = display;
+    const unit = await getSetting("distanceUnit", "km");
+    distanceUnit.value = unit;
   } catch (error) {
-    console.error("Error loading exercise display:", error);
+    console.error("Error loading distance unit:", error);
   }
 }
 
@@ -560,7 +490,9 @@ async function saveWorkout() {
 
     const id = await saveWorkoutToDB(workoutData);
 
+    // Update the workout ID and navigate if it's a new workout
     if (isNew.value) {
+      workout.value.id = id;
       router.replace(`/workout/${id}`);
     }
   } catch (error) {
@@ -630,6 +562,7 @@ function createNewSet() {
   return {
     type: "regular",
     weight: null,
+    distance: null,
     reps: null,
     time: "",
     rpe: "",
@@ -646,6 +579,17 @@ function createNewSet() {
 function toggleSetType(exerciseIndex, setIndex) {
   const set = workout.value.exercises[exerciseIndex].sets[setIndex];
   set.type = set.type === "warmup" ? "regular" : "warmup";
+}
+
+/**
+ * Update a specific field in a set
+ * @param {number} exerciseIndex - Index of the exercise
+ * @param {number} setIndex - Index of the set
+ * @param {string} field - Field name to update
+ * @param {*} value - New value for the field
+ */
+function updateSetField(exerciseIndex, setIndex, field, value) {
+  workout.value.exercises[exerciseIndex].sets[setIndex][field] = value;
 }
 
 /**
@@ -942,19 +886,17 @@ async function saveAsTemplate() {
 }
 
 /**
- * Confirm and delete workout
+ * Delete workout (called from DestructiveButton after confirmation)
  */
-async function confirmDelete() {
+async function deleteWorkoutConfirmed() {
   showContextMenu.value = false;
 
-  if (confirm(t("workout.deleteConfirm"))) {
-    try {
-      await deleteWorkout(parseInt(props.id));
-      router.push("/log");
-    } catch (error) {
-      console.error("Error deleting workout:", error);
-      showError(t("workout.deleteError"));
-    }
+  try {
+    await deleteWorkout(parseInt(props.id));
+    router.push("/log");
+  } catch (error) {
+    console.error("Error deleting workout:", error);
+    showError(t("workout.deleteError"));
   }
 }
 
@@ -969,7 +911,7 @@ onMounted(async () => {
   await loadAllWorkouts();
   await loadWorkout();
   await loadWeightUnit();
-  await loadExerciseDisplay();
+  await loadDistanceUnit();
 
   // Allow auto-save after initial load is complete
   await nextTick();

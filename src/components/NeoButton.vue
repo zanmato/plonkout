@@ -55,10 +55,10 @@ const hasIcon = computed(() => !!slots.icon);
 const variantClasses = computed(() => {
   const variants = {
     primary: "bg-purple-300 text-black",
-    secondary: "bg-nb-overlay text-nb-text",
+    secondary: "bg-nb-overlay text-black",
     success: "bg-green-500 text-white",
     danger: "bg-red-500 text-white",
-    overlay: "bg-nb-overlay text-nb-text",
+    overlay: "bg-nb-overlay text-black",
   };
   return variants[props.variant] || variants.primary;
 });

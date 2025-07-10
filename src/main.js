@@ -1,7 +1,7 @@
 import { createApp } from "vue";
 import { createRouter, createWebHistory } from "vue-router";
 import { createI18n } from "vue-i18n";
-import { createHead } from "@unhead/vue";
+import { createHead } from "@unhead/vue/client";
 import PrimeVue from "primevue/config";
 import ToastService from "primevue/toastservice";
 import App from "@/App.vue";

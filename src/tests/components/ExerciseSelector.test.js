@@ -5,7 +5,7 @@ import ExerciseSelector from '@/components/ExerciseSelector.vue'
 import { getExercises, saveExercise } from '@/utils/database.js'
 
 // Mock vue-i18n
-const mockT = vi.fn((key, params) => {
+const mockT = vi.fn((key, _params) => {
   const translations = {
     'exercise.selector.title': 'Select Exercise',
     'exercise.selector.new': '+ New',
@@ -104,7 +104,7 @@ describe('ExerciseSelector.vue', () => {
     })
 
     it('does not close modal when clicking content area', async () => {
-      const content = wrapper.find('.neo-card')
+      const content = wrapper.find('[data-testid="exercise-selector-content"]')
       await content.trigger('click')
       
       expect(wrapper.emitted('close')).toBeFalsy()

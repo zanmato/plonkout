@@ -87,13 +87,8 @@ describe('WorkoutEdit.vue', () => {
     })
 
     it('can add new exercise', async () => {
-      const addExerciseBtn = wrapper.find('button')
       // Find button with "Add Exercise" functionality
-      const buttons = wrapper.findAll('button')
-      const addExerciseButton = buttons.find(btn => 
-        btn.text().includes('workout.addExercise') || 
-        btn.attributes('class')?.includes('neo-button-accent')
-      )
+      const addExerciseButton = wrapper.find('[data-testid="add-exercise-button"]')
       
       if (addExerciseButton) {
         await addExerciseButton.trigger('click')
@@ -165,6 +160,37 @@ describe('WorkoutEdit.vue', () => {
           expect(mockPush).toHaveBeenCalledWith('/workout/456')
         }
       }
+    })
+
+    it('preserves workout ID when saving existing workout', async () => {
+      // Mock existing workout data
+      getWorkout.mockResolvedValueOnce({
+        id: 1,
+        name: 'Test Workout',
+        started: new Date(),
+        ended: null,
+        notes: '',
+        exercises: []
+      })
+      
+      saveWorkoutToDB.mockResolvedValueOnce(1) // Should return the same ID
+      
+      // Create wrapper for existing workout
+      wrapper = createWrapper({ id: '1' })
+      await nextTick()
+      await new Promise(resolve => setTimeout(resolve, 50)) // Wait for loading
+      
+      // Trigger save
+      const vm = wrapper.vm
+      await vm.saveWorkout()
+      
+      // Verify that saveWorkoutToDB was called with the workout including ID
+      expect(saveWorkoutToDB).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 1,
+          name: 'Test Workout'
+        })
+      )
     })
 
     it('can delete workout', async () => {
@@ -305,9 +331,7 @@ describe('WorkoutEdit.vue', () => {
     })
 
     it('navigates back when back button is clicked', async () => {
-      const backButton = wrapper.findAll('button').find(btn => 
-        btn.find('svg')?.exists() && btn.attributes('class')?.includes('neo-button-primary')
-      )
+      const backButton = wrapper.find('[data-testid="back-button"]')
       
       if (backButton) {
         await backButton.trigger('click')

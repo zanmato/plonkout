@@ -27,6 +27,7 @@
     "saveAsTemplate": "Save as template",
     "unnamed": "Unnamed workout",
     "loading": "Loading...",
+    "noWorkouts": "No Workouts",
     "workoutCount": "{count} workout | {count} workouts",
     "summary": {
       "noExercises": "No exercises",
@@ -61,6 +62,8 @@
       "namePlaceholder": "Exercise name",
       "muscleGroup": "Muscle Group",
       "muscleGroupPlaceholder": "e.g., Wrist, Forearm, Bicep",
+      "exerciseType": "Exercise Type",
+      "displayType": "Display Type",
       "singleArmLabel": "Single arm exercise",
       "create": "Create",
       "loadError": "Error loading exercises",
@@ -80,12 +83,15 @@
       "chest": "Chest",
       "abs": "Abs",
       "back": "Back",
-      "forearm": "Forearm",
-      "cardio": "Cardio"
+      "forearm": "Forearm"
     },
     "types": {
       "strength": "Strength",
       "cardio": "Cardio"
+    },
+    "displayTypes": {
+      "reps": "Reps",
+      "time": "Time"
     }
   },
   "statistics": {
@@ -113,6 +119,7 @@
     "title": "Settings",
     "language": "Language",
     "weightUnit": "Weight Unit",
+    "distanceUnit": "Distance Unit",
     "theme": "Theme",
     "exerciseDisplay": "Exercise Display",
     "themes": {
@@ -122,7 +129,9 @@
     },
     "units": {
       "kg": "Kilograms (kg)",
-      "lbs": "Pounds (lbs)"
+      "lbs": "Pounds (lbs)",
+      "km": "Kilometers (km)",
+      "miles": "Miles (mi)"
     },
     "exerciseDisplays": {
       "reps": "Reps",
