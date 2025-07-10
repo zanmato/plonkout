@@ -92,6 +92,22 @@ describe("WorkoutLog.vue", () => {
             },
           ],
         },
+        {
+          id: 3,
+          name: "Cardio Workout",
+          started: new Date("2024-01-17T09:00:00"),
+          ended: new Date("2024-01-17T10:00:00"),
+          exercises: [
+            {
+              name: "Running",
+              type: "cardio",
+              sets: [
+                { type: "regular", time: "30m", distance: 5 },
+                { type: "regular", time: "15m", distance: 2 },
+              ],
+            },
+          ],
+        },
       ]);
 
       wrapper = createWrapper();
@@ -109,36 +125,42 @@ describe("WorkoutLog.vue", () => {
 
     it("groups workouts by month", () => {
       const vm = wrapper.vm;
-      expect(vm.groupedWorkouts).toHaveLength(1); // Both workouts are in January 2024
+      expect(vm.groupedWorkouts).toHaveLength(1); // All three workouts are in January 2024
       expect(vm.groupedWorkouts[0].monthYear).toBe("January 2024");
-      expect(vm.groupedWorkouts[0].workouts).toHaveLength(2);
+      expect(vm.groupedWorkouts[0].workouts).toHaveLength(3);
     });
 
     it("flattens items for virtual scrolling", () => {
       const vm = wrapper.vm;
-      expect(vm.flattenedItems).toHaveLength(3); // 1 header + 2 workouts
+      expect(vm.flattenedItems).toHaveLength(4); // 1 header + 3 workouts
       expect(vm.flattenedItems[0].type).toBe("header");
       expect(vm.flattenedItems[1].type).toBe("workout");
       expect(vm.flattenedItems[2].type).toBe("workout");
+      expect(vm.flattenedItems[3].type).toBe("workout");
     });
 
     it("calculates workout summaries correctly", () => {
       const vm = wrapper.vm;
-      const workout1 = vm.flattenedItems[1];
-      const workout2 = vm.flattenedItems[2];
+      const workout1 = vm.flattenedItems[1]; // Newest (cardio workout)
+      const workout2 = vm.flattenedItems[2]; // Middle (strength workout 2)
+      const workout3 = vm.flattenedItems[3]; // Oldest (strength workout 1)
 
       // Test the actual behavior - workouts are sorted by date (newest first)
       const summary1 = vm.getWorkoutSummary(workout1);
       const summary2 = vm.getWorkoutSummary(workout2);
+      const summary3 = vm.getWorkoutSummary(workout3);
 
-      // Workout1 (newer, id: 2): 2 exercises (Hook Training + Side Pressure)
+      // Workout1 (newest, id: 3): Cardio workout with Running
+      // Running: 30m + 15m = 45m total
+      expect(summary1).toEqual(["45m of Running"]);
+
+      // Workout2 (middle, id: 2): 2 exercises (Hook Training + Side Pressure)
       // Hook Training: 1 warmup + 1 regular = 1 regular set
       // Side Pressure: 1 regular set
-      // Now shows per-exercise summaries
-      expect(summary1).toBe("1 sets of Hook Training\n1 sets of Side Pressure");
+      expect(summary2).toEqual(["1 sets of Hook Training", "1 sets of Side Pressure"]);
 
-      // Workout2 (older, id: 1): 1 exercise (Wrist Curl), 2 regular sets
-      expect(summary2).toBe("2 sets of Wrist Curl");
+      // Workout3 (oldest, id: 1): 1 exercise (Wrist Curl), 2 regular sets
+      expect(summary3).toEqual(["2 sets of Wrist Curl"]);
     });
   });
 

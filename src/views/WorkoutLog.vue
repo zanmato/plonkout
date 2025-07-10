@@ -85,7 +85,13 @@
               <div
                 class="text-sm dark:text-white text-black opacity-80 leading-relaxed"
               >
-                {{ getWorkoutSummary(item) }}
+                <div 
+                  v-for="(exerciseSummary, index) in getWorkoutSummary(item)"
+                  :key="index"
+                  class="leading-snug"
+                >
+                  {{ exerciseSummary }}
+                </div>
               </div>
             </div>
           </DynamicScrollerItem>
@@ -238,31 +244,82 @@ function formatWorkoutDate(date) {
 /**
  * Get workout summary (exercises and sets)
  * @param {Object} workout - The workout object
- * @returns {string} Summary string
+ * @returns {Array} Array of exercise summary strings
  */
 function getWorkoutSummary(workout) {
   if (!workout.exercises || workout.exercises.length === 0) {
-    return t("workout.summary.noExercises");
+    return [t("workout.summary.noExercises")];
   }
 
-  // Create a summary for each exercise showing individual set counts
+  // Create a summary for each exercise showing individual set counts or time for cardio
   const exerciseSummaries = workout.exercises.map((exercise) => {
     const regularSets = exercise.sets
-      ? exercise.sets.filter((set) => set.type !== "warmup").length
-      : 0;
+      ? exercise.sets.filter((set) => set.type !== "warmup")
+      : [];
     
-    if (regularSets === 0) {
+    if (regularSets.length === 0) {
       return null; // Skip exercises with no regular sets
     }
     
-    // Always use singleExercise format since we're showing per-exercise summaries
+    // Check if this is a cardio exercise (has time instead of reps)
+    const isCardio = exercise.type === "cardio" || 
+                     (regularSets.length > 0 && regularSets[0].time && !regularSets[0].reps);
+    
+    if (isCardio) {
+      // Calculate total time for cardio exercises
+      const totalMinutes = regularSets.reduce((total, set) => {
+        if (set.time) {
+          // Parse time format (could be "30m", "1h 30m", "90", etc.)
+          const timeStr = set.time.toString();
+          let minutes = 0;
+          
+          if (timeStr.includes('h') && timeStr.includes('m')) {
+            // Format: "1h 30m"
+            const hours = parseInt(timeStr.match(/(\d+)h/)?.[1] || '0');
+            const mins = parseInt(timeStr.match(/(\d+)m/)?.[1] || '0');
+            minutes = hours * 60 + mins;
+          } else if (timeStr.includes('h')) {
+            // Format: "1h"
+            const hours = parseInt(timeStr.match(/(\d+)h/)?.[1] || '0');
+            minutes = hours * 60;
+          } else if (timeStr.includes('m')) {
+            // Format: "30m"
+            minutes = parseInt(timeStr.match(/(\d+)m/)?.[1] || '0');
+          } else {
+            // Assume it's just minutes as a number
+            minutes = parseInt(timeStr) || 0;
+          }
+          
+          return total + minutes;
+        }
+        return total;
+      }, 0);
+      
+      if (totalMinutes > 0) {
+        const hours = Math.floor(totalMinutes / 60);
+        const mins = totalMinutes % 60;
+        
+        let timeDisplay;
+        if (hours > 0 && mins > 0) {
+          timeDisplay = `${hours}h ${mins}m`;
+        } else if (hours > 0) {
+          timeDisplay = `${hours}h`;
+        } else {
+          timeDisplay = `${mins}m`;
+        }
+        
+        return `${timeDisplay} of ${exercise.name}`;
+      }
+    }
+    
+    // For strength exercises, show set count
     return t("workout.summary.singleExercise", {
-      totalSets: regularSets,
+      totalSets: regularSets.length,
       exerciseName: exercise.name,
     });
   }).filter(Boolean); // Remove null entries
 
-  return exerciseSummaries.join('\n');
+  return exerciseSummaries.length > 0 ? exerciseSummaries : [t("workout.summary.noExercises")];
 }
 
 /**

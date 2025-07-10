@@ -12,32 +12,41 @@ import "vue3-virtual-scroller/dist/vue3-virtual-scroller.css";
 import en from "@/locales/en.json";
 import sv from "@/locales/sv.json";
 
-// Import views
-import Workouts from "@/views/Workouts.vue";
-import WorkoutLog from "@/views/WorkoutLog.vue";
-import Statistics from "@/views/Statistics.vue";
-import Settings from "@/views/Settings.vue";
-import WorkoutEdit from "@/views/WorkoutEdit.vue";
-
-// Router configuration
+// Router configuration with dynamic imports for code splitting
 const routes = [
   { path: "/", redirect: "/log" },
-  { path: "/templates", component: Workouts, name: "templates" },
-  { path: "/log", component: WorkoutLog, name: "log" },
+  {
+    path: "/templates",
+    component: () => import("@/views/Workouts.vue"),
+    name: "templates",
+  },
+  {
+    path: "/log",
+    component: () => import("@/views/WorkoutLog.vue"),
+    name: "log",
+  },
   {
     path: "/workout/:id?",
-    component: WorkoutEdit,
+    component: () => import("@/views/WorkoutEdit.vue"),
     name: "workout-edit",
     props: true,
   },
   {
     path: "/template/:id?",
-    component: WorkoutEdit,
+    component: () => import("@/views/WorkoutEdit.vue"),
     name: "template-edit",
     props: true,
   },
-  { path: "/statistics", component: Statistics, name: "statistics" },
-  { path: "/settings", component: Settings, name: "settings" },
+  {
+    path: "/statistics",
+    component: () => import("@/views/Statistics.vue"),
+    name: "statistics",
+  },
+  {
+    path: "/settings",
+    component: () => import("@/views/Settings.vue"),
+    name: "settings",
+  },
 ];
 
 const router = createRouter({
