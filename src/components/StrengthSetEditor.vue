@@ -154,7 +154,7 @@
           :value="set.notes"
           @input="$emit('update:notes', $event.target.value)"
           type="text"
-          class="bg-white border-2 border-nb-border rounded-md px-2 py-1 text-sm font-medium text-black focus:outline-none"
+          class="bg-white border-2 border-nb-border rounded-md px-2 py-1 text-sm font-medium text-black focus:outline-none dark:bg-black dark:text-white"
           :placeholder="t('exercise.notes')"
         />
       </div>

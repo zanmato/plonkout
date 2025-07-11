@@ -230,7 +230,7 @@
   
   .floating-input,
   .floating-textarea {
-    @apply w-full px-4 py-3 pt-6 bg-nb-bg border-3 border-nb-border rounded-lg text-black placeholder-transparent focus:outline-none focus:ring-0 focus:border-nb-main transition-colors duration-200;
+    @apply w-full px-4 py-3 pt-6 bg-nb-bg border-3 border-nb-border rounded-lg text-black placeholder-transparent focus:outline-none focus:ring-0 focus:border-nb-main transition-colors duration-200 dark:bg-black dark:text-white;
   }
   
   .floating-textarea {
@@ -238,7 +238,7 @@
   }
   
   .floating-label {
-    @apply absolute left-4 top-2 text-xs font-medium text-black opacity-70 transition-all duration-200 pointer-events-none;
+    @apply absolute left-4 top-2 text-xs font-medium text-black opacity-70 transition-all duration-200 pointer-events-none dark:text-white;
   }
   
   /* When input has value or is focused, keep label in floating position */
@@ -265,11 +265,11 @@
   
   /* Datetime-specific fixes for consistent floating labels */
   .datetime-fixed {
-    @apply pt-6 pb-3;
+    @apply pt-6 pb-3 dark:bg-black dark:text-white;
   }
   
   .datetime-label-fixed {
-    @apply top-2 text-xs opacity-70;
+    @apply top-2 text-xs opacity-70 dark:text-white;
     transform: none !important;
   }
   
