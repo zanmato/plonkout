@@ -16,6 +16,8 @@
     "@unhead/vue": "^2.0.12",
     "bootstrap-icons": "^1.13.1",
     "chart.js": "^4.4.0",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^4.1.0",
     "idb": "^8.0.0",
     "primevue": "^4.3.6",
     "tailwind-merge": "^3.3.1",

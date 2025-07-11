@@ -504,7 +504,7 @@ async function saveWorkout() {
 
     const id = await saveWorkoutToDB(workoutData);
 
-    // Update the workout ID and navigate if it's a new workout
+    // Navigate if it's a new workout (ID will be set by route params)
     if (isNew.value) {
       workout.value.id = id;
       router.replace({ name: "workout-edit", params: { id: id.toString() } });
@@ -618,22 +618,21 @@ function getSetNumber(sets, setIndex, exercise, currentSet) {
   const set = sets[setIndex];
 
   if (set.type === "warmup") {
-    // For warmup sets, count all warmup sets regardless of arm
-    const warmupSets = sets
-      .slice(0, setIndex + 1)
-      .filter((s) => s.type === "warmup");
-    let setNumber = `W${warmupSets.length}`;
-
-    // Add arm designation for single-arm exercises
+    // For warmup sets, count per arm for single-arm exercises
     if (exercise.singleArm && currentSet.arm) {
+      const warmupSetsForArm = sets
+        .slice(0, setIndex + 1)
+        .filter((s) => s.type === "warmup" && s.arm === currentSet.arm);
       const armSuffix =
         currentSet.arm === "left" ? "L" : currentSet.arm === "right" ? "R" : "";
-      if (armSuffix) {
-        setNumber += armSuffix;
-      }
+      return `W${warmupSetsForArm.length}${armSuffix}`;
+    } else {
+      // For non-single arm exercises, count all warmup sets
+      const warmupSets = sets
+        .slice(0, setIndex + 1)
+        .filter((s) => s.type === "warmup");
+      return `W${warmupSets.length}`;
     }
-
-    return setNumber;
   } else {
     // For regular sets
     if (exercise.singleArm && currentSet.arm) {
@@ -765,8 +764,13 @@ function getPreviousReps(exerciseName, weight, arm) {
 
   let bestReps = 0;
 
-  // Check all historical workouts
+  // Check all historical workouts (excluding current workout)
   allWorkouts.value.forEach((historicalWorkout) => {
+    // Skip the current workout being edited
+    if (historicalWorkout.id === workout.value.id) {
+      return;
+    }
+
     if (historicalWorkout.exercises) {
       historicalWorkout.exercises.forEach((exercise) => {
         if (exercise.name === exerciseName && exercise.sets) {
@@ -799,7 +803,28 @@ function isRepRecord(exerciseName, weight, reps, arm) {
   }
 
   const previousBest = getPreviousReps(exerciseName, weight, arm);
-  return previousBest === null || reps > previousBest;
+  const beatsHistoricalRecord = previousBest === null || reps > previousBest;
+
+  if (!beatsHistoricalRecord) {
+    return false;
+  }
+
+  // Check if this is the best reps for this weight in the current workout
+  let currentWorkoutBest = 0;
+  workout.value.exercises.forEach((exercise) => {
+    if (exercise.name === exerciseName) {
+      exercise.sets.forEach((set) => {
+        if (set.weight === weight && set.reps && set.type === "regular") {
+          if (isArmCompatible(arm, set.arm) && set.reps > currentWorkoutBest) {
+            currentWorkoutBest = set.reps;
+          }
+        }
+      });
+    }
+  });
+
+  // Only show star if this set has the highest reps for this weight in current workout
+  return reps === currentWorkoutBest;
 }
 
 /**
@@ -816,8 +841,13 @@ function isWeightRecord(exerciseName, weight, arm) {
 
   let maxWeight = 0;
 
-  // Check all historical workouts for max weight
+  // Check all historical workouts for max weight (excluding current workout)
   allWorkouts.value.forEach((historicalWorkout) => {
+    // Skip the current workout being edited
+    if (historicalWorkout.id === workout.value.id) {
+      return;
+    }
+
     if (historicalWorkout.exercises) {
       historicalWorkout.exercises.forEach((exercise) => {
         if (exercise.name === exerciseName && exercise.sets) {

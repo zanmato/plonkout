@@ -231,6 +231,8 @@
   .floating-input,
   .floating-textarea {
     @apply w-full px-4 py-3 pt-6 bg-nb-bg border-3 border-nb-border rounded-lg text-black placeholder-transparent focus:outline-none focus:ring-0 focus:border-nb-main transition-colors duration-200 dark:bg-black dark:text-white;
+    min-height: 3rem; /* Ensure adequate touch target on mobile */
+    touch-action: manipulation; /* Prevent double-tap zoom on mobile */
   }
   
   .floating-textarea {

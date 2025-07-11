@@ -8,7 +8,9 @@
       <NeoPanel>
         <!-- Language Setting -->
         <div class="mb-6">
-          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.language") }}</h3>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("settings.language") }}
+          </h3>
           <VoltSelect
             v-model="currentLocale"
             @change="changeLanguage"
@@ -21,7 +23,9 @@
 
         <!-- Theme Setting -->
         <div class="mb-6">
-          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.theme") }}</h3>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("settings.theme") }}
+          </h3>
           <SelectButton
             v-model="theme"
             @change="saveTheme"
@@ -34,7 +38,9 @@
 
         <!-- Weight Unit Setting -->
         <div class="mb-6">
-          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.weightUnit") }}</h3>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("settings.weightUnit") }}
+          </h3>
           <SelectButton
             v-model="weightUnit"
             @change="saveWeightUnit"
@@ -47,7 +53,9 @@
 
         <!-- Distance Unit Setting -->
         <div class="mb-6">
-          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">{{ t("settings.distanceUnit") }}</h3>
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("settings.distanceUnit") }}
+          </h3>
           <SelectButton
             v-model="distanceUnit"
             @change="saveDistanceUnit"
@@ -57,7 +65,6 @@
             class="w-full"
           />
         </div>
-
 
         <!-- Data Management -->
         <div class="mb-6">
@@ -85,7 +92,7 @@
             </NeoButton>
 
             <DestructiveButton
-              @click="confirmClearData"
+              @confirm="clearAllData"
               :confirm-text="t('settings.dataManagement.clear')"
               full-width
             >
@@ -151,7 +158,6 @@ const distanceUnitOptions = ref([
   { value: "miles", label: t("settings.units.miles") },
 ]);
 
-
 onMounted(() => {
   storageUsed.value = t("settings.appInfo.calculating");
   loadSettings();
@@ -178,7 +184,6 @@ async function saveWeightUnit() {
 async function saveDistanceUnit() {
   await saveSetting("distanceUnit", distanceUnit.value);
 }
-
 
 /**
  * Save theme preference and apply it
@@ -233,23 +238,6 @@ async function exportData() {
   } catch (error) {
     console.error(t("settings.dataManagement.exportError"), error);
     showError(t("settings.dataManagement.exportError"));
-  }
-}
-
-/**
- * Confirm and clear all data
- */
-function confirmClearData() {
-  const confirmed = confirm(t("settings.dataManagement.clearConfirm"));
-
-  if (confirmed) {
-    const doubleConfirmed = confirm(
-      t("settings.dataManagement.clearFinalWarning")
-    );
-
-    if (doubleConfirmed) {
-      clearAllData();
-    }
   }
 }
 

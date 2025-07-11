@@ -7,7 +7,7 @@
       <button
         @click="$emit('toggleSetType')"
         :class="[
-          'w-8 h-8 border-2 border-nb-border rounded-full flex items-center justify-center text-sm font-bold shadow-brutal-sm',
+          'w-9 h-9 min-w-9 min-h-9 flex-shrink-0 border-2 border-nb-border rounded-full flex items-center justify-center text-sm font-bold shadow-brutal-sm',
           set.type === 'warmup'
             ? 'bg-orange-500 text-white'
             : 'bg-purple-400 text-black',
@@ -30,7 +30,7 @@
                 )
               "
               type="number"
-              inputmode="numeric"
+              inputmode="decimal"
               step="0.5"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0"
@@ -40,13 +40,6 @@
             class="text-xs font-medium text-black opacity-70 dark:text-white"
           >
             {{ weightUnit }}
-            <span
-              v-if="set.weight && isWeightRecord"
-              class="text-yellow-500 text-sm ml-1 m-icon"
-              :title="t('exercise.newWeightRecord')"
-            >
-              star
-            </span>
           </div>
         </div>
 
@@ -63,7 +56,7 @@
                 )
               "
               type="number"
-              inputmode="numeric"
+              inputmode="decimal"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0"
             />
@@ -77,17 +70,19 @@
             />
           </div>
           <div
-            class="text-xs font-medium text-black opacity-70 lowercase dark:text-white"
+            class="text-xs font-medium text-black lowercase dark:text-white relative"
           >
             <template v-if="exercise.displayType === 'reps'">
-              <template v-if="set.weight && previousReps">
-                {{ t("exercise.reps") }} ({{ t("exercise.previousBest") }}:
-                {{ previousReps }})
-              </template>
-              <template v-else> {{ t("exercise.reps") }} </template>
+              <span class="opacity-70">
+                <template v-if="set.weight && previousReps">
+                  {{ t("exercise.reps") }} ({{ t("exercise.previousBest") }}:
+                  {{ previousReps }})
+                </template>
+                <template v-else> {{ t("exercise.reps") }} </template>
+              </span>
               <span
                 v-if="isRepRecord"
-                class="text-yellow-500 text-sm ml-1 m-icon"
+                class="absolute -top-1 -right-6 text-yellow-500 text-sm m-icon opacity-100"
                 :title="t('exercise.newRepRecord')"
               >
                 star
@@ -134,9 +129,6 @@
             </option>
             <option value="right">
               {{ t("exercise.arms.right") }}
-            </option>
-            <option value="both">
-              {{ t("exercise.arms.both") }}
             </option>
           </select>
           <div

@@ -140,6 +140,7 @@ import { Chart, registerables } from "chart.js";
 import { getWorkouts } from "@/utils/database.js";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
+import "chartjs-adapter-date-fns";
 
 Chart.register(...registerables);
 

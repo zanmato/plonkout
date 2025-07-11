@@ -7,7 +7,7 @@
       <button
         @click="$emit('toggleSetType')"
         :class="[
-          'w-8 h-8 border-2 border-nb-border rounded-full flex items-center justify-center text-sm font-bold shadow-brutal-sm',
+          'w-9 h-9 min-w-9 min-h-9 flex-shrink-0 border-2 border-nb-border rounded-full flex items-center justify-center text-sm font-bold shadow-brutal-sm',
           set.type === 'warmup'
             ? 'bg-orange-500 text-white'
             : 'bg-purple-400 text-black',
@@ -30,7 +30,7 @@
                 )
               "
               type="number"
-              inputmode="numeric"
+              inputmode="decimal"
               step="0.1"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0"

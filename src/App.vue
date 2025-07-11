@@ -47,10 +47,7 @@ const currentTheme = ref("system");
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // PWA auto-reload functionality
-const {
-  needRefresh,
-  updateServiceWorker,
-} = useRegisterSW({
+const { needRefresh, updateServiceWorker } = useRegisterSW({
   onRegistered(r) {
     console.log("SW Registered: " + r);
   },
@@ -71,10 +68,6 @@ useHead({
     {
       name: "theme-color",
       content: () => getThemeColor(),
-    },
-    {
-      name: "viewport",
-      content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
     },
     {
       name: "apple-mobile-web-app-title",

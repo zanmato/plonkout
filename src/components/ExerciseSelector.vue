@@ -32,6 +32,10 @@
             id="exercise-search"
             class="floating-input"
             :placeholder="t('exercise.selector.search')"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
           />
           <label for="exercise-search" class="floating-label">
             {{ t("exercise.selector.search") }}

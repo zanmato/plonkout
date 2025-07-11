@@ -38,7 +38,7 @@
         <!-- Quick Stats -->
         <div class="grid grid-cols-2 gap-4">
           <div
-            class="bg-nb-overlay border-2 border-nb-border rounded-lg p-3 text-center"
+            class="bg-nb-overlay dark:bg-zinc-800 border-2 border-nb-border rounded-lg p-3 text-center"
           >
             <div class="text-lg font-bold text-black dark:text-white">
               {{ totalSets }}
@@ -48,7 +48,7 @@
             </div>
           </div>
           <div
-            class="bg-nb-overlay border-2 border-nb-border rounded-lg p-3 text-center"
+            class="bg-nb-overlay dark:bg-zinc-800 border-2 border-nb-border rounded-lg p-3 text-center"
           >
             <div class="text-lg font-bold text-black dark:text-white">
               {{ personalBest }}
@@ -78,7 +78,7 @@
             <div
               v-for="set in recentSets.slice(0, 5)"
               :key="`${set.date}-${set.index}`"
-              class="flex justify-between items-center py-2 px-3 bg-nb-overlay border border-nb-border rounded"
+              class="flex justify-between items-center py-2 px-3 bg-nb-overlay dark:bg-zinc-800 border border-nb-border rounded"
             >
               <div class="text-sm text-black dark:text-white">
                 {{ formatDate(set.date) }}
@@ -118,6 +118,7 @@ import { useI18n } from "vue-i18n";
 import { Chart, registerables } from "chart.js";
 import { getWorkouts, getSetting } from "@/utils/database.js";
 import NeoPanel from "@/components/NeoPanel.vue";
+import "chartjs-adapter-date-fns";
 
 Chart.register(...registerables);
 
@@ -134,7 +135,7 @@ const props = defineProps({
 
 const emit = defineEmits(["close"]);
 
-const { t } = useI18n();
+const { t, d } = useI18n();
 const chartCanvas = useTemplateRef("chartCanvas");
 const loading = ref(false);
 const chartData = ref([]);
@@ -225,12 +226,7 @@ const recentSets = computed(() => {
 
 const formatDate = (dateStr) => {
   const date = new Date(dateStr);
-  return date.toLocaleDateString(undefined, {
-    month: "short",
-    day: "numeric",
-    year:
-      date.getFullYear() !== new Date().getFullYear() ? "numeric" : undefined,
-  });
+  return d(date, "short");
 };
 
 const closeModal = () => {
@@ -374,6 +370,7 @@ watch(
   () => props.isOpen,
   async (isOpen) => {
     if (isOpen) {
+      await nextTick(); // Ensure DOM is updated
       await loadData();
       await nextTick();
       createChart();
@@ -383,7 +380,8 @@ watch(
         chart.value = null;
       }
     }
-  }
+  },
+  { immediate: true }
 );
 
 // Watch for data changes
