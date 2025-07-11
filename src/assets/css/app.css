@@ -68,17 +68,17 @@
 
   /* Primary and Surface Palettes */
   :root {
-    --p-primary-50: #ecfdf5;
-    --p-primary-100: #d1fae5;
-    --p-primary-200: #a7f3d0;
-    --p-primary-300: #6ee7b7;
-    --p-primary-400: #34d399;
-    --p-primary-500: #10b981;
-    --p-primary-600: #059669;
-    --p-primary-700: #047857;
-    --p-primary-800: #065f46;
-    --p-primary-900: #064e3b;
-    --p-primary-950: #022c22;
+    --p-primary-50: #faf5ff;
+    --p-primary-100: #f3e8ff;
+    --p-primary-200: #e9d5ff;
+    --p-primary-300: #d8b4fe;
+    --p-primary-400: #c084fc;
+    --p-primary-500: #a855f7;
+    --p-primary-600: #9333ea;
+    --p-primary-700: #7c3aed;
+    --p-primary-800: #6b21d0;
+    --p-primary-900: #581c87;
+    --p-primary-950: #3b0764;
     --p-surface-0: #ffffff;
     --p-surface-50: #fafafa;
     --p-surface-100: #f4f4f5;
@@ -333,5 +333,11 @@
     border-top: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  /* Neobrutalism components - removed, using NeoButton, NeoPanel etc. components directly */
+  /* Hover utilities that only work on devices with hover capability */
+  @media (hover: hover) and (pointer: fine) {
+    .hover-capable:hover {
+      box-shadow: none !important;
+      transform: translate(2px, 2px);
+    }
+  }
 }

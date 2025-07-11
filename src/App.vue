@@ -34,16 +34,30 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
+import { useRegisterSW } from "virtual:pwa-register/vue";
 import { getSetting } from "@/utils/database.js";
 import VoltToast from "@/volt/Toast.vue";
 
 const { t, locale } = useI18n();
 const currentTheme = ref("system");
 const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
+
+// PWA auto-reload functionality
+const {
+  needRefresh,
+  updateServiceWorker,
+} = useRegisterSW({
+  onRegistered(r) {
+    console.log("SW Registered: " + r);
+  },
+  onRegisterError(error) {
+    console.log("SW registration error", error);
+  },
+});
 
 // Set up base head configuration with title template
 useHead({
@@ -195,6 +209,14 @@ async function loadAppSettings() {
     console.error("Error loading app settings:", error);
   }
 }
+
+// Auto-reload when PWA update is available
+watch(needRefresh, (needRefresh) => {
+  if (needRefresh) {
+    console.log("New app version available, reloading...");
+    updateServiceWorker(true);
+  }
+});
 
 onMounted(() => {
   loadAppSettings();

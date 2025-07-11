@@ -1,12 +1,11 @@
 <template>
   <button
     :class="[
-      'border-3 border-nb-border rounded-lg px-4 py-2 text-sm font-bold flex items-center justify-center shadow-brutal-sm hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all duration-200',
+      'border-3 border-nb-border rounded-lg px-4 py-2 text-sm font-bold flex items-center justify-center shadow-brutal-sm hover-capable transition-all duration-200',
       variantClasses,
       sizeClasses,
       {
-        'disabled:opacity-50 disabled:hover:shadow-brutal-sm disabled:hover:translate-x-0 disabled:hover:translate-y-0':
-          disabled,
+        'disabled:opacity-50': disabled,
         'w-full': fullWidth,
         'gap-2': $slots.default && hasIcon,
       },

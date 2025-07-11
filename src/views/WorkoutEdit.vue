@@ -169,7 +169,7 @@
               </div>
               <div class="flex items-center space-x-2">
                 <NeoButton
-                  @click="showExerciseStats(exerciseIndex)"
+                  @click="openExerciseStats(exerciseIndex)"
                   variant="secondary"
                   size="sm"
                   class="w-8 h-8 !px-0 !py-0 rounded-full"
@@ -309,6 +309,17 @@
       @close="showExerciseSelector = false"
       @select="addExercise"
     />
+
+    <!-- Exercise Stats Modal -->
+    <ExerciseStats
+      v-if="selectedExerciseForStats"
+      :exercise="selectedExerciseForStats"
+      :is-open="showExerciseStats"
+      @close="
+        showExerciseStats = false;
+        selectedExerciseForStats = null;
+      "
+    />
   </div>
 </template>
 
@@ -326,6 +337,7 @@ import {
   getSetting,
 } from "@/utils/database.js";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
+import ExerciseStats from "@/components/ExerciseStats.vue";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
@@ -336,7 +348,7 @@ import { useToast } from "@/composables/useToast.js";
 
 const router = useRouter();
 const { t } = useI18n();
-const { showSuccess, showError, showInfo } = useToast();
+const { showSuccess, showError } = useToast();
 
 const props = defineProps({
   id: String,
@@ -354,6 +366,8 @@ const workout = ref({
 const saving = ref(false);
 const showContextMenu = ref(false);
 const showExerciseSelector = ref(false);
+const showExerciseStats = ref(false);
+const selectedExerciseForStats = ref(null);
 const allWorkouts = ref([]);
 const weightUnit = ref("kg");
 const distanceUnit = ref("km");
@@ -493,7 +507,7 @@ async function saveWorkout() {
     // Update the workout ID and navigate if it's a new workout
     if (isNew.value) {
       workout.value.id = id;
-      router.replace({ name: 'workout-edit', params: { id: id.toString() } });
+      router.replace({ name: "workout-edit", params: { id: id.toString() } });
     }
   } catch (error) {
     console.error("Error saving workout:", error);
@@ -641,12 +655,12 @@ function getSetNumber(sets, setIndex, exercise, currentSet) {
 }
 
 /**
- * Show exercise statistics (placeholder)
- * @param {number} _exerciseIndex - Index of the exercise
+ * Show exercise statistics
+ * @param {number} exerciseIndex - Index of the exercise
  */
-function showExerciseStats(_exerciseIndex) {
-  // TODO: Implement exercise statistics
-  showInfo(t("exercise.statsComingSoon"));
+function openExerciseStats(exerciseIndex) {
+  selectedExerciseForStats.value = workout.value.exercises[exerciseIndex];
+  showExerciseStats.value = true;
 }
 
 /**
@@ -847,7 +861,7 @@ async function duplicateWorkout() {
 
   try {
     const id = await saveWorkoutToDB(duplicatedWorkout);
-    router.push({ name: 'workout-edit', params: { id: id.toString() } });
+    router.push({ name: "workout-edit", params: { id: id.toString() } });
   } catch (error) {
     console.error("Error duplicating workout:", error);
     showError(t("workout.duplicateError"));
@@ -893,7 +907,7 @@ async function deleteWorkoutConfirmed() {
 
   try {
     await deleteWorkout(parseInt(props.id));
-    router.push({ name: 'log' });
+    router.push({ name: "log" });
   } catch (error) {
     console.error("Error deleting workout:", error);
     showError(t("workout.deleteError"));
@@ -904,7 +918,7 @@ async function deleteWorkoutConfirmed() {
  * Go back to workout list
  */
 function goBack() {
-  router.push({ name: 'log' });
+  router.push({ name: "log" });
 }
 
 onMounted(async () => {

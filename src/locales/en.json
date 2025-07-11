@@ -95,6 +95,18 @@
     "displayTypes": {
       "reps": "Reps",
       "time": "Time"
+    },
+    "stats": {
+      "title": "Stats for {exercise}",
+      "noData": "No data available",
+      "noDataDescription": "Start adding sets for this exercise to see statistics",
+      "totalSets": "Total Sets",
+      "personalBest": "Personal Best",
+      "noPB": "No PB",
+      "progressChart": "Progress Over Time",
+      "recentPerformance": "Recent Performance",
+      "weight": "Weight",
+      "distance": "Distance"
     }
   },
   "statistics": {

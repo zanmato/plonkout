@@ -6,7 +6,7 @@
   >
     <NeoPanel
       @click.stop
-      class="w-full max-w-md h-[60vh] min-h-[60vh] flex flex-col safe-area-bottom"
+      class="w-full max-w-md h-[60vh] min-h-[80vh] flex flex-col safe-area-bottom"
       data-testid="exercise-selector-content"
     >
       <!-- Header -->

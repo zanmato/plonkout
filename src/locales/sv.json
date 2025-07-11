@@ -90,6 +90,18 @@
     "types": {
       "strength": "Styrka",
       "cardio": "Kardio"
+    },
+    "stats": {
+      "title": "Statistik för {exercise}",
+      "noData": "Ingen data tillgänglig",
+      "noDataDescription": "Börja lägga till set för denna övning för att se statistik",
+      "totalSets": "Totala Set",
+      "personalBest": "Personligt Rekord",
+      "noPB": "Inget PR",
+      "progressChart": "Utveckling Över Tid",
+      "recentPerformance": "Senaste Prestationer",
+      "weight": "Vikt",
+      "distance": "Distans"
     }
   },
   "statistics": {
