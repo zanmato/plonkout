@@ -43,6 +43,7 @@ import VoltToast from "@/volt/Toast.vue";
 
 const { t, locale } = useI18n();
 const currentTheme = ref("system");
+const baseUrl = import.meta.env.BASE_URL.replace(/\/$/, "");
 
 // Set up base head configuration with title template
 useHead({
@@ -60,6 +61,36 @@ useHead({
     {
       name: "viewport",
       content: "width=device-width, initial-scale=1.0, viewport-fit=cover",
+    },
+    {
+      name: "apple-mobile-web-app-title",
+      content: "Plonkout",
+    },
+  ],
+  link: [
+    {
+      rel: "icon",
+      type: "image/png",
+      href: () => `${baseUrl}/favicon-96x96.png`,
+      sizes: "96x96",
+    },
+    {
+      rel: "icon",
+      type: "image/svg+xml",
+      href: () => `${baseUrl}/favicon.svg`,
+    },
+    {
+      rel: "shortcut icon",
+      href: () => `${baseUrl}/favicon.ico`,
+    },
+    {
+      rel: "apple-touch-icon",
+      sizes: "180x180",
+      href: () => `${baseUrl}/apple-touch-icon.png`,
+    },
+    {
+      rel: "manifest",
+      href: () => `${baseUrl}/site.webmanifest`,
     },
   ],
 });
@@ -116,7 +147,7 @@ function getThemeColor() {
       window.matchMedia("(prefers-color-scheme: dark)").matches);
 
   // Return dark theme color or light theme color
-  return isDark ? "#0a0a0a" : "#8B5CF6";
+  return isDark ? "#0a0a0a" : "#ffffff";
 }
 
 /**
