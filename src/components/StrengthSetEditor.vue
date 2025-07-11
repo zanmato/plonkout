@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-nb-overlay border-2 border-nb-border rounded-lg p-4 shadow-brutal-sm"
+    class="bg-nb-overlay border-2 border-nb-border rounded-lg p-4 shadow-brutal-sm dark:bg-zinc-800"
   >
     <div class="flex items-center justify-between mb-3">
       <!-- Set Number -->
@@ -30,12 +30,13 @@
                 )
               "
               type="number"
+              inputmode="numeric"
               step="0.5"
-              class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none"
+              class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0"
             />
           </div>
-          <div class="text-xs font-medium text-black opacity-70">
+          <div class="text-xs font-medium text-black opacity-70 dark:text-white">
             {{ weightUnit }}
             <span
               v-if="set.weight && isWeightRecord"
@@ -60,7 +61,8 @@
                 )
               "
               type="number"
-              class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none"
+              inputmode="numeric"
+              class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0"
             />
             <input
@@ -68,11 +70,11 @@
               :value="set.time"
               @input="$emit('update:time', $event.target.value)"
               type="text"
-              class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none"
+              class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0:00"
             />
           </div>
-          <div class="text-xs font-medium text-black lowercase">
+          <div class="text-xs font-medium text-black lowercase dark:text-white">
             <template v-if="exercise.displayType === 'reps'">
               <template v-if="set.weight && previousReps">
                 {{ t("exercise.reps") }} ({{ t("exercise.previousBest") }}:
@@ -98,14 +100,14 @@
           <select
             :value="set.rpe"
             @change="$emit('update:rpe', $event.target.value)"
-            class="text-base font-bold text-black bg-transparent border-none text-align-last-center w-16 focus:outline-none appearance-none"
+            class="text-base font-bold text-black bg-transparent border-none text-align-last-center w-16 focus:outline-none appearance-none dark:text-white"
           >
             <option value="">-</option>
             <option v-for="rpe in rpeOptions" :key="rpe" :value="rpe">
               {{ rpe.replace("RPE ", "") }}
             </option>
           </select>
-          <div class="text-xs font-medium text-black opacity-70">RPE</div>
+          <div class="text-xs font-medium text-black opacity-70 dark:text-white">RPE</div>
         </div>
 
         <!-- Arm (only for single arm exercises) -->
@@ -116,7 +118,7 @@
           <select
             :value="set.arm"
             @change="$emit('update:arm', $event.target.value)"
-            class="text-base font-bold text-black bg-transparent text-align-last-center border-none text-center w-16 focus:outline-none appearance-none"
+            class="text-base font-bold text-black bg-transparent text-align-last-center border-none text-center w-16 focus:outline-none appearance-none dark:text-white"
           >
             <option value="">-</option>
             <option value="left">
@@ -129,7 +131,7 @@
               {{ t("exercise.arms.both") }}
             </option>
           </select>
-          <div class="text-xs font-medium text-black opacity-70 lowercase">
+          <div class="text-xs font-medium text-black opacity-70 lowercase dark:text-white">
             {{ t("exercise.arm") }}
           </div>
         </div>
@@ -140,10 +142,10 @@
     <div class="flex gap-3 items-center">
       <!-- % of max -->
       <div class="flex flex-col items-center text-center">
-        <div class="text-base font-bold text-black">
+        <div class="text-base font-bold text-black dark:text-white">
           {{ maxPercentage }}
         </div>
-        <div class="text-xs font-medium text-black opacity-70">
+        <div class="text-xs font-medium text-black opacity-70 dark:text-white">
           {{ t("exercise.percentOfMax") }}
         </div>
       </div>
