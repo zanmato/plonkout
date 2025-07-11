@@ -160,37 +160,43 @@
           <NeoPanel
             v-for="(exercise, exerciseIndex) in workout.exercises"
             :key="exerciseIndex"
-            padding="md"
+            padding="none"
+            class="relative"
           >
-            <!-- Exercise Header -->
-            <div class="flex items-center justify-between mb-5">
-              <div class="text-xl font-bold text-black dark:text-white">
-                {{ exercise.name }}
-              </div>
-              <div class="flex items-center space-x-2">
-                <NeoButton
-                  @click="openExerciseStats(exerciseIndex)"
-                  variant="secondary"
-                  size="sm"
-                  class="w-8 h-8 !px-0 !py-0 rounded-full"
-                >
-                  <template #icon>
-                    <span class="material-icons">bar_chart</span>
-                  </template>
-                </NeoButton>
-                <DestructiveButton
-                  @confirm="removeExercise(exerciseIndex)"
-                  :confirm-text="t('workout.delete')"
-                  size="sm"
-                  class="w-8 h-8 !px-0 !py-0 rounded-full"
-                  icon-only
-                >
-                  <template #icon>
-                    <span class="material-icons">delete</span>
-                  </template>
-                </DestructiveButton>
+            <!-- Sticky Exercise Header -->
+            <div class="sticky top-0 z-10 bg-nb-bg dark:bg-zinc-700 border-b-2 border-nb-border p-4">
+              <div class="flex items-center justify-between">
+                <div class="text-xl font-bold text-black dark:text-white">
+                  {{ exercise.name }}
+                </div>
+                <div class="flex items-center space-x-2">
+                  <NeoButton
+                    @click="openExerciseStats(exerciseIndex)"
+                    variant="secondary"
+                    size="sm"
+                    class="w-8 h-8 !px-0 !py-0 rounded-full"
+                  >
+                    <template #icon>
+                      <span class="material-icons">bar_chart</span>
+                    </template>
+                  </NeoButton>
+                  <DestructiveButton
+                    @confirm="removeExercise(exerciseIndex)"
+                    :confirm-text="t('workout.delete')"
+                    size="sm"
+                    class="w-8 h-8 !px-0 !py-0 rounded-full"
+                    icon-only
+                  >
+                    <template #icon>
+                      <span class="material-icons">delete</span>
+                    </template>
+                  </DestructiveButton>
+                </div>
               </div>
             </div>
+
+            <!-- Scrollable Sets Area -->
+            <div class="p-4">
 
             <div class="flex flex-col gap-3">
               <!-- Use Cardio Set Editor for cardio exercises -->
@@ -273,17 +279,18 @@
               </template>
             </div>
 
-            <!-- Add Set Button -->
-            <NeoButton
-              @click="addSet(exerciseIndex)"
-              variant="primary"
-              class="mt-4 w-full"
-            >
-              <template #icon>
-                <span class="material-icons">add</span>
-              </template>
-              {{ t("workout.addSet") }}
-            </NeoButton>
+              <!-- Add Set Button -->
+              <NeoButton
+                @click="addSet(exerciseIndex)"
+                variant="primary"
+                class="mt-4 w-full"
+              >
+                <template #icon>
+                  <span class="material-icons">add</span>
+                </template>
+                {{ t("workout.addSet") }}
+              </NeoButton>
+            </div>
           </NeoPanel>
 
           <!-- Add Exercise Button -->
