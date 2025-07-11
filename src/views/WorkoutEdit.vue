@@ -164,7 +164,9 @@
             class="relative"
           >
             <!-- Sticky Exercise Header -->
-            <div class="sticky top-0 z-10 bg-nb-bg dark:bg-zinc-700 border-b-2 border-nb-border p-4">
+            <div
+              class="sticky top-0 z-10 bg-nb-bg dark:bg-zinc-700 border-b-2 border-nb-border p-4"
+            >
               <div class="flex items-center justify-between">
                 <div class="text-xl font-bold text-black dark:text-white">
                   {{ exercise.name }}
@@ -196,88 +198,92 @@
             </div>
 
             <!-- Scrollable Sets Area -->
-            <div class="p-4">
+            <div class="py-4">
+              <div class="flex flex-col gap-3">
+                <!-- Use Cardio Set Editor for cardio exercises -->
+                <template v-if="exercise.type === 'cardio'">
+                  <CardioSetEditor
+                    v-for="(set, setIndex) in exercise.sets"
+                    :key="`cardio-${setIndex}`"
+                    :set="set"
+                    :exercise="exercise"
+                    :set-number="
+                      getSetNumber(exercise.sets, setIndex, exercise, set)
+                    "
+                    :distance-unit="distanceUnit"
+                    :rpe-options="rpeOptions"
+                    @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
+                    @update:distance="
+                      updateSetField(
+                        exerciseIndex,
+                        setIndex,
+                        'distance',
+                        $event
+                      )
+                    "
+                    @update:time="
+                      updateSetField(exerciseIndex, setIndex, 'time', $event)
+                    "
+                    @update:rpe="
+                      updateSetField(exerciseIndex, setIndex, 'rpe', $event)
+                    "
+                    @update:notes="
+                      updateSetField(exerciseIndex, setIndex, 'notes', $event)
+                    "
+                  />
+                </template>
 
-            <div class="flex flex-col gap-3">
-              <!-- Use Cardio Set Editor for cardio exercises -->
-              <template v-if="exercise.type === 'cardio'">
-                <CardioSetEditor
-                  v-for="(set, setIndex) in exercise.sets"
-                  :key="`cardio-${setIndex}`"
-                  :set="set"
-                  :exercise="exercise"
-                  :set-number="
-                    getSetNumber(exercise.sets, setIndex, exercise, set)
-                  "
-                  :distance-unit="distanceUnit"
-                  :rpe-options="rpeOptions"
-                  @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
-                  @update:distance="
-                    updateSetField(exerciseIndex, setIndex, 'distance', $event)
-                  "
-                  @update:time="
-                    updateSetField(exerciseIndex, setIndex, 'time', $event)
-                  "
-                  @update:rpe="
-                    updateSetField(exerciseIndex, setIndex, 'rpe', $event)
-                  "
-                  @update:notes="
-                    updateSetField(exerciseIndex, setIndex, 'notes', $event)
-                  "
-                />
-              </template>
-
-              <!-- Use Strength Set Editor for strength exercises -->
-              <template v-else>
-                <StrengthSetEditor
-                  v-for="(set, setIndex) in exercise.sets"
-                  :key="`strength-${setIndex}`"
-                  :set="set"
-                  :exercise="exercise"
-                  :set-number="
-                    getSetNumber(exercise.sets, setIndex, exercise, set)
-                  "
-                  :weight-unit="weightUnit"
-                  :is-weight-record="
-                    set.weight &&
-                    isWeightRecord(exercise.name, set.weight, set.arm)
-                  "
-                  :is-rep-record="
-                    set.reps &&
-                    set.weight &&
-                    isRepRecord(exercise.name, set.weight, set.reps, set.arm)
-                  "
-                  :previous-reps="
-                    set.weight
-                      ? getPreviousReps(exercise.name, set.weight, set.arm)
-                      : null
-                  "
-                  :max-percentage="
-                    getMaxPercentage(exercise.name, set.weight, set.arm)
-                  "
-                  :rpe-options="rpeOptions"
-                  @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
-                  @update:weight="
-                    updateSetField(exerciseIndex, setIndex, 'weight', $event)
-                  "
-                  @update:reps="
-                    updateSetField(exerciseIndex, setIndex, 'reps', $event)
-                  "
-                  @update:time="
-                    updateSetField(exerciseIndex, setIndex, 'time', $event)
-                  "
-                  @update:rpe="
-                    updateSetField(exerciseIndex, setIndex, 'rpe', $event)
-                  "
-                  @update:arm="
-                    updateSetField(exerciseIndex, setIndex, 'arm', $event)
-                  "
-                  @update:notes="
-                    updateSetField(exerciseIndex, setIndex, 'notes', $event)
-                  "
-                />
-              </template>
-            </div>
+                <!-- Use Strength Set Editor for strength exercises -->
+                <template v-else>
+                  <StrengthSetEditor
+                    v-for="(set, setIndex) in exercise.sets"
+                    :key="`strength-${setIndex}`"
+                    :set="set"
+                    :exercise="exercise"
+                    :set-number="
+                      getSetNumber(exercise.sets, setIndex, exercise, set)
+                    "
+                    :weight-unit="weightUnit"
+                    :is-weight-record="
+                      set.weight &&
+                      isWeightRecord(exercise.name, set.weight, set.arm)
+                    "
+                    :is-rep-record="
+                      set.reps &&
+                      set.weight &&
+                      isRepRecord(exercise.name, set.weight, set.reps, set.arm)
+                    "
+                    :previous-reps="
+                      set.weight
+                        ? getPreviousReps(exercise.name, set.weight, set.arm)
+                        : null
+                    "
+                    :max-percentage="
+                      getMaxPercentage(exercise.name, set.weight, set.arm)
+                    "
+                    :rpe-options="rpeOptions"
+                    @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
+                    @update:weight="
+                      updateSetField(exerciseIndex, setIndex, 'weight', $event)
+                    "
+                    @update:reps="
+                      updateSetField(exerciseIndex, setIndex, 'reps', $event)
+                    "
+                    @update:time="
+                      updateSetField(exerciseIndex, setIndex, 'time', $event)
+                    "
+                    @update:rpe="
+                      updateSetField(exerciseIndex, setIndex, 'rpe', $event)
+                    "
+                    @update:arm="
+                      updateSetField(exerciseIndex, setIndex, 'arm', $event)
+                    "
+                    @update:notes="
+                      updateSetField(exerciseIndex, setIndex, 'notes', $event)
+                    "
+                  />
+                </template>
+              </div>
 
               <!-- Add Set Button -->
               <NeoButton
