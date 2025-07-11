@@ -1,6 +1,6 @@
 <template>
   <header
-    class="dark:bg-header dark:text-white bg-white border-b-4 border-black flex gap-8 items-center justify-between p-4 safe-area-top"
+    class="dark:bg-header dark:text-white bg-white border-b-4 border-black flex gap-8 items-center justify-between p-2 safe-area-top min-h-16"
   >
     <!-- Left Section -->
     <div class="flex flex-1 gap-3 items-center justify-start">

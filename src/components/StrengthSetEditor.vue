@@ -36,7 +36,9 @@
               placeholder="0"
             />
           </div>
-          <div class="text-xs font-medium text-black opacity-70 dark:text-white">
+          <div
+            class="text-xs font-medium text-black opacity-70 dark:text-white"
+          >
             {{ weightUnit }}
             <span
               v-if="set.weight && isWeightRecord"
@@ -74,7 +76,9 @@
               placeholder="0:00"
             />
           </div>
-          <div class="text-xs font-medium text-black lowercase dark:text-white">
+          <div
+            class="text-xs font-medium text-black opacity-70 lowercase dark:text-white"
+          >
             <template v-if="exercise.displayType === 'reps'">
               <template v-if="set.weight && previousReps">
                 {{ t("exercise.reps") }} ({{ t("exercise.previousBest") }}:
@@ -107,7 +111,11 @@
               {{ rpe.replace("RPE ", "") }}
             </option>
           </select>
-          <div class="text-xs font-medium text-black opacity-70 dark:text-white">RPE</div>
+          <div
+            class="text-xs font-medium text-black opacity-70 dark:text-white"
+          >
+            RPE
+          </div>
         </div>
 
         <!-- Arm (only for single arm exercises) -->
@@ -131,7 +139,9 @@
               {{ t("exercise.arms.both") }}
             </option>
           </select>
-          <div class="text-xs font-medium text-black opacity-70 lowercase dark:text-white">
+          <div
+            class="text-xs font-medium text-black opacity-70 lowercase dark:text-white"
+          >
             {{ t("exercise.arm") }}
           </div>
         </div>

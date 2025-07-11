@@ -36,7 +36,9 @@
               placeholder="0"
             />
           </div>
-          <div class="text-xs font-medium text-black opacity-70 dark:text-white">
+          <div
+            class="text-xs font-medium text-black opacity-70 dark:text-white"
+          >
             {{ distanceUnit }}
           </div>
         </div>
@@ -52,7 +54,9 @@
               placeholder="0:00"
             />
           </div>
-          <div class="text-xs font-medium text-black lowercase dark:text-white">
+          <div
+            class="text-xs font-medium text-black lowercase opacity-70 dark:text-white"
+          >
             {{ t("exercise.time") }}
           </div>
         </div>
@@ -69,7 +73,11 @@
               {{ rpe.replace("RPE ", "") }}
             </option>
           </select>
-          <div class="text-xs font-medium text-black opacity-70 dark:text-white">RPE</div>
+          <div
+            class="text-xs font-medium text-black opacity-70 dark:text-white"
+          >
+            RPE
+          </div>
         </div>
       </div>
     </div>
