@@ -207,5 +207,16 @@
       "hours": "t",
       "minutes": "m"
     }
+  },
+  "calendar": {
+    "days": {
+      "mon": "Mån",
+      "tue": "Tis",
+      "wed": "Ons",
+      "thu": "Tor",
+      "fri": "Fre",
+      "sat": "Lör",
+      "sun": "Sön"
+    }
   }
 }

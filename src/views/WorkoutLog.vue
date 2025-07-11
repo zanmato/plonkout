@@ -46,18 +46,36 @@
             class="px-4"
           >
             <!-- Month header -->
-            <div
-              v-if="item.type === 'header'"
-              class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl mb-5 shadow-brutal dark:bg-zinc-600"
-            >
-              <div class="text-base font-bold text-black dark:text-white">
-                {{ item.monthYear }}
-              </div>
+            <div v-if="item.type === 'header'" class="mb-5">
+              <!-- Clickable month header -->
               <div
-                class="bg-purple-300 text-black px-3 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
+                @click="toggleMonthExpansion(item.monthYear)"
+                class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl shadow-brutal dark:bg-zinc-600 cursor-pointer transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
               >
-                {{ t("workout.workoutCount", { count: item.count }) }}
+                <div class="flex items-center space-x-2">
+                  <div class="text-base font-bold text-black dark:text-white">
+                    {{ item.monthYear }}
+                  </div>
+                  <span 
+                    class="material-icons text-black dark:text-white transition-transform duration-200"
+                    :class="{ 'rotate-180': isMonthExpanded(item.monthYear) }"
+                  >
+                    expand_more
+                  </span>
+                </div>
+                <div
+                  class="bg-purple-300 text-black px-3 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
+                >
+                  {{ t("workout.workoutCount", { count: item.count }) }}
+                </div>
               </div>
+
+              <!-- Calendar Grid -->
+              <MonthCalendar
+                v-if="isMonthExpanded(item.monthYear)"
+                :month-year="item.monthYear"
+                :workouts="groupedWorkouts.find(g => g.monthYear === item.monthYear)?.workouts || []"
+              />
             </div>
 
             <!-- Workout item -->
@@ -111,6 +129,7 @@ import { getWorkouts, initializeDefaultExercises } from "@/utils/database.js";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
+import MonthCalendar from "@/components/MonthCalendar.vue";
 
 const router = useRouter();
 const { t, d } = useI18n();
@@ -121,6 +140,7 @@ useHead({
 });
 const workouts = ref([]);
 const loading = ref(true);
+const expandedMonths = ref(new Set());
 
 /**
  * Group workouts by month and year
@@ -205,6 +225,25 @@ async function loadWorkouts() {
     loading.value = false;
   }
 }
+
+/**
+ * Toggle month calendar expansion
+ */
+function toggleMonthExpansion(monthYear) {
+  if (expandedMonths.value.has(monthYear)) {
+    expandedMonths.value.delete(monthYear);
+  } else {
+    expandedMonths.value.add(monthYear);
+  }
+}
+
+/**
+ * Check if month is expanded
+ */
+function isMonthExpanded(monthYear) {
+  return expandedMonths.value.has(monthYear);
+}
+
 
 /**
  * Navigate to add new workout
