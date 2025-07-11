@@ -37,13 +37,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # TODO: fix tests
-      # - name: Run tests
-      #  run: pnpm test --run
+      - name: Run tests
+        run: pnpm test --run
 
-      # TODO: Fix linting errors and re-enable
-      # - name: Run linter
-      #   run: pnpm lint
+      - name: Run linter
+        run: pnpm lint
 
       - name: Build for production
         run: pnpm build
