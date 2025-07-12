@@ -165,7 +165,7 @@
           >
             <!-- Sticky Exercise Header -->
             <div
-              class="sticky top-0 z-10 bg-nb-bg dark:bg-zinc-700 border-b-2 border-nb-border p-4"
+              class="sticky top-0 z-10 bg-nb-bg dark:bg-zinc-700 border-b-2 border-nb-border pb-4"
             >
               <div class="flex items-center justify-between">
                 <div class="text-xl font-bold text-black dark:text-white">
@@ -198,7 +198,7 @@
             </div>
 
             <!-- Scrollable Sets Area -->
-            <div class="py-4">
+            <div class="pt-4 px-[2px]">
               <div class="flex flex-col gap-3">
                 <!-- Use Cardio Set Editor for cardio exercises -->
                 <template v-if="exercise.type === 'cardio'">

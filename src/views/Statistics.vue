@@ -157,6 +157,9 @@ const workoutsChartCanvas = useTemplateRef("workoutsChartCanvas");
 const durationChartCanvas = useTemplateRef("durationChartCanvas");
 const volumeChartCanvas = useTemplateRef("volumeChartCanvas");
 
+const isDark = document.documentElement.classList.contains("dark");
+const textColor = isDark ? "#ffffff" : "#000000";
+
 let workoutsChart = null;
 let durationChart = null;
 let volumeChart = null;
@@ -418,10 +421,16 @@ function createWorkoutsChart() {
           },
         },
         scales: {
+          x: {
+            ticks: {
+              color: textColor,
+            },
+          },
           y: {
             beginAtZero: true,
             ticks: {
               stepSize: 1,
+              color: textColor,
             },
           },
         },
@@ -499,11 +508,20 @@ function createDurationChart() {
           },
         },
         scales: {
+          x: {
+            ticks: {
+              color: textColor,
+            },
+          },
           y: {
             beginAtZero: true,
+            ticks: {
+              color: textColor,
+            },
             title: {
               display: true,
               text: t("statistics.charts.minutes"),
+              color: textColor,
             },
           },
         },
@@ -598,6 +616,7 @@ function createVolumeChart() {
             labels: {
               padding: 15,
               usePointStyle: true,
+              color: textColor,
               font: {
                 family: "DM Sans",
                 weight: "600",

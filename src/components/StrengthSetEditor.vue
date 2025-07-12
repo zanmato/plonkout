@@ -82,7 +82,7 @@
               </span>
               <span
                 v-if="isRepRecord"
-                class="absolute -top-1 -right-6 text-yellow-500 text-sm m-icon opacity-100"
+                class="absolute -top-[2px] -right-6 text-yellow-500 text-sm m-icon animate-pulse"
                 :title="t('exercise.newRepRecord')"
               >
                 star
