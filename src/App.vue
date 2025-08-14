@@ -211,14 +211,34 @@ watch(needRefresh, (needRefresh) => {
   }
 });
 
+function handleViewportChange() {
+  // Update a CSS custom property that you can use alongside or instead of dvh
+  document.documentElement.style.setProperty(
+    "--actual-viewport-height",
+    `${window.visualViewport.height}px`
+  );
+
+  // Force dvh recalculation by triggering a reflow
+  document.body.style.transform = "translateZ(0)";
+  requestAnimationFrame(() => {
+    document.body.style.transform = "";
+  });
+}
+
 onMounted(() => {
   loadAppSettings();
+
+  if ("visualViewport" in window) {
+    window.visualViewport.addEventListener("resize", handleViewportChange);
+    handleViewportChange();
+  }
 });
 </script>
 
 <style scoped>
 .app-container {
   height: 100dvh;
+  min-height: var(--actual-viewport-height, 100dvh);
   display: flex;
   flex-direction: column;
 }

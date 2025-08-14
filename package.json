@@ -1,6 +1,6 @@
 {
   "name": "plonkout",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Workout logger",
   "type": "module",
   "scripts": {
