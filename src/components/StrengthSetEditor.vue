@@ -99,6 +99,7 @@
           <select
             :value="set.rpe"
             @change="$emit('update:rpe', $event.target.value)"
+            @blur="handleSelectBlur"
             class="text-base font-bold text-black bg-transparent border-none text-align-last-center w-16 focus:outline-none appearance-none dark:text-white"
           >
             <option value="">-</option>
@@ -121,6 +122,7 @@
           <select
             :value="set.arm"
             @change="$emit('update:arm', $event.target.value)"
+            @blur="handleSelectBlur"
             class="text-base font-bold text-black bg-transparent text-align-last-center border-none text-center w-16 focus:outline-none appearance-none dark:text-white"
           >
             <option value="">-</option>
@@ -170,6 +172,38 @@
 import { useI18n } from "vue-i18n";
 
 const { t } = useI18n();
+
+function handleSelectBlur() {
+  // Force viewport update for iOS when select loses focus
+  if (window.visualViewport) {
+    // Immediate update
+    document.documentElement.style.setProperty(
+      "--actual-viewport-height",
+      `${window.visualViewport.height}px`
+    );
+
+    // Force reflow
+    document.body.style.transform = "translateZ(0)";
+    requestAnimationFrame(() => {
+      document.body.style.transform = "";
+    });
+
+    // Additional delayed updates for iOS quirks
+    setTimeout(() => {
+      document.documentElement.style.setProperty(
+        "--actual-viewport-height",
+        `${window.visualViewport.height}px`
+      );
+    }, 50);
+
+    setTimeout(() => {
+      document.documentElement.style.setProperty(
+        "--actual-viewport-height",
+        `${window.visualViewport.height}px`
+      );
+    }, 200);
+  }
+}
 
 defineProps({
   set: {
