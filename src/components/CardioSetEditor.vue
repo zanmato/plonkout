@@ -107,32 +107,11 @@ const { t } = useI18n();
 function handleSelectBlur() {
   // Force viewport update for iOS when select loses focus
   if (window.visualViewport) {
-    // Immediate update
-    document.documentElement.style.setProperty(
-      "--actual-viewport-height",
-      `${window.visualViewport.height}px`
-    );
-
     // Force reflow
     document.body.style.transform = "translateZ(0)";
     requestAnimationFrame(() => {
       document.body.style.transform = "";
     });
-
-    // Additional delayed updates for iOS quirks
-    setTimeout(() => {
-      document.documentElement.style.setProperty(
-        "--actual-viewport-height",
-        `${window.visualViewport.height}px`
-      );
-    }, 50);
-
-    setTimeout(() => {
-      document.documentElement.style.setProperty(
-        "--actual-viewport-height",
-        `${window.visualViewport.height}px`
-      );
-    }, 200);
   }
 }
 
