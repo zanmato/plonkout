@@ -48,7 +48,10 @@
     "newWeightRecord": "Nytt viktrekord!",
     "newRepRecord": "Nytt reprekord!",
     "previousBest": "föregående",
+    "previousBestFull": "Föregående Bästa",
+    "highestReps": "Högsta Reps",
     "percentOfMax": "% av max",
+    "repHistory": "Rep-historik",
     "selector": {
       "title": "Välj övning",
       "new": "+ Ny",

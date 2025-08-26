@@ -73,16 +73,20 @@
             class="text-xs font-medium text-black lowercase dark:text-white relative"
           >
             <template v-if="exercise.displayType === 'reps'">
-              <span class="opacity-70">
-                <template v-if="set.weight && previousReps">
-                  {{ t("exercise.reps") }} ({{ t("exercise.previousBest") }}:
-                  {{ previousReps }})
-                </template>
-                <template v-else> {{ t("exercise.reps") }} </template>
-              </span>
+              <div class="flex items-center gap-1">
+                <span class="opacity-70">{{ t("exercise.reps") }}</span>
+                <button
+                  v-if="set.weight && (previousReps || highestReps)"
+                  @click="repHistoryPanel.toggle($event)"
+                  class="text-purple-600 hover:text-purple-800 dark:text-purple-400 dark:hover:text-purple-300 ml-1 p-0.5 rounded hover:bg-purple-100 dark:hover:bg-purple-900/20"
+                  :title="t('exercise.repHistory')"
+                >
+                  <span class="m-icon text-sm">history</span>
+                </button>
+              </div>
               <span
                 v-if="isRepRecord"
-                class="absolute -top-[2px] -right-6 text-yellow-500 text-sm m-icon animate-pulse"
+                class="absolute top-[1px] -right-6 text-yellow-500 text-sm m-icon animate-pulse"
                 :title="t('exercise.newRepRecord')"
               >
                 star
@@ -92,6 +96,41 @@
               {{ t("exercise.time") }}
             </template>
           </div>
+
+          <!-- Rep History Popover -->
+          <Popover
+            ref="repHistoryPanel"
+            :showCloseIcon="true"
+            class="rep-history-popover"
+          >
+            <div class="p-3 min-w-40">
+              <h4 class="font-semibold mb-2 text-sm">
+                {{ t("exercise.repHistory") }}
+              </h4>
+              <div class="space-y-1 text-xs">
+                <div
+                  v-if="previousReps"
+                  class="flex justify-between items-center"
+                >
+                  <span>{{ t("exercise.previousBestFull") }}:</span>
+                  <span
+                    class="font-medium text-purple-600 dark:text-purple-400"
+                    >{{ previousReps }}</span
+                  >
+                </div>
+                <div
+                  v-if="highestReps"
+                  class="flex justify-between items-center"
+                >
+                  <span>{{ t("exercise.highestReps") }}:</span>
+                  <span
+                    class="font-medium text-purple-600 dark:text-purple-400"
+                    >{{ highestReps }}</span
+                  >
+                </div>
+              </div>
+            </div>
+          </Popover>
         </div>
 
         <!-- RPE -->
@@ -169,9 +208,13 @@
 </template>
 
 <script setup>
+import { ref } from "vue";
 import { useI18n } from "vue-i18n";
+import Popover from "@/volt/Popover.vue";
 
 const { t } = useI18n();
+
+const repHistoryPanel = ref();
 
 function handleSelectBlur() {
   // Force viewport update for iOS when select loses focus
@@ -210,6 +253,10 @@ defineProps({
     default: false,
   },
   previousReps: {
+    type: Number,
+    default: null,
+  },
+  highestReps: {
     type: Number,
     default: null,
   },

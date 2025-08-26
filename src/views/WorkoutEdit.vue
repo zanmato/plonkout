@@ -258,6 +258,11 @@
                         ? getPreviousReps(exercise.name, set.weight, set.arm)
                         : null
                     "
+                    :highest-reps="
+                      set.weight
+                        ? getHighestReps(exercise.name, set.weight, set.arm)
+                        : null
+                    "
                     :max-percentage="
                       getMaxPercentage(exercise.name, set.weight, set.arm)
                     "
@@ -800,6 +805,55 @@ function getPreviousReps(exerciseName, weight, arm) {
   });
 
   return bestReps > 0 ? bestReps : null;
+}
+
+/**
+ * Get the highest reps ever achieved for a given weight across all history
+ * @param {string} exerciseName - Name of the exercise
+ * @param {number} weight - Weight to check reps for
+ * @param {string} arm - Arm setting
+ * @returns {number|null} Highest reps ever or null if no data
+ */
+function getHighestReps(exerciseName, weight, arm) {
+  if (!weight || weight <= 0) {
+    return null;
+  }
+
+  let highestReps = 0;
+
+  // Check all historical workouts (including current workout)
+  allWorkouts.value.forEach((historicalWorkout) => {
+    if (historicalWorkout.exercises) {
+      historicalWorkout.exercises.forEach((exercise) => {
+        if (exercise.name === exerciseName && exercise.sets) {
+          exercise.sets.forEach((set) => {
+            if (set.weight === weight && set.reps && set.type === "regular") {
+              if (isArmCompatible(arm, set.arm) && set.reps > highestReps) {
+                highestReps = set.reps;
+              }
+            }
+          });
+        }
+      });
+    }
+  });
+
+  // Also check the current workout being edited
+  if (workout.value.exercises) {
+    workout.value.exercises.forEach((exercise) => {
+      if (exercise.name === exerciseName && exercise.sets) {
+        exercise.sets.forEach((set) => {
+          if (set.weight === weight && set.reps && set.type === "regular") {
+            if (isArmCompatible(arm, set.arm) && set.reps > highestReps) {
+              highestReps = set.reps;
+            }
+          }
+        });
+      }
+    });
+  }
+
+  return highestReps > 0 ? highestReps : null;
 }
 
 /**

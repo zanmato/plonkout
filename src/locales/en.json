@@ -46,7 +46,10 @@
     "newWeightRecord": "New weight record!",
     "newRepRecord": "New rep record!",
     "previousBest": "prev",
+    "previousBestFull": "Previous Best",
+    "highestReps": "Highest Reps",
     "percentOfMax": "% of max",
+    "repHistory": "Rep History",
     "time": "Time",
     "distance": "Distance",
     "selector": {
