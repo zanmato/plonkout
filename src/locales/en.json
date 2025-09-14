@@ -50,6 +50,7 @@
     "highestReps": "Highest Reps",
     "percentOfMax": "% of max",
     "repHistory": "Rep History",
+    "totalVolume": "Total Volume",
     "time": "Time",
     "distance": "Distance",
     "selector": {
@@ -71,7 +72,8 @@
       "create": "Create",
       "loadError": "Error loading exercises",
       "createError": "Error creating exercise",
-      "defaultMuscleGroup": "General"
+      "defaultMuscleGroup": "General",
+      "recentExercises": "Recent"
     },
     "arms": {
       "left": "Left",

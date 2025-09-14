@@ -69,8 +69,11 @@
               class="text-sm font-bold text-black dark:text-white opacity-70 uppercase tracking-wider px-1"
             >
               {{
-                t(`exercise.muscleGroups.${group.muscleGroup.toLowerCase()}`) ||
-                group.muscleGroup
+                group.muscleGroup === "Recent"
+                  ? t("exercise.selector.recentExercises")
+                  : t(
+                      `exercise.muscleGroups.${group.muscleGroup.toLowerCase()}`,
+                    ) || group.muscleGroup
               }}
             </h4>
             <div class="space-y-2">
@@ -230,17 +233,29 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { getExercises, saveExercise } from "@/utils/database.js";
+import { getExercises, saveExercise, getMostRecentWorkoutByName } from "@/utils/database.js";
 import { useToast } from "@/composables/useToast.js";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import VoltSelect from "@/volt/Select.vue";
+
+const props = defineProps({
+  workoutName: {
+    type: String,
+    default: "",
+  },
+  workoutId: {
+    type: Number,
+    default: 0,
+  },
+});
 
 const emit = defineEmits(["close", "select"]);
 const { t } = useI18n();
 const { showError } = useToast();
 
 const exercises = ref([]);
+const recentExercises = ref([]);
 const loading = ref(true);
 const searchQuery = ref("");
 const showNewExerciseForm = ref(false);
@@ -289,16 +304,46 @@ const filteredExercises = computed(() => {
   return exercises.value.filter(
     (exercise) =>
       exercise.name.toLowerCase().includes(query) ||
-      exercise.muscleGroup.toLowerCase().includes(query)
+      exercise.muscleGroup.toLowerCase().includes(query),
   );
 });
 
 /**
- * Group filtered exercises by muscle group
+ * Group filtered exercises by muscle group, with recent exercises first
  */
 const groupedExercises = computed(() => {
   const groups = {};
+  const result = [];
 
+  // Create a "Recent" group if there are recent exercises and a workout name
+  if (recentExercises.value.length > 0 && props.workoutName) {
+    const recentGroup = {
+      muscleGroup: "Recent",
+      exercises: [],
+    };
+
+    // Filter recent exercises that match the search query and exist in available exercises
+    recentExercises.value.forEach((recentExercise) => {
+      const matchingExercise = filteredExercises.value.find(
+        (ex) =>
+          ex.name === recentExercise.name &&
+          ex.muscleGroup === recentExercise.muscleGroup,
+      );
+
+      if (
+        matchingExercise &&
+        !recentGroup.exercises.some((ex) => ex.name === matchingExercise.name)
+      ) {
+        recentGroup.exercises.push(matchingExercise);
+      }
+    });
+
+    if (recentGroup.exercises.length > 0) {
+      result.push(recentGroup);
+    }
+  }
+
+  // Group remaining exercises by muscle group
   filteredExercises.value.forEach((exercise) => {
     const muscleGroup = exercise.muscleGroup;
     if (!groups[muscleGroup]) {
@@ -311,13 +356,42 @@ const groupedExercises = computed(() => {
   });
 
   // Sort groups by muscle group name and exercises within each group by name
-  return Object.values(groups)
+  const otherGroups = Object.values(groups)
     .sort((a, b) => a.muscleGroup.localeCompare(b.muscleGroup))
     .map((group) => ({
       ...group,
       exercises: group.exercises.sort((a, b) => a.name.localeCompare(b.name)),
     }));
+
+  return [...result, ...otherGroups];
 });
+
+/**
+ * Load exercises from the most recent workout with the same name
+ */
+async function loadRecentExercises() {
+  if (!props.workoutName) {
+    recentExercises.value = [];
+    return;
+  }
+
+  try {
+    // Use the optimized cursor-based query to get the most recent workout
+    const mostRecentWorkout = await getMostRecentWorkoutByName(
+      props.workoutName,
+      props.workoutId
+    );
+
+    if (mostRecentWorkout) {
+      recentExercises.value = mostRecentWorkout.exercises || [];
+    } else {
+      recentExercises.value = [];
+    }
+  } catch (error) {
+    console.error("Error loading recent exercises:", error);
+    recentExercises.value = [];
+  }
+}
 
 /**
  * Load exercises from database
@@ -326,6 +400,7 @@ async function loadExercises() {
   try {
     loading.value = true;
     exercises.value = await getExercises();
+    await loadRecentExercises();
   } catch (error) {
     console.error(t("exercise.selector.loadError"), error);
   } finally {

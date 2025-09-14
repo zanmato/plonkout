@@ -1,7 +1,7 @@
 import { openDB } from "idb";
 
 const DB_NAME = "PlonkoutDB";
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 /**
  * Initialize the IndexedDB database
@@ -9,7 +9,7 @@ const DB_VERSION = 2;
  */
 async function initDB() {
   return openDB(DB_NAME, DB_VERSION, {
-    upgrade(db) {
+    upgrade(db, oldVersion, newVersion, transaction) {
       // Workouts store
       if (!db.objectStoreNames.contains("workouts")) {
         const workoutStore = db.createObjectStore("workouts", {
@@ -17,6 +17,13 @@ async function initDB() {
           autoIncrement: true,
         });
         workoutStore.createIndex("date", "started");
+        workoutStore.createIndex("name_date", ["name", "started"]);
+      } else {
+        // Add the compound index if it doesn't exist (for existing databases)
+        const workoutStore = transaction.objectStore("workouts");
+        if (!workoutStore.indexNames.contains("name_date")) {
+          workoutStore.createIndex("name_date", ["name", "started"]);
+        }
       }
 
       // Exercises store (predefined exercises)
@@ -56,6 +63,52 @@ async function initDB() {
 export async function getWorkouts() {
   const db = await initDB();
   return db.getAllFromIndex("workouts", "date");
+}
+
+/**
+ * Get the most recent workout by name using efficient cursor-based query
+ * @param {string} workoutName - The workout name to search for
+ * @param {number} excludeId - Optional workout ID to exclude from results
+ * @returns {Promise<Object|null>} The most recent workout object or null
+ */
+export async function getMostRecentWorkoutByName(workoutName, excludeId = null) {
+  if (!workoutName) {
+    return null;
+  }
+
+  const db = await initDB();
+  const tx = db.transaction("workouts", "readonly");
+  const index = tx.objectStore("workouts").index("name_date");
+
+  // Use a key range to find all workouts with the specified name
+  const keyRange = IDBKeyRange.bound([workoutName], [workoutName, []]);
+
+  let mostRecentWorkout = null;
+  let mostRecentDate = null;
+
+  // Open cursor in reverse order (newest first)
+  for await (const cursor of index.iterate(keyRange, "prev")) {
+    const workout = cursor.value;
+
+    // Skip if this is the workout we want to exclude
+    if (excludeId && workout.id === excludeId) {
+      continue;
+    }
+
+    // Get the most recent date (ended or started)
+    const workoutDate = new Date(workout.ended || workout.started);
+
+    if (!mostRecentWorkout || workoutDate > mostRecentDate) {
+      mostRecentWorkout = workout;
+      mostRecentDate = workoutDate;
+    }
+
+    // Since we're iterating in reverse order by started date,
+    // the first valid match should be the most recent
+    break;
+  }
+
+  return mostRecentWorkout;
 }
 
 /**

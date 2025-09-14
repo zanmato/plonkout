@@ -218,7 +218,7 @@
                         exerciseIndex,
                         setIndex,
                         'distance',
-                        $event
+                        $event,
                       )
                     "
                     @update:time="
@@ -290,6 +290,21 @@
                 </template>
               </div>
 
+              <!-- Total Volume Display -->
+              <div
+                v-if="
+                  exercise.type === 'strength' && getTotalVolume(exercise) > 0
+                "
+                class="mt-3 text-right"
+              >
+                <div class="text-md">
+                  {{ t("exercise.totalVolume") }}
+                  <span class="font-bold text-purple-600 dark:text-purple-400"
+                    >{{ getTotalVolume(exercise) }} {{ weightUnit }}</span
+                  >
+                </div>
+              </div>
+
               <!-- Add Set Button -->
               <NeoButton
                 @click="addSet(exerciseIndex)"
@@ -324,6 +339,8 @@
     <!-- Exercise Selector Modal -->
     <ExerciseSelector
       v-if="showExerciseSelector"
+      :workout-name="workout.name"
+      :workout-id="workout.id"
       @close="showExerciseSelector = false"
       @select="addExercise"
     />
@@ -517,7 +534,7 @@ async function saveWorkout() {
       JSON.stringify({
         ...workout.value,
         updated: new Date(),
-      })
+      }),
     );
 
     const id = await saveWorkoutToDB(workoutData);
@@ -525,7 +542,10 @@ async function saveWorkout() {
     // Navigate if it's a new workout (ID will be set by route params)
     if (isNew.value) {
       workout.value.id = id;
-      router.replace({ name: "workout-edit", params: { id: id.toString() } });
+      router.replace({
+        name: "workout-edit",
+        params: { id: id.toString() },
+      });
     }
   } catch (error) {
     console.error("Error saving workout:", error);
@@ -669,6 +689,25 @@ function getSetNumber(sets, setIndex, exercise, currentSet) {
       return `${regularSets.length}`;
     }
   }
+}
+
+/**
+ * Calculate total volume for an exercise (sum of reps * weight for all regular sets)
+ * @param {Object} exercise - The exercise object
+ * @returns {number} - Total volume
+ */
+function getTotalVolume(exercise) {
+  if (!exercise.sets || exercise.type !== "strength") {
+    return 0;
+  }
+
+  return exercise.sets
+    .filter((set) => set.type === "regular" || !set.type) // Include sets without type (default to regular)
+    .reduce((total, set) => {
+      const weight = parseFloat(set.weight) || 0;
+      const reps = parseInt(set.reps) || 0;
+      return total + weight * reps;
+    }, 0);
 }
 
 /**
@@ -1035,7 +1074,7 @@ watch(
   () => {
     debouncedSave();
   },
-  { deep: true }
+  { deep: true },
 );
 
 // Cleanup timeout on component unmount

@@ -52,6 +52,7 @@
     "highestReps": "Högsta Reps",
     "percentOfMax": "% av max",
     "repHistory": "Rep-historik",
+    "totalVolume": "Total volym",
     "selector": {
       "title": "Välj övning",
       "new": "+ Ny",
@@ -70,7 +71,8 @@
       "create": "Skapa",
       "loadError": "Fel vid laddning av övningar",
       "createError": "Fel vid skapande av övning",
-      "defaultMuscleGroup": "Allmänt"
+      "defaultMuscleGroup": "Allmänt",
+      "recentExercises": "Senaste"
     },
     "arms": {
       "left": "Vänster",
