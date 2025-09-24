@@ -207,11 +207,12 @@
                     :key="`cardio-${setIndex}`"
                     :set="set"
                     :exercise="exercise"
+                    :exercise-index="exerciseIndex"
+                    :set-index="setIndex"
                     :set-number="
                       getSetNumber(exercise.sets, setIndex, exercise, set)
                     "
                     :distance-unit="distanceUnit"
-                    :rpe-options="rpeOptions"
                     @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
                     @update:distance="
                       updateSetField(
@@ -230,6 +231,8 @@
                     @update:notes="
                       updateSetField(exerciseIndex, setIndex, 'notes', $event)
                     "
+                    @add-set="addSet(exerciseIndex)"
+                    @delete-set="deleteSet(exerciseIndex, setIndex)"
                   />
                 </template>
 
@@ -240,6 +243,8 @@
                     :key="`strength-${setIndex}`"
                     :set="set"
                     :exercise="exercise"
+                    :exercise-index="exerciseIndex"
+                    :set-index="setIndex"
                     :set-number="
                       getSetNumber(exercise.sets, setIndex, exercise, set)
                     "
@@ -266,7 +271,6 @@
                     :max-percentage="
                       getMaxPercentage(exercise.name, set.weight, set.arm)
                     "
-                    :rpe-options="rpeOptions"
                     @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
                     @update:weight="
                       updateSetField(exerciseIndex, setIndex, 'weight', $event)
@@ -286,6 +290,8 @@
                     @update:notes="
                       updateSetField(exerciseIndex, setIndex, 'notes', $event)
                     "
+                    @add-set="addSet(exerciseIndex)"
+                    @delete-set="deleteSet(exerciseIndex, setIndex)"
                   />
                 </template>
               </div>
@@ -409,18 +415,6 @@ const distanceUnit = ref("km");
 const isInitialLoad = ref(true);
 let saveTimeout = null;
 
-const rpeOptions = [
-  "RPE 1",
-  "RPE 2",
-  "RPE 3",
-  "RPE 4",
-  "RPE 5",
-  "RPE 6",
-  "RPE 7",
-  "RPE 8",
-  "RPE 9",
-  "RPE 10",
-];
 
 const isNew = computed(() => !props.id);
 
@@ -599,11 +593,78 @@ function removeExercise(exerciseIndex) {
 }
 
 /**
+ * Delete a set from an exercise
+ * @param {number} exerciseIndex - Index of the exercise
+ * @param {number} setIndex - Index of the set to delete
+ */
+function deleteSet(exerciseIndex, setIndex) {
+  const exercise = workout.value.exercises[exerciseIndex];
+
+  // Don't delete if it's the only set in the exercise
+  if (exercise.sets.length <= 1) {
+    return;
+  }
+
+  exercise.sets.splice(setIndex, 1);
+}
+
+/**
  * Add a new set to an exercise
  * @param {number} exerciseIndex - Index of the exercise
  */
 function addSet(exerciseIndex) {
   workout.value.exercises[exerciseIndex].sets.push(createNewSet());
+
+  // Focus on the weight input of the new set after DOM update
+  nextTick(() => {
+    const exercise = workout.value.exercises[exerciseIndex];
+    const newSetIndex = exercise.sets.length - 1;
+
+    // Try multiple approaches to find the new set's weight/distance input
+    let weightInput = null;
+
+    // First try: specific data attributes
+    weightInput = document.querySelector(
+      `[data-exercise-index="${exerciseIndex}"][data-set-index="${newSetIndex}"] input[type="number"]:first-of-type`
+    );
+
+    // Second try: find all inputs in the exercise and get the one for the new set
+    if (!weightInput) {
+      const allExerciseInputs = document.querySelectorAll(
+        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`
+      );
+      // Calculate which input should be the weight/distance for the new set
+      const inputsPerSet = exercise.type === 'cardio' ? 2 : 2; // distance+rpe OR weight+reps for now, RPE is separate
+      const expectedInputIndex = newSetIndex * inputsPerSet;
+      if (allExerciseInputs[expectedInputIndex]) {
+        weightInput = allExerciseInputs[expectedInputIndex];
+      }
+    }
+
+    // Third try: just find the last number input in this exercise
+    if (!weightInput) {
+      const allInputs = document.querySelectorAll(
+        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`
+      );
+      if (allInputs.length > 0) {
+        // Find inputs that are likely weight/distance (first input in each set)
+        for (let i = allInputs.length - 1; i >= 0; i--) {
+          const input = allInputs[i];
+          const setContainer = input.closest('[data-set-index]');
+          if (setContainer && setContainer.getAttribute('data-set-index') == newSetIndex) {
+            weightInput = input;
+            break;
+          }
+        }
+      }
+    }
+
+    if (weightInput) {
+      weightInput.focus();
+    } else {
+      console.warn(`Could not find weight input for exercise ${exerciseIndex}, set ${newSetIndex}`);
+    }
+  });
 }
 
 /**
@@ -617,7 +678,7 @@ function createNewSet() {
     distance: null,
     reps: null,
     time: "",
-    rpe: "",
+    rpe: null,
     arm: "",
     notes: "",
   };
