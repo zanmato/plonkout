@@ -345,11 +345,4 @@ function handleAddSetInput() {
     addSetInput.value.value = "";
   }
 }
-
-function clearAddSetField() {
-  // Clear the field when it loses focus
-  if (addSetInput.value) {
-    addSetInput.value.value = "";
-  }
-}
 </script>
