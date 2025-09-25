@@ -458,7 +458,7 @@ describe("WorkoutEdit.vue", () => {
       expect(newSet).toHaveProperty("distance", null);
       expect(newSet).toHaveProperty("reps", null);
       expect(newSet).toHaveProperty("time", "");
-      expect(newSet).toHaveProperty("rpe", "");
+      expect(newSet).toHaveProperty("rpe", null);
       expect(newSet).toHaveProperty("arm", "");
       expect(newSet).toHaveProperty("notes", "");
     });
