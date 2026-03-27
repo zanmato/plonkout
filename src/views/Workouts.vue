@@ -131,7 +131,7 @@ async function loadTemplates() {
  * Navigate to create new template
  */
 function addTemplate() {
-  router.push({ name: 'workout-edit' });
+  router.push({ name: 'template-edit' });
 }
 
 /**

@@ -185,10 +185,16 @@
     "loadError": "Fel vid laddning av inställningar"
   },
   "templates": {
+    "new": "Ny mall",
+    "edit": "Redigera mall",
+    "unnamed": "Namnlös mall",
+    "saveError": "Fel vid sparande av mall",
+    "saveSuccess": "Mall sparad",
     "noTemplates": "Inga träningsmallar",
     "noTemplatesDescription": "Skapa mallar för att snabbt starta träningspass",
     "loadError": "Fel vid laddning av mallar",
     "startError": "Fel vid start av träningspass från mall",
+    "delete": "Ta bort mall",
     "deleteSuccess": "Mall borttagen framgångsrikt",
     "deleteError": "Fel vid borttagning av mall",
     "summary": {

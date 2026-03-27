@@ -190,10 +190,16 @@
     "loadError": "Error loading settings"
   },
   "templates": {
+    "new": "New Template",
+    "edit": "Edit Template",
+    "unnamed": "Unnamed template",
+    "saveError": "Error saving template",
+    "saveSuccess": "Template saved successfully",
     "noTemplates": "No workout templates",
     "noTemplatesDescription": "Create templates to quickly start workouts",
     "loadError": "Error loading templates",
     "startError": "Error starting workout from template",
+    "delete": "Delete Template",
     "deleteSuccess": "Template deleted successfully",
     "deleteError": "Error deleting template",
     "summary": {

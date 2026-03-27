@@ -50,17 +50,27 @@
       v-if="showContextMenu"
       @click="showContextMenu = false"
       class="fixed inset-0 z-50 flex items-end justify-center"
-      style="background-color: rgba(0, 0, 0, 0.4)"
+      style="background-color: rgba(1, 0, 0, 0.4)"
     >
       <NeoPanel @click.stop class="w-full max-w-md safe-area-bottom">
         <div class="space-y-3">
-          <NeoButton @click="saveAsTemplate" variant="secondary" full-width>
+          <NeoButton
+            v-if="!isTemplate"
+            @click="saveAsTemplate"
+            variant="secondary"
+            full-width
+          >
             <template #icon>
               <span class="material-icons">save_as</span>
             </template>
             {{ t("workout.saveAsTemplate") }}
           </NeoButton>
-          <NeoButton @click="duplicateWorkout" variant="primary" full-width>
+          <NeoButton
+            v-if="!isTemplate"
+            @click="duplicateWorkout"
+            variant="primary"
+            full-width
+          >
             <template #icon>
               <span class="material-icons">content_copy</span>
             </template>
@@ -68,13 +78,15 @@
           </NeoButton>
           <DestructiveButton
             @confirm="deleteWorkoutConfirmed"
-            :confirm-text="t('workout.delete')"
+            :confirm-text="
+              isTemplate ? t('templates.delete') : t('workout.delete')
+            "
             full-width
           >
             <template #icon>
               <span class="material-icons">delete</span>
             </template>
-            {{ t("workout.delete") }}
+            {{ isTemplate ? t("templates.delete") : t("workout.delete") }}
           </DestructiveButton>
         </div>
         <NeoButton
@@ -107,8 +119,8 @@
             </label>
           </div>
 
-          <!-- Started/Ended Date Fields -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Started/Ended Date Fields (only for workouts, not templates) -->
+          <div v-if="!isTemplate" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="floating-label-container">
               <input
                 v-model="startedDatetime"
@@ -366,14 +378,16 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from "vue";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import {
   getWorkout,
   getWorkouts,
+  getWorkoutTemplate,
   saveWorkout as saveWorkoutToDB,
   deleteWorkout,
+  deleteWorkoutTemplate,
   saveWorkoutTemplate,
   getSetting,
 } from "@/utils/database.js";
@@ -388,6 +402,7 @@ import CardioSetEditor from "@/components/CardioSetEditor.vue";
 import { useToast } from "@/composables/useToast.js";
 
 const router = useRouter();
+const route = useRoute();
 const { t } = useI18n();
 const { showSuccess, showError } = useToast();
 
@@ -415,15 +430,19 @@ const distanceUnit = ref("km");
 const isInitialLoad = ref(true);
 let saveTimeout = null;
 
-
 const isNew = computed(() => !props.id);
+const isTemplate = computed(() => route.name === "template-edit");
 
 // Set dynamic page title
 useHead({
   title: () => {
-    const workoutName = workout.value.name || t("workout.unnamed");
-    const prefix = isNew.value ? t("workout.new") : t("workout.edit");
-    return `${prefix}${isNew.value ? "" : `: ${workoutName}`}`;
+    const entityName =
+      workout.value.name ||
+      t(isTemplate.value ? "templates.unnamed" : "workout.unnamed");
+    const newKey = isTemplate.value ? "templates.new" : "workout.new";
+    const editKey = isTemplate.value ? "templates.edit" : "workout.edit";
+    const prefix = isNew.value ? t(newKey) : t(editKey);
+    return `${prefix}${isNew.value ? "" : `: ${entityName}`}`;
   },
 });
 
@@ -461,21 +480,26 @@ function formatDatetimeLocal(date) {
 }
 
 /**
- * Load existing workout data
+ * Load existing workout or template data
  */
 async function loadWorkout() {
   if (props.id) {
     try {
-      const data = await getWorkout(parseInt(props.id));
+      const data = isTemplate.value
+        ? await getWorkoutTemplate(parseInt(props.id))
+        : await getWorkout(parseInt(props.id));
       if (data) {
         workout.value = {
           ...data,
-          started: new Date(data.started),
+          started: data.started ? new Date(data.started) : new Date(),
           ended: data.ended ? new Date(data.ended) : null,
         };
       }
     } catch (error) {
-      console.error(t("workout.loadError"), error);
+      console.error(
+        isTemplate.value ? t("templates.loadError") : t("workout.loadError"),
+        error,
+      );
     }
   }
 }
@@ -517,33 +541,47 @@ async function loadAllWorkouts() {
 }
 
 /**
- * Save workout to database
+ * Save workout or template to database
  */
 async function saveWorkout() {
   if (saving.value) return;
 
   try {
     saving.value = true;
-    const workoutData = JSON.parse(
-      JSON.stringify({
-        ...workout.value,
-        updated: new Date(),
-      }),
-    );
+    const rawData = {
+      ...workout.value,
+      updated: new Date(),
+    };
 
-    const id = await saveWorkoutToDB(workoutData);
-
-    // Navigate if it's a new workout (ID will be set by route params)
+    // Remove the id field so let the database generate it
     if (isNew.value) {
-      workout.value.id = id;
-      router.replace({
-        name: "workout-edit",
-        params: { id: id.toString() },
-      });
+      delete rawData.id;
+    }
+
+    const data = JSON.parse(JSON.stringify(rawData));
+
+    let id;
+    if (isTemplate.value) {
+      id = await saveWorkoutTemplate(data);
+      if (isNew.value) {
+        workout.value.id = id;
+        router.replace({
+          name: "template-edit",
+          params: { id: id.toString() },
+        });
+      }
+    } else {
+      id = await saveWorkoutToDB(data);
+      if (isNew.value) {
+        workout.value.id = id;
+        router.replace({ name: "workout-edit", params: { id: id.toString() } });
+      }
     }
   } catch (error) {
-    console.error("Error saving workout:", error);
-    showError(t("workout.saveError"));
+    console.error("Error saving:", error);
+    showError(
+      isTemplate.value ? t("templates.saveError") : t("workout.saveError"),
+    );
   } finally {
     saving.value = false;
   }
@@ -625,16 +663,16 @@ function addSet(exerciseIndex) {
 
     // First try: specific data attributes
     weightInput = document.querySelector(
-      `[data-exercise-index="${exerciseIndex}"][data-set-index="${newSetIndex}"] input[type="number"]:first-of-type`
+      `[data-exercise-index="${exerciseIndex}"][data-set-index="${newSetIndex}"] input[type="number"]:first-of-type`,
     );
 
     // Second try: find all inputs in the exercise and get the one for the new set
     if (!weightInput) {
       const allExerciseInputs = document.querySelectorAll(
-        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`
+        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`,
       );
       // Calculate which input should be the weight/distance for the new set
-      const inputsPerSet = exercise.type === 'cardio' ? 2 : 2; // distance+rpe OR weight+reps for now, RPE is separate
+      const inputsPerSet = exercise.type === "cardio" ? 2 : 2; // distance+rpe OR weight+reps for now, RPE is separate
       const expectedInputIndex = newSetIndex * inputsPerSet;
       if (allExerciseInputs[expectedInputIndex]) {
         weightInput = allExerciseInputs[expectedInputIndex];
@@ -644,14 +682,17 @@ function addSet(exerciseIndex) {
     // Third try: just find the last number input in this exercise
     if (!weightInput) {
       const allInputs = document.querySelectorAll(
-        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`
+        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`,
       );
       if (allInputs.length > 0) {
         // Find inputs that are likely weight/distance (first input in each set)
         for (let i = allInputs.length - 1; i >= 0; i--) {
           const input = allInputs[i];
-          const setContainer = input.closest('[data-set-index]');
-          if (setContainer && setContainer.getAttribute('data-set-index') == newSetIndex) {
+          const setContainer = input.closest("[data-set-index]");
+          if (
+            setContainer &&
+            setContainer.getAttribute("data-set-index") == newSetIndex
+          ) {
             weightInput = input;
             break;
           }
@@ -662,7 +703,9 @@ function addSet(exerciseIndex) {
     if (weightInput) {
       weightInput.focus();
     } else {
-      console.warn(`Could not find weight input for exercise ${exerciseIndex}, set ${newSetIndex}`);
+      console.warn(
+        `Could not find weight input for exercise ${exerciseIndex}, set ${newSetIndex}`,
+      );
     }
   });
 }
@@ -1097,25 +1140,32 @@ async function saveAsTemplate() {
 }
 
 /**
- * Delete workout (called from DestructiveButton after confirmation)
+ * Delete workout or template (called from DestructiveButton after confirmation)
  */
 async function deleteWorkoutConfirmed() {
   showContextMenu.value = false;
 
   try {
-    await deleteWorkout(parseInt(props.id));
-    router.push({ name: "log" });
+    if (isTemplate.value) {
+      await deleteWorkoutTemplate(parseInt(props.id));
+      router.push({ name: "templates" });
+    } else {
+      await deleteWorkout(parseInt(props.id));
+      router.push({ name: "log" });
+    }
   } catch (error) {
-    console.error("Error deleting workout:", error);
-    showError(t("workout.deleteError"));
+    console.error("Error deleting:", error);
+    showError(
+      isTemplate.value ? t("templates.deleteError") : t("workout.deleteError"),
+    );
   }
 }
 
 /**
- * Go back to workout list
+ * Go back to workout list or templates list
  */
 function goBack() {
-  router.push({ name: "log" });
+  router.push({ name: isTemplate.value ? "templates" : "log" });
 }
 
 onMounted(async () => {
