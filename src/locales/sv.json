@@ -107,6 +107,41 @@
       "recentPerformance": "Senaste Prestationer",
       "weight": "Vikt",
       "distance": "Distans"
+    },
+    "plan": {
+      "title": "Plan - {exercise}",
+      "buttonTitle": "Träningsplan",
+      "noData": "Ingen historisk data",
+      "noDataDescription": "Slutför några pass med denna övning för att få rekommendationer",
+      "noActiveBlock": "Inget aktivt block",
+      "noActiveBlockDescription": "Starta ett nytt träningsblock för att få personliga viktrekommendationer",
+      "startNewBlock": "Starta nytt block",
+      "restartBlock": "Starta om block",
+      "currentBlock": "Nuvarande block",
+      "weekOf": "Vecka {week} av {total}",
+      "recommendedWeight": "Rekommenderad vikt",
+      "ofMax": "av uppskattad 1RM",
+      "estimated1RM": "Uppskattad 1RM",
+      "targetReps": "Målreps",
+      "reps": "reps",
+      "blockProgress": "Blockframsteg",
+      "workouts": "pass",
+      "applyToSet": "Applicera på set",
+      "startingMax": "Startmax",
+      "targetMax": "Målmax",
+      "blockComplete": "Block klart!",
+      "blockCompleteDescription": "Du har slutfört detta block. Testa ditt nya max och starta ett nytt block.",
+      "configureExercise": "Konfigurera övningsinställningar",
+      "exerciseSettings": "Övningsinställningar",
+      "settingsDescription": "Överskrid globala inställningar för denna övning. Sätt till 0 för att använda globalt värde.",
+      "weeksPerBlock": "Veckor per block",
+      "workoutsPerWeek": "Pass per vecka",
+      "startPercentage": "Startprocent",
+      "progressionPerWeek": "Veckovis progression",
+      "global": "global",
+      "setZeroForGlobal": "0 = använd global inställning",
+      "startAtWeek": "Starta på vecka",
+      "startAtWeekDescription": "Redan i ett block? Hoppa till en specifik vecka"
     }
   },
   "statistics": {
@@ -182,6 +217,16 @@
       "clearSuccess": "All data har rensats. Appen kommer nu att laddas om.",
       "clearError": "Fel vid rensning av data. Vänligen försök igen."
     },
+    "blockPeriodization": {
+      "title": "Blockperiodisering",
+      "description": "Konfigurera progressiv överbelastning för träningsblock",
+      "weeksPerBlock": "Veckor per block",
+      "workoutsPerWeek": "Pass per vecka (per övning)",
+      "startPercentage": "Startprocent",
+      "progressionPerWeek": "Veckovis progression",
+      "resetAll": "Återställ alla block",
+      "resetSuccess": "Alla träningsblock har återställts"
+    },
     "loadError": "Fel vid laddning av inställningar"
   },
   "templates": {
@@ -210,6 +255,7 @@
   },
   "common": {
     "cancel": "Avbryt",
+    "loading": "Laddar...",
     "today": "Idag",
     "yesterday": "Igår",
     "dateSeparator": "-",

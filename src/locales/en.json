@@ -112,6 +112,41 @@
       "recentPerformance": "Recent Performance",
       "weight": "Weight",
       "distance": "Distance"
+    },
+    "plan": {
+      "title": "Plan - {exercise}",
+      "buttonTitle": "Training Plan",
+      "noData": "No historical data",
+      "noDataDescription": "Complete some workouts with this exercise to get recommendations",
+      "noActiveBlock": "No Active Block",
+      "noActiveBlockDescription": "Start a new training block to get personalized weight recommendations",
+      "startNewBlock": "Start New Block",
+      "restartBlock": "Restart Block",
+      "currentBlock": "Current Block",
+      "weekOf": "Week {week} of {total}",
+      "recommendedWeight": "Recommended Weight",
+      "ofMax": "of estimated 1RM",
+      "estimated1RM": "Estimated 1RM",
+      "targetReps": "Target Reps",
+      "reps": "reps",
+      "blockProgress": "Block Progress",
+      "workouts": "workouts",
+      "applyToSet": "Apply to Set",
+      "startingMax": "Starting Max",
+      "targetMax": "Target Max",
+      "blockComplete": "Block Complete!",
+      "blockCompleteDescription": "You've completed this block. Test your new max and start a new block.",
+      "configureExercise": "Configure exercise settings",
+      "exerciseSettings": "Exercise Settings",
+      "settingsDescription": "Override global settings for this exercise. Set to 0 to use global value.",
+      "weeksPerBlock": "Weeks per Block",
+      "workoutsPerWeek": "Workouts per Week",
+      "startPercentage": "Start Percentage",
+      "progressionPerWeek": "Weekly Progression",
+      "global": "global",
+      "setZeroForGlobal": "0 = use global setting",
+      "startAtWeek": "Start at Week",
+      "startAtWeekDescription": "Already in a block? Jump to a specific week"
     }
   },
   "statistics": {
@@ -187,6 +222,16 @@
       "clearSuccess": "All data has been cleared. The app will now reload.",
       "clearError": "Error clearing data. Please try again."
     },
+    "blockPeriodization": {
+      "title": "Block Periodization",
+      "description": "Configure progressive overload settings for training blocks",
+      "weeksPerBlock": "Weeks per Block",
+      "workoutsPerWeek": "Workouts per Week (per exercise)",
+      "startPercentage": "Start Percentage",
+      "progressionPerWeek": "Weekly Progression",
+      "resetAll": "Reset All Blocks",
+      "resetSuccess": "All training blocks have been reset"
+    },
     "loadError": "Error loading settings"
   },
   "templates": {
@@ -215,6 +260,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "loading": "Loading...",
     "today": "Today",
     "yesterday": "Yesterday",
     "dateSeparator": "-",

@@ -185,6 +185,18 @@
                 </div>
                 <div class="flex items-center space-x-2">
                   <NeoButton
+                    v-if="exercise.type !== 'cardio'"
+                    @click="openExercisePlan(exerciseIndex)"
+                    variant="secondary"
+                    size="sm"
+                    class="w-8 h-8 !px-0 !py-0 rounded-full"
+                    :title="t('exercise.plan.buttonTitle')"
+                  >
+                    <template #icon>
+                      <span class="material-icons">timeline</span>
+                    </template>
+                  </NeoButton>
+                  <NeoButton
                     @click="openExerciseStats(exerciseIndex)"
                     variant="secondary"
                     size="sm"
@@ -373,6 +385,19 @@
         selectedExerciseForStats = null;
       "
     />
+
+    <!-- Exercise Plan Modal -->
+    <ExercisePlanModal
+      v-if="selectedExerciseForPlan"
+      :exercise="selectedExerciseForPlan"
+      :arm="selectedExerciseArmForPlan"
+      :is-open="showExercisePlan"
+      :on-apply-weight="applyPlanWeight"
+      @close="
+        showExercisePlan = false;
+        selectedExerciseForPlan = null;
+      "
+    />
   </div>
 </template>
 
@@ -393,6 +418,7 @@ import {
 } from "@/utils/database.js";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
 import ExerciseStats from "@/components/ExerciseStats.vue";
+import ExercisePlanModal from "@/components/ExercisePlanModal.vue";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
@@ -400,6 +426,7 @@ import DestructiveButton from "@/components/DestructiveButton.vue";
 import StrengthSetEditor from "@/components/StrengthSetEditor.vue";
 import CardioSetEditor from "@/components/CardioSetEditor.vue";
 import { useToast } from "@/composables/useToast.js";
+import { incrementBlockWorkout } from "@/utils/blockPeriodization.js";
 
 const router = useRouter();
 const route = useRoute();
@@ -424,6 +451,9 @@ const showContextMenu = ref(false);
 const showExerciseSelector = ref(false);
 const showExerciseStats = ref(false);
 const selectedExerciseForStats = ref(null);
+const showExercisePlan = ref(false);
+const selectedExerciseForPlan = ref(null);
+const selectedExerciseArmForPlan = ref("");
 const allWorkouts = ref([]);
 const weightUnit = ref("kg");
 const distanceUnit = ref("km");
@@ -575,6 +605,13 @@ async function saveWorkout() {
       if (isNew.value) {
         workout.value.id = id;
         router.replace({ name: "workout-edit", params: { id: id.toString() } });
+
+        // Increment block workout count for each exercise in this new workout
+        for (const exercise of workout.value.exercises) {
+          if (exercise.name) {
+            await incrementBlockWorkout(exercise.name);
+          }
+        }
       }
     }
   } catch (error) {
@@ -821,6 +858,48 @@ function getTotalVolume(exercise) {
 function openExerciseStats(exerciseIndex) {
   selectedExerciseForStats.value = workout.value.exercises[exerciseIndex];
   showExerciseStats.value = true;
+}
+
+/**
+ * Show exercise plan modal
+ * @param {number} exerciseIndex - Index of the exercise
+ */
+function openExercisePlan(exerciseIndex) {
+  const exercise = workout.value.exercises[exerciseIndex];
+  selectedExerciseForPlan.value = exercise;
+  // Determine arm for single-arm exercises
+  const hasArmSets = exercise.sets?.some((s) => s.arm);
+  selectedExerciseArmForPlan.value = hasArmSets
+    ? exercise.sets?.find((s) => s.arm)?.arm || ""
+    : "";
+  showExercisePlan.value = true;
+}
+
+/**
+ * Apply recommended weight to first empty set
+ * @param {number} weight - Weight to apply
+ */
+function applyPlanWeight(weight) {
+  if (!selectedExerciseForPlan.value) return;
+
+  const exerciseIndex = workout.value.exercises.findIndex(
+    (ex) => ex === selectedExerciseForPlan.value,
+  );
+  if (exerciseIndex === -1) return;
+
+  const exercise = workout.value.exercises[exerciseIndex];
+
+  // Find first set without weight
+  const emptySetIndex = exercise.sets?.findIndex(
+    (s) => !s.weight || s.weight === 0,
+  );
+
+  if (emptySetIndex !== undefined && emptySetIndex >= 0) {
+    updateSetField(exerciseIndex, emptySetIndex, "weight", weight);
+  } else if (exercise.sets && exercise.sets.length > 0) {
+    // If no empty set, update the last set
+    updateSetField(exerciseIndex, exercise.sets.length - 1, "weight", weight);
+  }
 }
 
 /**
