@@ -232,7 +232,8 @@ export async function getEffectiveSettings(exerciseName) {
  * @returns {number} Current week (1-indexed)
  */
 export function getCurrentBlockWeek(blockState, workoutsPerWeek) {
-  if (!blockState || blockState.blockWorkoutCount <= 0) return 0;
+  if (!blockState) return 0;
+  if (blockState.blockWorkoutCount <= 0) return 1;
   return Math.ceil(blockState.blockWorkoutCount / workoutsPerWeek);
 }
 
@@ -309,9 +310,9 @@ export async function startNewBlock(exerciseName, estimated1RM, settings = {}) {
     (progressionPerWeek * weeksPerBlock * estimated1RM) / 100;
   const targetMax = estimated1RM + totalProgression;
 
-  // Calculate initial workout count based on start week
-  // Week 1 = 0 workouts completed, Week 3 = 2 workouts completed (for workoutsPerWeek=1)
-  const initialWorkoutCount = (startWeek - 1) * workoutsPerWeek;
+  // Calculate initial workout count so getCurrentBlockWeek returns startWeek
+  // Week 1 = 1 workout count, Week 3 = 3 workout count (for workoutsPerWeek=1)
+  const initialWorkoutCount = startWeek * workoutsPerWeek;
 
   const allBlocks = await getSetting("blockPeriodization_exercises", {});
   allBlocks[exerciseName] = {
