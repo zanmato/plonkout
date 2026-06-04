@@ -1,17 +1,17 @@
 <template>
   <NeoButton
-    @click="handleClick"
     :variant="isConfirming ? 'danger' : variant"
     :size="size"
     :disabled="disabled"
     :full-width="fullWidth"
     :class="$props.class"
     :title="iconOnly && isConfirming ? t('common.areYouSure') : undefined"
+    @click="handleClick"
   >
-    <template #icon v-if="$slots.icon && !isConfirming">
+    <template v-if="$slots.icon && !isConfirming" #icon>
       <slot name="icon" />
     </template>
-    <template #icon v-else-if="isConfirming">
+    <template v-else-if="isConfirming" #icon>
       <span class="material-icons">warning</span>
     </template>
     <span v-if="!iconOnly">

@@ -133,7 +133,7 @@ export async function saveWorkout(workout) {
     return workout.id;
   } else {
     // Remove id field for new workouts to avoid IndexedDB key validation errors
-    // eslint-disable-next-line no-unused-vars
+     
     const { id, ...workoutData } = workout;
     return db.add("workouts", {
       ...workoutData,

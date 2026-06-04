@@ -43,7 +43,11 @@ describe("WorkoutLog.vue", () => {
     });
 
     it("shows loading state initially", () => {
-      expect(wrapper.find(".text-gray-500").text()).toBe("Loading...");
+      // Keep getWorkouts pending so the component stays in its loading state,
+      // then assert synchronously before the load resolves.
+      getWorkouts.mockReturnValueOnce(new Promise(() => {}));
+      const loadingWrapper = createWrapper();
+      expect(loadingWrapper.find(".text-gray-500").text()).toBe("Loading...");
     });
 
     it("navigates to new workout when add button is clicked", async () => {

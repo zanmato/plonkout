@@ -4,7 +4,7 @@
     <NeoHeader :title="t('settings.title')" />
 
     <!-- Content -->
-    <div class="flex-1 p-4">
+    <div class="flex-1 overflow-y-auto p-4">
       <NeoPanel>
         <!-- Language Setting -->
         <div class="mb-6">
@@ -13,11 +13,11 @@
           </h3>
           <VoltSelect
             v-model="currentLocale"
-            @change="changeLanguage"
             :options="languageOptions"
             optionLabel="label"
             optionValue="value"
             class="w-full"
+            @change="changeLanguage"
           />
         </div>
 
@@ -28,11 +28,11 @@
           </h3>
           <SelectButton
             v-model="theme"
-            @change="saveTheme"
             :options="themeOptions"
             optionLabel="label"
             optionValue="value"
             class="w-full"
+            @change="saveTheme"
           />
         </div>
 
@@ -43,11 +43,11 @@
           </h3>
           <SelectButton
             v-model="weightUnit"
-            @change="saveWeightUnit"
             :options="weightUnitOptions"
             optionLabel="label"
             optionValue="value"
             class="w-full"
+            @change="saveWeightUnit"
           />
         </div>
 
@@ -58,11 +58,11 @@
           </h3>
           <SelectButton
             v-model="distanceUnit"
-            @change="saveDistanceUnit"
             :options="distanceUnitOptions"
             optionLabel="label"
             optionValue="value"
             class="w-full"
+            @change="saveDistanceUnit"
           />
         </div>
 
@@ -87,8 +87,8 @@
                 type="number"
                 min="1"
                 max="12"
-                @change="saveBlockSettings"
                 class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                @change="saveBlockSettings"
               />
             </div>
 
@@ -104,8 +104,8 @@
                 type="number"
                 min="1"
                 max="7"
-                @change="saveBlockSettings"
                 class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                @change="saveBlockSettings"
               />
             </div>
 
@@ -122,8 +122,8 @@
                   type="number"
                   min="50"
                   max="90"
-                  @change="saveBlockSettings"
                   class="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  @change="saveBlockSettings"
                 />
                 <span class="ml-2 text-black dark:text-white">%</span>
               </div>
@@ -142,8 +142,8 @@
                   type="number"
                   min="1"
                   max="10"
-                  @change="saveBlockSettings"
                   class="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  @change="saveBlockSettings"
                 />
                 <span class="ml-2 text-black dark:text-white">%</span>
               </div>
@@ -151,9 +151,9 @@
 
             <!-- Reset All Blocks -->
             <DestructiveButton
-              @confirm="handleResetAllBlocks"
               :confirm-text="t('settings.blockPeriodization.resetAll')"
               full-width
+              @confirm="handleResetAllBlocks"
             >
               <template #icon>
                 <span class="material-icons">restart_alt</span>
@@ -170,10 +170,10 @@
           </h3>
           <div class="space-y-3">
             <NeoButton
-              @click="exportData"
               variant="secondary"
               full-width
               class="text-left"
+              @click="exportData"
             >
               <template #icon>
                 <span class="material-icons">download</span>
@@ -189,9 +189,9 @@
             </NeoButton>
 
             <DestructiveButton
-              @confirm="clearAllData"
               :confirm-text="t('settings.dataManagement.clear')"
               full-width
+              @confirm="clearAllData"
             >
               <template #icon>
                 <span class="material-icons">delete</span>

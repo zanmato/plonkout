@@ -4,10 +4,10 @@
     <NeoHeader :title="t('workout.title')">
       <template #right>
         <NeoButton
-          @click="addWorkout"
           variant="primary"
           size="sm"
           class="rounded-full w-10 h-10 !px-0 !py-0"
+          @click="addWorkout"
         >
           <template #icon>
             <span class="material-icons">add</span>
@@ -37,7 +37,7 @@
         :min-item-size="70"
         class="h-full pb-4"
       >
-        <template v-slot="{ item, index, active }">
+        <template #default="{ item, index, active }">
           <DynamicScrollerItem
             :item="item"
             :active="active"
@@ -49,14 +49,14 @@
             <div v-if="item.type === 'header'" class="mb-5">
               <!-- Clickable month header -->
               <div
-                @click="toggleMonthExpansion(item.monthYear)"
                 class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl shadow-brutal dark:bg-zinc-600 cursor-pointer transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
+                @click="toggleMonthExpansion(item.monthYear)"
               >
                 <div class="flex items-center space-x-2">
                   <div class="text-base font-bold text-black dark:text-white">
                     {{ item.monthYear }}
                   </div>
-                  <span 
+                  <span
                     class="material-icons text-black dark:text-white transition-transform duration-200"
                     :class="{ 'rotate-180': isMonthExpanded(item.monthYear) }"
                   >
@@ -74,7 +74,10 @@
               <MonthCalendar
                 v-if="isMonthExpanded(item.monthYear)"
                 :month-year="item.monthYear"
-                :workouts="groupedWorkouts.find(g => g.monthYear === item.monthYear)?.workouts || []"
+                :workouts="
+                  groupedWorkouts.find((g) => g.monthYear === item.monthYear)
+                    ?.workouts || []
+                "
               />
             </div>
 
@@ -90,11 +93,21 @@
                 >
                   {{ formatWorkoutDate(item.started) }}
                 </div>
-                <div
-                  v-if="item.ended"
-                  class="bg-nb-overlay text-black px-2.5 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
-                >
-                  {{ getWorkoutDuration(item) }}
+                <div class="flex items-center gap-2">
+                  <div
+                    v-if="item.ended"
+                    class="bg-nb-overlay text-black px-2.5 py-1.5 border-2 border-nb-border rounded-md text-xs font-semibold shadow-brutal-sm"
+                  >
+                    {{ getWorkoutDuration(item) }}
+                  </div>
+                  <button
+                    :title="t('workout.duplicate')"
+                    :aria-label="t('workout.duplicate')"
+                    class="flex items-center justify-center bg-purple-300 text-black w-8 h-8 p-2 border-2 border-nb-border rounded-md shadow-brutal-sm transition-all duration-200 hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+                    @click.stop="duplicateWorkout(item)"
+                  >
+                    <span class="material-icons text-base!">content_copy</span>
+                  </button>
                 </div>
               </div>
               <div class="text-lg font-bold dark:text-white text-black mb-2">
@@ -104,8 +117,8 @@
                 class="text-sm dark:text-white text-black opacity-80 leading-relaxed"
               >
                 <div
-                  v-for="(exerciseSummary, index) in getWorkoutSummary(item)"
-                  :key="index"
+                  v-for="(exerciseSummary, summaryIndex) in getWorkoutSummary(item)"
+                  :key="summaryIndex"
                   class="leading-snug"
                 >
                   {{ exerciseSummary }}
@@ -125,7 +138,12 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
-import { getWorkouts, initializeDefaultExercises } from "@/utils/database.js";
+import {
+  getWorkouts,
+  saveWorkout,
+  initializeDefaultExercises,
+} from "@/utils/database.js";
+import { useToast } from "@/composables/useToast.js";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
@@ -133,6 +151,7 @@ import MonthCalendar from "@/components/MonthCalendar.vue";
 
 const router = useRouter();
 const { t, d } = useI18n();
+const { showError } = useToast();
 
 // Set page title
 useHead({
@@ -175,7 +194,7 @@ const groupedWorkouts = computed(() => {
     .map((group) => ({
       ...group,
       workouts: group.workouts.sort(
-        (a, b) => new Date(b.started) - new Date(a.started)
+        (a, b) => new Date(b.started) - new Date(a.started),
       ),
     }));
 });
@@ -217,7 +236,7 @@ async function loadWorkouts() {
     const data = await getWorkouts();
     // Sort workouts by started date (newest first)
     workouts.value = data.sort(
-      (a, b) => new Date(b.started) - new Date(a.started)
+      (a, b) => new Date(b.started) - new Date(a.started),
     );
   } catch (error) {
     console.error(t("workout.loadError"), error);
@@ -244,7 +263,6 @@ function isMonthExpanded(monthYear) {
   return expandedMonths.value.has(monthYear);
 }
 
-
 /**
  * Navigate to add new workout
  */
@@ -258,6 +276,48 @@ function addWorkout() {
  */
 function editWorkout(id) {
   router.push({ name: "workout-edit", params: { id: id.toString() } });
+}
+
+/**
+ * Create a fresh, empty set
+ * @returns {Object} A new set object
+ */
+function createNewSet() {
+  return {
+    type: "regular",
+    weight: null,
+    distance: null,
+    reps: null,
+    time: "",
+    rpe: null,
+    arm: "",
+    notes: "",
+  };
+}
+
+/**
+ * Quickly duplicate a workout and open the copy for editing
+ * @param {Object} workout - The workout to duplicate
+ */
+async function duplicateWorkout(workout) {
+  const duplicatedWorkout = {
+    name: workout.name || "",
+    started: new Date(),
+    ended: null,
+    notes: workout.notes,
+    exercises: (workout.exercises || []).map((exercise) => ({
+      ...exercise,
+      sets: [createNewSet()],
+    })),
+  };
+
+  try {
+    const id = await saveWorkout(duplicatedWorkout);
+    router.push({ name: "workout-edit", params: { id: id.toString() } });
+  } catch (error) {
+    console.error("Error duplicating workout:", error);
+    showError(t("workout.duplicateError"));
+  }
 }
 
 /**
@@ -390,7 +450,7 @@ function getWorkoutDuration(workout) {
 
   if (hours > 0 && minutes > 0) {
     return `${hours}${t("common.duration.hours")} ${minutes}${t(
-      "common.duration.minutes"
+      "common.duration.minutes",
     )}`;
   } else if (hours > 0) {
     return `${hours}${t("common.duration.hours")}`;

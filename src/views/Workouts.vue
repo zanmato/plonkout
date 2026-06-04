@@ -4,11 +4,11 @@
     <NeoHeader :title="t('tabs.templates')">
       <template #right>
         <NeoButton
-          @click="addTemplate"
           variant="primary"
           size="sm"
           class="rounded-full w-10 h-10 !px-0 !py-0"
           icon-only
+          @click="addTemplate"
         >
           <template #icon>
             <span class="material-icons">add</span>
@@ -55,19 +55,19 @@
             </div>
             <div class="flex items-center space-x-2 ml-4">
               <NeoButton
-                @click.stop="editTemplate(template.id)"
                 variant="overlay"
                 size="sm"
+                @click.stop="editTemplate(template.id)"
               >
                 <template #icon>
                   <span class="material-icons">edit</span>
                 </template>
               </NeoButton>
               <DestructiveButton
-                @confirm="deleteTemplate(template.id)"
                 :confirm-text="t('workout.delete')"
                 size="sm"
                 icon-only
+                @confirm="deleteTemplate(template.id)"
               >
                 <template #icon>
                   <span class="material-icons">delete</span>

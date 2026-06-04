@@ -1,13 +1,13 @@
 <template>
   <div
-    @click="$emit('close')"
     class="fixed inset-0 z-50 flex items-end justify-center"
     style="background-color: rgba(0, 0, 0, 0.4)"
+    @click="$emit('close')"
   >
     <NeoPanel
-      @click.stop
       class="w-full max-w-md h-[60vh] min-h-[80vh] flex flex-col safe-area-bottom"
       data-testid="exercise-selector-content"
+      @click.stop
     >
       <!-- Header -->
       <div class="p-4 border-b-2 border-nb-border">
@@ -16,9 +16,9 @@
             {{ t("exercise.selector.title") }}
           </h3>
           <NeoButton
-            @click="showNewExerciseForm = true"
             variant="primary"
             size="sm"
+            @click="showNewExerciseForm = true"
           >
             {{ t("exercise.selector.new") }}
           </NeoButton>
@@ -27,9 +27,9 @@
         <!-- Search -->
         <div class="floating-label-container mt-4">
           <input
+            id="exercise-search"
             v-model="searchQuery"
             type="text"
-            id="exercise-search"
             class="floating-input"
             :placeholder="t('exercise.selector.search')"
             autocomplete="off"
@@ -80,8 +80,8 @@
               <button
                 v-for="exercise in group.exercises"
                 :key="exercise.id"
-                @click="selectExercise(exercise)"
                 class="w-full text-left p-3 bg-nb-overlay border-2 border-nb-border rounded-lg shadow-brutal-sm hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all duration-200"
+                @click="selectExercise(exercise)"
               >
                 <div class="font-bold text-white dark:text-black">
                   {{ exercise.name }}
@@ -111,7 +111,7 @@
 
       <!-- Cancel Button -->
       <div class="p-4 border-t-2 border-nb-border">
-        <NeoButton @click="$emit('close')" variant="overlay" full-width>
+        <NeoButton variant="overlay" full-width @click="$emit('close')">
           {{ t("common.cancel") }}
         </NeoButton>
       </div>
@@ -120,11 +120,11 @@
     <!-- New Exercise Form -->
     <div
       v-if="showNewExerciseForm"
-      @click="showNewExerciseForm = false"
       class="fixed inset-0 z-60 flex items-center justify-center p-4"
       style="background-color: rgba(0, 0, 0, 0.4)"
+      @click="showNewExerciseForm = false"
     >
-      <NeoPanel @click.stop class="w-full max-w-sm" padding="lg">
+      <NeoPanel class="w-full max-w-sm" padding="lg" @click.stop>
         <h3 class="text-xl font-semibold text-black dark:text-white mb-2 mb-6">
           {{ t("exercise.selector.newExercise") }}
         </h3>
@@ -132,9 +132,9 @@
         <div class="space-y-6">
           <div class="floating-label-container">
             <input
+              id="exercise-name"
               v-model="newExercise.name"
               type="text"
-              id="exercise-name"
               class="floating-input"
               :placeholder="t('exercise.selector.namePlaceholder')"
             />
@@ -194,9 +194,9 @@
             class="flex items-center space-x-3"
           >
             <input
+              id="exercise-single-arm"
               v-model="newExercise.singleArm"
               type="checkbox"
-              id="exercise-single-arm"
               class="w-5 h-5 border-2 border-nb-border rounded bg-nb-bg checked:bg-nb-accent checked:border-nb-accent focus:outline-none focus:ring-2 focus:ring-nb-accent focus:ring-offset-2"
             />
             <label
@@ -210,17 +210,17 @@
 
         <div class="flex space-x-3 mt-8">
           <NeoButton
-            @click="showNewExerciseForm = false"
             variant="overlay"
             class="flex-1"
+            @click="showNewExerciseForm = false"
           >
             {{ t("common.cancel") }}
           </NeoButton>
           <NeoButton
-            @click="createExercise"
             :disabled="!newExercise.name.trim()"
             variant="primary"
             class="flex-1"
+            @click="createExercise"
           >
             {{ t("exercise.selector.create") }}
           </NeoButton>

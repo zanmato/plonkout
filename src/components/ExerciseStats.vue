@@ -11,8 +11,8 @@
           {{ t("exercise.stats.title", { exercise: exercise.name }) }}
         </h3>
         <button
-          @click="closeModal"
           class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          @click="closeModal"
         >
           <span class="material-icons text-xl">close</span>
         </button>

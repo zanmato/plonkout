@@ -7,13 +7,13 @@
     <div class="flex items-center justify-between mb-3">
       <!-- Set Number -->
       <button
-        @click="$emit('toggleSetType')"
         :class="[
           'w-9 h-9 min-w-9 min-h-9 flex-shrink-0 border-2 border-nb-border rounded-full flex items-center justify-center text-sm font-bold shadow-brutal-sm',
           set.type === 'warmup'
             ? 'bg-orange-500 text-white'
             : 'bg-purple-400 text-black',
         ]"
+        @click="$emit('toggleSetType')"
       >
         {{ setNumber }}
       </button>
@@ -25,18 +25,18 @@
           <div class="relative flex items-center">
             <input
               :value="set.distance"
-              @input="
-                $emit(
-                  'update:distance',
-                  $event.target.value ? Number($event.target.value) : null
-                )
-              "
               type="number"
               inputmode="decimal"
               step="0.1"
               tabindex="0"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0"
+              @input="
+                $emit(
+                  'update:distance',
+                  $event.target.value ? Number($event.target.value) : null
+                )
+              "
             />
           </div>
           <div
@@ -51,11 +51,11 @@
           <div class="relative flex items-center">
             <input
               :value="set.time"
-              @input="$emit('update:time', $event.target.value)"
               type="text"
               tabindex="0"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
               placeholder="0:00"
+              @input="$emit('update:time', $event.target.value)"
             />
           </div>
           <div
@@ -69,12 +69,6 @@
         <div class="flex flex-col items-center text-center">
           <input
             :value="set.rpe"
-            @input="
-              $emit(
-                'update:rpe',
-                $event.target.value ? Number($event.target.value) : null
-              )
-            "
             type="number"
             inputmode="numeric"
             min="1"
@@ -82,6 +76,12 @@
             tabindex="0"
             class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
             placeholder="0"
+            @input="
+              $emit(
+                'update:rpe',
+                $event.target.value ? Number($event.target.value) : null
+              )
+            "
           />
           <div
             class="text-xs font-medium text-black opacity-70 dark:text-white"
@@ -98,22 +98,22 @@
       <div class="flex flex-col flex-1">
         <input
           :value="set.notes"
-          @input="$emit('update:notes', $event.target.value)"
           type="text"
           tabindex="0"
           class="bg-white border-2 border-nb-border rounded-md px-2 py-1 text-sm font-medium text-black focus:outline-none dark:bg-black dark:text-white"
           :placeholder="t('exercise.notes')"
+          @input="$emit('update:notes', $event.target.value)"
         />
       </div>
 
       <!-- Delete Set Button (only show if more than one set) -->
       <div v-if="exercise.sets.length > 1" class="flex flex-col">
         <DestructiveButton
-          @confirm="$emit('delete-set')"
           :confirm-text="t('workout.deleteSet')"
           size="sm"
           class="w-8 h-8 !px-0 !py-0 rounded-full"
           icon-only
+          @confirm="$emit('delete-set')"
         >
           <template #icon>
             <span class="material-icons">delete</span>
@@ -124,14 +124,14 @@
       <!-- Add Set Tab Field (minimal but tabbable) - only show on last set -->
       <div v-if="isLastSet" class="flex flex-col">
         <input
-          @focus="handleAddSetFocus"
-          @input="handleAddSetInput"
-          @blur="clearAddSetField"
           ref="addSetInput"
           type="text"
           tabindex="0"
           class="w-4 h-1 text-transparent bg-transparent border-none focus:bg-purple-100 focus:border-2 focus:border-purple-300 focus:rounded-md focus:px-2 focus:py-1 focus:text-sm focus:font-medium focus:text-purple-600 focus:outline-none focus:w-auto focus:h-auto focus:text-purple-600 dark:focus:bg-purple-900/20 dark:focus:border-purple-600 dark:focus:text-purple-400"
           :placeholder="t('workout.addSet')"
+          @focus="handleAddSetFocus"
+          @input="handleAddSetInput"
+          @blur="clearAddSetField"
         />
       </div>
     </div>

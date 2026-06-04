@@ -12,9 +12,9 @@
             {{ t("exercise.plan.title", { exercise: exercise.name }) }}
           </h3>
           <button
-            @click="showSettings = !showSettings"
             class="w-7 h-7 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
             :title="t('exercise.plan.configureExercise')"
+            @click="showSettings = !showSettings"
           >
             <span class="material-icons text-lg">{{
               showSettings ? "close" : "settings"
@@ -22,8 +22,8 @@
           </button>
         </div>
         <button
-          @click="closeModal"
           class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          @click="closeModal"
         >
           <span class="material-icons text-xl">close</span>
         </button>
@@ -36,9 +36,7 @@
 
       <!-- No Historical Data -->
       <div v-else-if="!loading && estimated1RM <= 0" class="text-center py-8">
-        <span class="material-icons text-4xl text-gray-400 mb-2"
-          >fitness_center</span
-        >
+        <span class="material-icons text-4xl text-gray-400 mb-2">fitness_center</span>
         <div class="text-base font-bold text-black dark:text-white mb-2">
           {{ t("exercise.plan.noData") }}
         </div>
@@ -78,8 +76,8 @@
             min="0"
             max="12"
             :placeholder="String(globalSettings.weeksPerBlock)"
-            @change="saveExerciseSettings"
             class="w-full px-3 py-2 bg-white dark:bg-zinc-700 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            @change="saveExerciseSettings"
           />
           <p class="text-xs text-black dark:text-white opacity-50 mt-1">
             {{ t("exercise.plan.setZeroForGlobal") }}
@@ -105,8 +103,8 @@
             min="0"
             max="7"
             :placeholder="String(globalSettings.workoutsPerWeek)"
-            @change="saveExerciseSettings"
             class="w-full px-3 py-2 bg-white dark:bg-zinc-700 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+            @change="saveExerciseSettings"
           />
         </div>
 
@@ -130,8 +128,8 @@
               min="0"
               max="90"
               :placeholder="String(globalSettings.startPercentage)"
-              @change="saveExerciseSettings"
               class="flex-1 px-3 py-2 bg-white dark:bg-zinc-700 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              @change="saveExerciseSettings"
             />
             <span class="ml-2 text-black dark:text-white">%</span>
           </div>
@@ -157,8 +155,8 @@
               min="0"
               max="10"
               :placeholder="String(globalSettings.progressionPerWeek)"
-              @change="saveExerciseSettings"
               class="flex-1 px-3 py-2 bg-white dark:bg-zinc-700 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+              @change="saveExerciseSettings"
             />
             <span class="ml-2 text-black dark:text-white">%</span>
           </div>
@@ -169,9 +167,7 @@
       <div v-else-if="!loading && estimated1RM > 0" class="space-y-6">
         <!-- No Active Block State -->
         <div v-if="!blockData.hasActiveBlock" class="text-center py-4">
-          <span class="material-icons text-4xl text-purple-500 mb-2"
-            >timeline</span
-          >
+          <span class="material-icons text-4xl text-purple-500 mb-2">timeline</span>
           <div class="text-base font-bold text-black dark:text-white mb-2">
             {{ t("exercise.plan.noActiveBlock") }}
           </div>
@@ -200,8 +196,8 @@
             </label>
             <div class="flex items-center justify-center gap-2">
               <button
-                @click="startWeek = Math.max(1, startWeek - 1)"
                 class="w-8 h-8 flex items-center justify-center rounded-full bg-nb-overlay dark:bg-zinc-700 border-2 border-nb-border hover:bg-gray-200 dark:hover:bg-zinc-600"
+                @click="startWeek = Math.max(1, startWeek - 1)"
               >
                 <span class="material-icons text-sm">remove</span>
               </button>
@@ -211,10 +207,10 @@
                 {{ startWeek }}
               </div>
               <button
+                class="w-8 h-8 flex items-center justify-center rounded-full bg-nb-overlay dark:bg-zinc-700 border-2 border-nb-border hover:bg-gray-200 dark:hover:bg-zinc-600"
                 @click="
                   startWeek = Math.min(effectiveTotalWeeks, startWeek + 1)
                 "
-                class="w-8 h-8 flex items-center justify-center rounded-full bg-nb-overlay dark:bg-zinc-700 border-2 border-nb-border hover:bg-gray-200 dark:hover:bg-zinc-600"
               >
                 <span class="material-icons text-sm">add</span>
               </button>
@@ -224,7 +220,7 @@
             </div>
           </div>
 
-          <NeoButton @click="handleStartNewBlock" variant="primary" full-width>
+          <NeoButton variant="primary" full-width @click="handleStartNewBlock">
             <template #icon>
               <span class="material-icons">play_arrow</span>
             </template>
@@ -234,9 +230,7 @@
 
         <!-- Block Complete State -->
         <div v-else-if="blockData.isComplete" class="text-center py-4">
-          <span class="material-icons text-4xl text-green-500 mb-2"
-            >check_circle</span
-          >
+          <span class="material-icons text-4xl text-green-500 mb-2">check_circle</span>
           <div class="text-base font-bold text-black dark:text-white mb-2">
             {{ t("exercise.plan.blockComplete") }}
           </div>
@@ -268,7 +262,7 @@
             </div>
           </div>
 
-          <NeoButton @click="handleStartNewBlock" variant="primary" full-width>
+          <NeoButton variant="primary" full-width @click="handleStartNewBlock">
             <template #icon>
               <span class="material-icons">refresh</span>
             </template>
@@ -390,9 +384,9 @@
           <div class="flex gap-3">
             <NeoButton
               v-if="onApplyWeight"
-              @click="applyWeight"
               variant="primary"
               full-width
+              @click="applyWeight"
             >
               <template #icon>
                 <span class="material-icons">add</span>
@@ -400,10 +394,10 @@
               {{ t("exercise.plan.applyToSet") }}
             </NeoButton>
             <NeoButton
-              @click="handleStartNewBlock"
               :variant="onApplyWeight ? 'secondary' : 'primary'"
               :full-width="!onApplyWeight"
               :class="{ 'flex-1': onApplyWeight }"
+              @click="handleStartNewBlock"
             >
               <template #icon>
                 <span class="material-icons">restart_alt</span>

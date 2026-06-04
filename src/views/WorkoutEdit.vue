@@ -4,10 +4,10 @@
     <NeoHeader>
       <template #left>
         <NeoButton
-          @click="goBack"
           variant="primary"
           size="sm"
           data-testid="back-button"
+          @click="goBack"
         >
           <template #icon>
             <span class="material-icons">arrow_back</span>
@@ -24,9 +24,9 @@
       <template #right>
         <NeoButton
           v-if="!isNew"
-          @click="showContextMenu = true"
           variant="overlay"
           size="sm"
+          @click="showContextMenu = true"
         >
           <template #icon>
             <span class="material-icons">more_vert</span>
@@ -48,17 +48,17 @@
     <!-- Context Menu -->
     <div
       v-if="showContextMenu"
-      @click="showContextMenu = false"
       class="fixed inset-0 z-50 flex items-end justify-center"
       style="background-color: rgba(1, 0, 0, 0.4)"
+      @click="showContextMenu = false"
     >
-      <NeoPanel @click.stop class="w-full max-w-md safe-area-bottom">
+      <NeoPanel class="w-full max-w-md safe-area-bottom" @click.stop>
         <div class="space-y-3">
           <NeoButton
             v-if="!isTemplate"
-            @click="saveAsTemplate"
             variant="secondary"
             full-width
+            @click="saveAsTemplate"
           >
             <template #icon>
               <span class="material-icons">save_as</span>
@@ -67,9 +67,9 @@
           </NeoButton>
           <NeoButton
             v-if="!isTemplate"
-            @click="duplicateWorkout"
             variant="primary"
             full-width
+            @click="duplicateWorkout"
           >
             <template #icon>
               <span class="material-icons">content_copy</span>
@@ -77,11 +77,11 @@
             {{ t("workout.duplicate") }}
           </NeoButton>
           <DestructiveButton
-            @confirm="deleteWorkoutConfirmed"
             :confirm-text="
               isTemplate ? t('templates.delete') : t('workout.delete')
             "
             full-width
+            @confirm="deleteWorkoutConfirmed"
           >
             <template #icon>
               <span class="material-icons">delete</span>
@@ -90,10 +90,10 @@
           </DestructiveButton>
         </div>
         <NeoButton
-          @click="showContextMenu = false"
           variant="overlay"
           full-width
           class="mt-4"
+          @click="showContextMenu = false"
         >
           {{ t("common.cancel") }}
         </NeoButton>
@@ -108,9 +108,9 @@
           <!-- Workout Name -->
           <div class="floating-label-container">
             <input
+              id="workout-name"
               v-model="workout.name"
               type="text"
-              id="workout-name"
               class="floating-input"
               :placeholder="t('workout.namePlaceholder')"
             />
@@ -123,9 +123,9 @@
           <div v-if="!isTemplate" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="floating-label-container">
               <input
+                id="workout-started"
                 v-model="startedDatetime"
                 type="datetime-local"
-                id="workout-started"
                 class="floating-input datetime-fixed"
               />
               <label
@@ -138,9 +138,9 @@
 
             <div class="floating-label-container">
               <input
+                id="workout-ended"
                 v-model="endedDatetime"
                 type="datetime-local"
-                id="workout-ended"
                 class="floating-input datetime-fixed"
               />
               <label
@@ -155,9 +155,9 @@
           <!-- Workout Notes -->
           <div class="floating-label-container">
             <textarea
+              id="workout-notes"
               v-model="workout.notes"
               rows="3"
-              id="workout-notes"
               class="floating-textarea"
               :placeholder="t('workout.notesPlaceholder')"
             ></textarea>
@@ -186,32 +186,32 @@
                 <div class="flex items-center space-x-2">
                   <NeoButton
                     v-if="exercise.type !== 'cardio'"
-                    @click="openExercisePlan(exerciseIndex)"
                     variant="secondary"
                     size="sm"
                     class="w-8 h-8 !px-0 !py-0 rounded-full"
                     :title="t('exercise.plan.buttonTitle')"
+                    @click="openExercisePlan(exerciseIndex)"
                   >
                     <template #icon>
                       <span class="material-icons">timeline</span>
                     </template>
                   </NeoButton>
                   <NeoButton
-                    @click="openExerciseStats(exerciseIndex)"
                     variant="secondary"
                     size="sm"
                     class="w-8 h-8 !px-0 !py-0 rounded-full"
+                    @click="openExerciseStats(exerciseIndex)"
                   >
                     <template #icon>
                       <span class="material-icons">bar_chart</span>
                     </template>
                   </NeoButton>
                   <DestructiveButton
-                    @confirm="removeExercise(exerciseIndex)"
                     :confirm-text="t('workout.delete')"
                     size="sm"
                     class="w-8 h-8 !px-0 !py-0 rounded-full"
                     icon-only
+                    @confirm="removeExercise(exerciseIndex)"
                   >
                     <template #icon>
                       <span class="material-icons">delete</span>
@@ -329,17 +329,15 @@
               >
                 <div class="text-md">
                   {{ t("exercise.totalVolume") }}
-                  <span class="font-bold text-purple-600 dark:text-purple-400"
-                    >{{ getTotalVolume(exercise) }} {{ weightUnit }}</span
-                  >
+                  <span class="font-bold text-purple-600 dark:text-purple-400">{{ getTotalVolume(exercise) }} {{ weightUnit }}</span>
                 </div>
               </div>
 
               <!-- Add Set Button -->
               <NeoButton
-                @click="addSet(exerciseIndex)"
                 variant="primary"
                 class="mt-4 w-full"
+                @click="addSet(exerciseIndex)"
               >
                 <template #icon>
                   <span class="material-icons">add</span>
@@ -351,11 +349,11 @@
 
           <!-- Add Exercise Button -->
           <NeoButton
-            @click="showExerciseSelector = true"
             variant="primary"
             size="lg"
             full-width
             data-testid="add-exercise-button"
+            @click="showExerciseSelector = true"
           >
             <template #icon>
               <span class="material-icons">add</span>
@@ -434,7 +432,10 @@ const { t } = useI18n();
 const { showSuccess, showError } = useToast();
 
 const props = defineProps({
-  id: String,
+  id: {
+    type: String,
+    default: null,
+  },
 });
 
 const workout = ref({
@@ -1166,9 +1167,7 @@ async function duplicateWorkout() {
   showContextMenu.value = false;
 
   const duplicatedWorkout = {
-    name: workout.value.name
-      ? `${workout.value.name} (${t("workout.copyName")})`
-      : "",
+    name: workout.value.name || "",
     started: new Date(),
     ended: null,
     notes: workout.value.notes,
