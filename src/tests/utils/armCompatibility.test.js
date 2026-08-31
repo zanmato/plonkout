@@ -1,71 +1,19 @@
 import { describe, it, expect } from 'vitest'
 
-/**
- * Check if two arm settings are compatible for comparison (copied from WorkoutEdit.vue for testing)
- * @param {string} currentArm - Current arm setting
- * @param {string} historicalArm - Historical arm setting to compare
- * @returns {boolean} Whether the arms are compatible for comparison
- */
-function isArmCompatible(currentArm, historicalArm) {
-  // If either arm is not specified, they're compatible
-  if (!currentArm || !historicalArm) {
-    return true;
-  }
-  
-  // Exact match
-  if (currentArm === historicalArm) {
-    return true;
-  }
-  
-  // 'both' is compatible with individual arms (since both arms working together might be stronger)
-  if (historicalArm === 'both' && (currentArm === 'left' || currentArm === 'right')) {
-    return true;
-  }
-  
-  // Individual arms are not compatible with 'both' (single arm max should not include both-arm sets)
-  // Individual arms are not compatible with each other
-  return false;
-}
+import {
+  isArmCompatible,
+  buildExerciseHistory,
+  getMaxWeight,
+} from "@/utils/exerciseHistory.js";
 
 /**
- * Calculate the percentage of current weight vs max weight for an exercise (simplified for testing)
- * @param {string} exerciseName - Name of the exercise
- * @param {number} currentWeight - Current weight being lifted
- * @param {string} currentArm - Current arm setting
- * @param {Array} allWorkouts - All historical workouts
- * @returns {string} Percentage string or '-' if no data
+ * Percentage of max, built on the real history helpers
  */
-function getMaxPercentage(exerciseName, currentWeight, currentArm, allWorkouts) {
-  if (!currentWeight || currentWeight <= 0) {
-    return '-';
-  }
-  
-  let maxWeight = 0;
-  
-  // Check all historical workouts
-  allWorkouts.forEach(historicalWorkout => {
-    if (historicalWorkout.exercises) {
-      historicalWorkout.exercises.forEach(exercise => {
-        if (exercise.name === exerciseName && exercise.sets) {
-          exercise.sets.forEach(set => {
-            if (set.weight && set.weight > maxWeight && set.type === 'regular') {
-              // Only consider sets with the same arm setting or compatible arm settings
-              if (isArmCompatible(currentArm, set.arm)) {
-                maxWeight = set.weight;
-              }
-            }
-          });
-        }
-      });
-    }
-  });
-  
-  if (maxWeight === 0) {
-    return '-';
-  }
-  
-  const percentage = Math.round((currentWeight / maxWeight) * 100);
-  return `${percentage}%`;
+function getMaxPercentage(exerciseName, currentWeight, currentArm, workouts) {
+  if (!currentWeight || currentWeight <= 0) return "-";
+  const entries = buildExerciseHistory(workouts).get(exerciseName);
+  const max = getMaxWeight(entries, { arm: currentArm });
+  return max > 0 ? `${Math.round((currentWeight / max) * 100)}%` : "-";
 }
 
 describe('Arm Compatibility and Max Percentage', () => {

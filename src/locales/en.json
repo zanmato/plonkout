@@ -111,7 +111,10 @@
       "progressChart": "Progress Over Time",
       "recentPerformance": "Recent Performance",
       "weight": "Weight",
-      "distance": "Distance"
+      "distance": "Distance",
+      "heavy": "Heavy",
+      "light": "Light",
+      "untagged": "Untagged"
     },
     "plan": {
       "title": "Plan - {exercise}",
@@ -147,7 +150,14 @@
       "setZeroForGlobal": "0 = use global setting",
       "startAtWeek": "Start at Week",
       "startAtWeekDescription": "Already in a block? Jump to a specific week"
-    }
+    },
+    "intensity": {
+      "label": "Intensity",
+      "any": "Any",
+      "heavy": "Heavy",
+      "light": "Light"
+    },
+    "lastTime": "Last time ({date}):"
   },
   "statistics": {
     "title": "Statistics",
@@ -232,7 +242,13 @@
       "resetAll": "Reset All Blocks",
       "resetSuccess": "All training blocks have been reset"
     },
-    "loadError": "Error loading settings"
+    "loadError": "Error loading settings",
+    "compareScope": {
+      "title": "Compare Against",
+      "description": "Choose what \"previous best\" and \"last time\" compare with. Records and % of max always use your full history.",
+      "intensity": "Same intensity",
+      "all": "All workouts"
+    }
   },
   "templates": {
     "new": "New Template",

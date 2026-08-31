@@ -423,6 +423,7 @@ import {
   getBestEstimated1RM,
 } from "@/utils/blockPeriodization.js";
 import { getWorkouts } from "@/utils/database.js";
+import { useUnits } from "@/composables/useUnits.js";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoButton from "@/components/NeoButton.vue";
 
@@ -450,7 +451,7 @@ const emit = defineEmits(["close", "weightApplied", "blockStarted"]);
 const { t } = useI18n();
 const loading = ref(false);
 const showSettings = ref(false);
-const weightUnit = ref("kg");
+const { weightUnit } = useUnits();
 const workouts = ref([]);
 const blockData = ref({});
 const estimated1RM = ref(0);
@@ -494,13 +495,11 @@ const closeModal = () => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const [workoutsData, weightSetting, global] = await Promise.all([
+    const [workoutsData, global] = await Promise.all([
       getWorkouts(),
-      getSetting("weightUnit", "kg"),
       getGlobalSettings(),
     ]);
 
-    weightUnit.value = weightSetting;
     workouts.value = workoutsData;
     globalSettings.value = global;
 

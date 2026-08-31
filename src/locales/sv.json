@@ -106,7 +106,10 @@
       "progressChart": "Utveckling Över Tid",
       "recentPerformance": "Senaste Prestationer",
       "weight": "Vikt",
-      "distance": "Distans"
+      "distance": "Distans",
+      "heavy": "Tung",
+      "light": "Lätt",
+      "untagged": "Omärkt"
     },
     "plan": {
       "title": "Plan - {exercise}",
@@ -142,7 +145,14 @@
       "setZeroForGlobal": "0 = använd global inställning",
       "startAtWeek": "Starta på vecka",
       "startAtWeekDescription": "Redan i ett block? Hoppa till en specifik vecka"
-    }
+    },
+    "intensity": {
+      "label": "Intensitet",
+      "any": "Valfri",
+      "heavy": "Tung",
+      "light": "Lätt"
+    },
+    "lastTime": "Senast ({date}):"
   },
   "statistics": {
     "title": "Statistik",
@@ -227,7 +237,13 @@
       "resetAll": "Återställ alla block",
       "resetSuccess": "Alla träningsblock har återställts"
     },
-    "loadError": "Fel vid laddning av inställningar"
+    "loadError": "Fel vid laddning av inställningar",
+    "compareScope": {
+      "title": "Jämför med",
+      "description": "Välj vad \"föregående bästa\" och \"senast\" jämförs mot. Rekord och % av max använder alltid hela historiken.",
+      "intensity": "Samma intensitet",
+      "all": "Alla pass"
+    }
   },
   "templates": {
     "new": "Ny mall",

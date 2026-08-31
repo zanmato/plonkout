@@ -5,6 +5,11 @@
  */
 
 import { getSetting, saveSetting } from "./database.js";
+import {
+  buildExerciseHistory,
+  getMaxWeight as historyMaxWeight,
+  getBestEstimated1RM as historyBestEstimated1RM,
+} from "./exerciseHistory.js";
 
 // Rep ranges for each week of the block
 const REP_RANGES = {
@@ -24,46 +29,10 @@ const DEFAULT_SETTINGS = {
   progressionPerWeek: 5,
 };
 
-/**
- * Calculate estimated 1RM using Epley formula
- * @param {number} weight - Weight lifted
- * @param {number} reps - Reps performed
- * @returns {number} Estimated 1RM
- */
-export function calculateEpley1RM(weight, reps) {
-  if (!weight || !reps || weight <= 0 || reps <= 0) return 0;
-  // Formula is less accurate for high reps, cap at 12
-  const cappedReps = Math.min(reps, 12);
-  return weight * (1 + cappedReps / 30);
-}
-
-/**
- * Check if two arm settings are compatible for comparison
- * @param {string} currentArm - Current arm setting
- * @param {string} historicalArm - Historical arm setting to compare
- * @returns {boolean} Whether the arms are compatible for comparison
- */
-export function isArmCompatible(currentArm, historicalArm) {
-  // If either arm is not specified, they're compatible
-  if (!currentArm || !historicalArm) {
-    return true;
-  }
-
-  // Exact match
-  if (currentArm === historicalArm) {
-    return true;
-  }
-
-  // 'both' is compatible with individual arms
-  if (
-    historicalArm === "both" &&
-    (currentArm === "left" || currentArm === "right")
-  ) {
-    return true;
-  }
-
-  return false;
-}
+export {
+  calculateEpley1RM,
+  isArmCompatible,
+} from "./exerciseHistory.js";
 
 /**
  * Get the maximum weight lifted for an exercise
@@ -74,25 +43,8 @@ export function isArmCompatible(currentArm, historicalArm) {
  * @returns {number} Maximum weight lifted
  */
 export function getMaxWeight(workouts, exerciseName, arm, excludeWorkoutId) {
-  let maxWeight = 0;
-
-  workouts.forEach((workout) => {
-    if (excludeWorkoutId && workout.id === excludeWorkoutId) return;
-
-    workout.exercises?.forEach((exercise) => {
-      if (exercise.name === exerciseName) {
-        exercise.sets?.forEach((set) => {
-          if (set.weight && set.weight > maxWeight && set.type === "regular") {
-            if (isArmCompatible(arm, set.arm)) {
-              maxWeight = set.weight;
-            }
-          }
-        });
-      }
-    });
-  });
-
-  return maxWeight;
+  const entries = buildExerciseHistory(workouts).get(exerciseName);
+  return historyMaxWeight(entries, { arm, excludeWorkoutId });
 }
 
 /**
@@ -110,35 +62,8 @@ export function getBestEstimated1RM(
   arm,
   excludeWorkoutId,
 ) {
-  let maxWeight = 0;
-  let bestEpley1RM = 0;
-
-  workouts.forEach((workout) => {
-    if (excludeWorkoutId && workout.id === excludeWorkoutId) return;
-
-    workout.exercises?.forEach((exercise) => {
-      if (exercise.name === exerciseName) {
-        exercise.sets?.forEach((set) => {
-          if (set.weight && set.type === "regular" && set.reps) {
-            if (isArmCompatible(arm, set.arm)) {
-              // Track max weight
-              if (set.weight > maxWeight) {
-                maxWeight = set.weight;
-              }
-              // Track best Epley estimate
-              const estimated1RM = calculateEpley1RM(set.weight, set.reps);
-              if (estimated1RM > bestEpley1RM) {
-                bestEpley1RM = estimated1RM;
-              }
-            }
-          }
-        });
-      }
-    });
-  });
-
-  // Prefer actual max weight, fallback to Epley estimate
-  return maxWeight > 0 ? maxWeight : bestEpley1RM;
+  const entries = buildExerciseHistory(workouts).get(exerciseName);
+  return historyBestEstimated1RM(entries, { arm, excludeWorkoutId });
 }
 
 /**

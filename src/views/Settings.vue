@@ -66,6 +66,24 @@
           />
         </div>
 
+        <!-- Compare Scope Setting -->
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("settings.compareScope.title") }}
+          </h3>
+          <p class="text-sm text-black dark:text-white opacity-70 mb-4">
+            {{ t("settings.compareScope.description") }}
+          </p>
+          <SelectButton
+            v-model="compareScope"
+            :options="compareScopeOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+            @change="saveCompareScope"
+          />
+        </div>
+
         <!-- Block Periodization Settings -->
         <div class="mb-6">
           <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
@@ -205,7 +223,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import { getSetting, saveSetting, getWorkouts } from "@/utils/database.js";
@@ -221,6 +239,7 @@ import NeoButton from "@/components/NeoButton.vue";
 import DestructiveButton from "@/components/DestructiveButton.vue";
 import VoltSelect from "@/volt/Select.vue";
 import SelectButton from "@/volt/SelectButton.vue";
+import { COMPARE_SCOPES } from "@/composables/useExerciseHistory.js";
 
 const { locale, t } = useI18n();
 const { showSuccess, showError } = useToast();
@@ -232,6 +251,7 @@ useHead({
 
 const currentLocale = ref("en");
 const weightUnit = ref("kg");
+const compareScope = ref("intensity");
 const distanceUnit = ref("km");
 const theme = ref("system");
 const storageUsed = ref("");
@@ -255,6 +275,13 @@ const themeOptions = ref([
   { value: "dark", label: t("settings.themes.dark") },
   { value: "system", label: t("settings.themes.system") },
 ]);
+
+const compareScopeOptions = computed(() =>
+  COMPARE_SCOPES.map((value) => ({
+    value,
+    label: t(`settings.compareScope.${value}`),
+  })),
+);
 
 const weightUnitOptions = ref([
   { value: "kg", label: t("settings.units.kg") },
@@ -284,6 +311,13 @@ async function changeLanguage() {
  */
 async function saveWeightUnit() {
   await saveSetting("weightUnit", weightUnit.value);
+}
+
+/**
+ * Save the compare scope preference
+ */
+async function saveCompareScope() {
+  await saveSetting("compareScope", compareScope.value);
 }
 
 /**
@@ -411,6 +445,7 @@ async function loadSettings() {
     const savedWeightUnit = await getSetting("weightUnit", "kg");
     const savedDistanceUnit = await getSetting("distanceUnit", "km");
     const savedTheme = await getSetting("theme", "system");
+    compareScope.value = await getSetting("compareScope", "intensity");
     currentLocale.value = savedLocale;
     locale.value = savedLocale;
     weightUnit.value = savedWeightUnit;

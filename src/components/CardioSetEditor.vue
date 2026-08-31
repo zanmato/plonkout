@@ -24,6 +24,7 @@
         <div class="flex flex-col items-center text-center">
           <div class="relative flex items-center">
             <input
+              ref="primaryInput"
               :value="set.distance"
               type="number"
               inputmode="decimal"
@@ -146,6 +147,12 @@ import DestructiveButton from "@/components/DestructiveButton.vue";
 const { t } = useI18n();
 
 const addSetInput = ref();
+const primaryInput = ref();
+
+defineExpose({
+  /** Focus the first input of this set */
+  focus: () => primaryInput.value?.focus(),
+});
 
 const props = defineProps({
   set: {

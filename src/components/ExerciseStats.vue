@@ -82,6 +82,12 @@
             >
               <div class="text-sm text-black dark:text-white">
                 {{ formatDate(set.date) }}
+                <span
+                  v-if="set.intensity"
+                  class="ml-1 text-xs font-bold uppercase opacity-70"
+                >
+                  {{ t(`exercise.intensity.${set.intensity}`) }}
+                </span>
               </div>
               <div class="text-sm font-semibold text-black dark:text-white">
                 <span v-if="exercise.type === 'cardio'">
@@ -116,7 +122,9 @@ import {
 } from "vue";
 import { useI18n } from "vue-i18n";
 import { Chart, registerables } from "chart.js";
-import { getWorkouts, getSetting } from "@/utils/database.js";
+import { getWorkouts } from "@/utils/database.js";
+import { useUnits } from "@/composables/useUnits.js";
+import { isWorkingSet } from "@/utils/exerciseHistory.js";
 import NeoPanel from "@/components/NeoPanel.vue";
 import "chartjs-adapter-date-fns";
 
@@ -140,8 +148,7 @@ const chartCanvas = useTemplateRef("chartCanvas");
 const loading = ref(false);
 const chartData = ref([]);
 const chart = ref(null);
-const weightUnit = ref("kg");
-const distanceUnit = ref("km");
+const { weightUnit, distanceUnit } = useUnits();
 
 // Computed statistics
 const totalSets = computed(() => {
@@ -214,6 +221,7 @@ const recentSets = computed(() => {
             .forEach((set, index) => {
               sets.push({
                 ...set,
+                intensity: ex.intensity || null,
                 date: workout.started,
                 index,
               });
@@ -236,14 +244,7 @@ const closeModal = () => {
 const loadData = async () => {
   loading.value = true;
   try {
-    const [workouts, weightSetting, distanceSetting] = await Promise.all([
-      getWorkouts(),
-      getSetting("weightUnit", "kg"),
-      getSetting("distanceUnit", "km"),
-    ]);
-
-    weightUnit.value = weightSetting;
-    distanceUnit.value = distanceSetting;
+    const workouts = await getWorkouts();
 
     // Filter workouts that contain this exercise
     chartData.value = workouts.filter((workout) =>
@@ -270,62 +271,65 @@ const createChart = async () => {
 
   const ctx = chartCanvas.value.getContext("2d");
 
-  // Prepare data for chart
-  const dataPoints = [];
-  chartData.value
+  // One series per intensity tag so heavy and light days can be compared
+  const SERIES = {
+    heavy: { label: t("exercise.stats.heavy"), color: "#ef4444" },
+    light: { label: t("exercise.stats.light"), color: "#0ea5e9" },
+    untagged: { label: t("exercise.stats.untagged"), color: "#a855f7" },
+  };
+  const series = { heavy: [], light: [], untagged: [] };
+
+  [...chartData.value]
     .sort((a, b) => new Date(a.started) - new Date(b.started))
     .forEach((workout) => {
       workout.exercises
         .filter((ex) => ex.name === props.exercise.name)
         .forEach((ex) => {
-          ex.sets
-            .filter((s) => s.type !== "warmup")
-            .forEach((set) => {
-              if (props.exercise.type === "cardio") {
-                if (set.distance) {
-                  dataPoints.push({
-                    x: new Date(workout.started),
-                    y: set.distance,
-                  });
-                }
-              } else {
-                if (set.weight && set.reps) {
-                  dataPoints.push({
-                    x: new Date(workout.started),
-                    y: set.weight,
-                  });
-                }
-              }
-            });
+          const bucket = series[ex.intensity] || series.untagged;
+          ex.sets.filter(isWorkingSet).forEach((set) => {
+            const y =
+              props.exercise.type === "cardio"
+                ? set.distance
+                : set.weight && set.reps
+                  ? set.weight
+                  : null;
+            if (y) bucket.push({ x: new Date(workout.started), y });
+          });
         });
     });
 
-  if (dataPoints.length === 0) return;
+  const datasets = Object.entries(series)
+    .filter(([, data]) => data.length > 0)
+    .map(([key, data]) => ({
+      label: SERIES[key].label,
+      data,
+      borderColor: SERIES[key].color,
+      backgroundColor: SERIES[key].color + "1a",
+      borderWidth: 2,
+      tension: 0.2,
+    }));
+  if (datasets.length === 0) return;
+  // Only fill the area when there is a single series, overlaps get muddy
+  datasets[0].fill = datasets.length === 1;
+
+  const isDark = document.documentElement.classList.contains("dark");
+  const tickColor = isDark ? "#d4d4d8" : "#52525b";
+  const gridColor = isDark
+    ? "rgba(212, 212, 216, 0.15)"
+    : "rgba(82, 82, 91, 0.15)";
 
   chart.value = new Chart(ctx, {
     type: "line",
     data: {
-      datasets: [
-        {
-          label:
-            props.exercise.type === "cardio"
-              ? t("exercise.stats.distance")
-              : t("exercise.stats.weight"),
-          data: dataPoints,
-          borderColor: "#a855f7",
-          backgroundColor: "rgba(168, 85, 247, 0.1)",
-          borderWidth: 2,
-          fill: true,
-          tension: 0.2,
-        },
-      ],
+      datasets,
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          display: false,
+          display: datasets.length > 1,
+          labels: { color: tickColor },
         },
       },
       scales: {
@@ -338,16 +342,16 @@ const createChart = async () => {
             },
           },
           ticks: {
-            color: "#6b7280",
+            color: tickColor,
           },
           grid: {
-            color: "rgba(107, 114, 128, 0.2)",
+            color: gridColor,
           },
         },
         y: {
           beginAtZero: true,
           ticks: {
-            color: "#6b7280",
+            color: tickColor,
             callback: function (value) {
               if (props.exercise.type === "cardio") {
                 return value + distanceUnit.value;
@@ -357,7 +361,7 @@ const createChart = async () => {
             },
           },
           grid: {
-            color: "rgba(107, 114, 128, 0.2)",
+            color: gridColor,
           },
         },
       },

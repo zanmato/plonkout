@@ -179,11 +179,31 @@
             <div
               class="sticky top-0 z-10 bg-nb-bg dark:bg-zinc-700 border-b-2 border-nb-border pb-4"
             >
-              <div class="flex items-center justify-between">
-                <div class="text-xl font-bold text-black dark:text-white">
-                  {{ exercise.name }}
+              <div class="flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                  <div
+                    class="text-xl font-bold text-black dark:text-white truncate"
+                  >
+                    {{ exercise.name }}
+                  </div>
+                  <!-- Intensity toggle -->
+                  <button
+                    type="button"
+                    :class="[
+                      'mt-1 inline-flex items-center gap-1 border-2 border-nb-border rounded-full px-2 py-0.5 text-xs font-bold shadow-brutal-sm',
+                      intensityClass(exercise.intensity),
+                    ]"
+                    :title="t('exercise.intensity.label')"
+                    :data-testid="`intensity-toggle-${exerciseIndex}`"
+                    @click="cycleIntensity(exerciseIndex)"
+                  >
+                    <span class="material-icons text-sm">bolt</span>
+                    {{
+                      t(`exercise.intensity.${exercise.intensity || "any"}`)
+                    }}
+                  </button>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex items-center space-x-2 shrink-0">
                   <NeoButton
                     v-if="exercise.type !== 'cardio'"
                     variant="secondary"
@@ -221,6 +241,23 @@
               </div>
             </div>
 
+            <!-- Last time summary -->
+            <div
+              v-if="!isTemplate && getLastTimeSummary(exercise)"
+              class="mt-3 px-1 text-sm text-black dark:text-white"
+            >
+              <span class="font-semibold opacity-70">
+                {{
+                  t("exercise.lastTime", {
+                    date: d(getLastTimeSummary(exercise).date, "short"),
+                  })
+                }}
+              </span>
+              <span class="ml-1 font-bold text-purple-600 dark:text-purple-400">
+                {{ getLastTimeSummary(exercise).sets }}
+              </span>
+            </div>
+
             <!-- Scrollable Sets Area -->
             <div class="pt-4 px-[2px]">
               <div class="flex flex-col gap-3">
@@ -229,6 +266,7 @@
                   <CardioSetEditor
                     v-for="(set, setIndex) in exercise.sets"
                     :key="`cardio-${setIndex}`"
+                    :ref="(el) => registerSetEditor(exerciseIndex, setIndex, el)"
                     :set="set"
                     :exercise="exercise"
                     :exercise-index="exerciseIndex"
@@ -265,6 +303,7 @@
                   <StrengthSetEditor
                     v-for="(set, setIndex) in exercise.sets"
                     :key="`strength-${setIndex}`"
+                    :ref="(el) => registerSetEditor(exerciseIndex, setIndex, el)"
                     :set="set"
                     :exercise="exercise"
                     :exercise-index="exerciseIndex"
@@ -284,7 +323,7 @@
                     "
                     :previous-reps="
                       set.weight
-                        ? getPreviousReps(exercise.name, set.weight, set.arm)
+                        ? getPreviousReps(exercise, set.weight, set.arm)
                         : null
                     "
                     :highest-reps="
@@ -406,13 +445,11 @@ import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import {
   getWorkout,
-  getWorkouts,
   getWorkoutTemplate,
   saveWorkout as saveWorkoutToDB,
   deleteWorkout,
   deleteWorkoutTemplate,
   saveWorkoutTemplate,
-  getSetting,
 } from "@/utils/database.js";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
 import ExerciseStats from "@/components/ExerciseStats.vue";
@@ -424,11 +461,14 @@ import DestructiveButton from "@/components/DestructiveButton.vue";
 import StrengthSetEditor from "@/components/StrengthSetEditor.vue";
 import CardioSetEditor from "@/components/CardioSetEditor.vue";
 import { useToast } from "@/composables/useToast.js";
+import { useUnits } from "@/composables/useUnits.js";
+import { useExerciseHistory } from "@/composables/useExerciseHistory.js";
+import { INTENSITIES, formatEntrySets } from "@/utils/exerciseHistory.js";
 import { incrementBlockWorkout } from "@/utils/blockPeriodization.js";
 
 const router = useRouter();
 const route = useRoute();
-const { t } = useI18n();
+const { t, d } = useI18n();
 const { showSuccess, showError } = useToast();
 
 const props = defineProps({
@@ -455,11 +495,21 @@ const selectedExerciseForStats = ref(null);
 const showExercisePlan = ref(false);
 const selectedExerciseForPlan = ref(null);
 const selectedExerciseArmForPlan = ref("");
-const allWorkouts = ref([]);
-const weightUnit = ref("kg");
-const distanceUnit = ref("km");
 const isInitialLoad = ref(true);
+const setEditorRefs = new Map();
 let saveTimeout = null;
+let pendingSave = false;
+
+const { weightUnit, distanceUnit } = useUnits();
+const {
+  loadHistory,
+  getMaxPercentage,
+  getPreviousReps,
+  getHighestReps,
+  isRepRecord,
+  isWeightRecord,
+  getLastTime,
+} = useExerciseHistory(workout);
 
 const isNew = computed(() => !props.id);
 const isTemplate = computed(() => route.name === "template-edit");
@@ -536,46 +586,17 @@ async function loadWorkout() {
 }
 
 /**
- * Load weight unit setting
- */
-async function loadWeightUnit() {
-  try {
-    const unit = await getSetting("weightUnit", "kg");
-    weightUnit.value = unit;
-  } catch (error) {
-    console.error("Error loading weight unit:", error);
-  }
-}
-
-/**
- * Load distance unit setting
- */
-async function loadDistanceUnit() {
-  try {
-    const unit = await getSetting("distanceUnit", "km");
-    distanceUnit.value = unit;
-  } catch (error) {
-    console.error("Error loading distance unit:", error);
-  }
-}
-
-/**
- * Load all workouts for max weight calculations
- */
-async function loadAllWorkouts() {
-  try {
-    const data = await getWorkouts();
-    allWorkouts.value = data;
-  } catch (error) {
-    console.error("Error loading all workouts:", error);
-  }
-}
-
-/**
  * Save workout or template to database
  */
 async function saveWorkout() {
-  if (saving.value) return;
+  // A save is already running, remember to run again once it finishes so
+  // edits made during the save are not lost
+  if (saving.value) {
+    pendingSave = true;
+    return;
+  }
+
+  const wasNew = isNew.value;
 
   try {
     saving.value = true;
@@ -585,7 +606,7 @@ async function saveWorkout() {
     };
 
     // Remove the id field so let the database generate it
-    if (isNew.value) {
+    if (wasNew) {
       delete rawData.id;
     }
 
@@ -594,7 +615,7 @@ async function saveWorkout() {
     let id;
     if (isTemplate.value) {
       id = await saveWorkoutTemplate(data);
-      if (isNew.value) {
+      if (wasNew) {
         workout.value.id = id;
         router.replace({
           name: "template-edit",
@@ -603,7 +624,7 @@ async function saveWorkout() {
       }
     } else {
       id = await saveWorkoutToDB(data);
-      if (isNew.value) {
+      if (wasNew) {
         workout.value.id = id;
         router.replace({ name: "workout-edit", params: { id: id.toString() } });
 
@@ -622,6 +643,10 @@ async function saveWorkout() {
     );
   } finally {
     saving.value = false;
+    if (pendingSave) {
+      pendingSave = false;
+      saveWorkout();
+    }
   }
 }
 
@@ -655,6 +680,7 @@ function debouncedSave() {
 function addExercise(exercise) {
   workout.value.exercises.push({
     ...exercise,
+    intensity: exercise.intensity || null,
     sets: [createNewSet()],
   });
   showExerciseSelector.value = false;
@@ -691,61 +717,61 @@ function deleteSet(exerciseIndex, setIndex) {
 function addSet(exerciseIndex) {
   workout.value.exercises[exerciseIndex].sets.push(createNewSet());
 
-  // Focus on the weight input of the new set after DOM update
+  // Focus the first input of the new set once it is rendered
   nextTick(() => {
-    const exercise = workout.value.exercises[exerciseIndex];
-    const newSetIndex = exercise.sets.length - 1;
-
-    // Try multiple approaches to find the new set's weight/distance input
-    let weightInput = null;
-
-    // First try: specific data attributes
-    weightInput = document.querySelector(
-      `[data-exercise-index="${exerciseIndex}"][data-set-index="${newSetIndex}"] input[type="number"]:first-of-type`,
-    );
-
-    // Second try: find all inputs in the exercise and get the one for the new set
-    if (!weightInput) {
-      const allExerciseInputs = document.querySelectorAll(
-        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`,
-      );
-      // Calculate which input should be the weight/distance for the new set
-      const inputsPerSet = exercise.type === "cardio" ? 2 : 2; // distance+rpe OR weight+reps for now, RPE is separate
-      const expectedInputIndex = newSetIndex * inputsPerSet;
-      if (allExerciseInputs[expectedInputIndex]) {
-        weightInput = allExerciseInputs[expectedInputIndex];
-      }
-    }
-
-    // Third try: just find the last number input in this exercise
-    if (!weightInput) {
-      const allInputs = document.querySelectorAll(
-        `[data-exercise-index="${exerciseIndex}"] input[type="number"]`,
-      );
-      if (allInputs.length > 0) {
-        // Find inputs that are likely weight/distance (first input in each set)
-        for (let i = allInputs.length - 1; i >= 0; i--) {
-          const input = allInputs[i];
-          const setContainer = input.closest("[data-set-index]");
-          if (
-            setContainer &&
-            setContainer.getAttribute("data-set-index") == newSetIndex
-          ) {
-            weightInput = input;
-            break;
-          }
-        }
-      }
-    }
-
-    if (weightInput) {
-      weightInput.focus();
-    } else {
-      console.warn(
-        `Could not find weight input for exercise ${exerciseIndex}, set ${newSetIndex}`,
-      );
-    }
+    const newSetIndex = workout.value.exercises[exerciseIndex].sets.length - 1;
+    const editor = setEditorRefs.get(`${exerciseIndex}-${newSetIndex}`);
+    if (typeof editor?.focus === "function") editor.focus();
   });
+}
+
+/**
+ * Track set editor component instances so new sets can be focused
+ * @param {number} exerciseIndex - Index of the exercise
+ * @param {number} setIndex - Index of the set
+ * @param {Object|null} el - Component instance, or null when unmounted
+ */
+function registerSetEditor(exerciseIndex, setIndex, el) {
+  const key = `${exerciseIndex}-${setIndex}`;
+  if (el) {
+    setEditorRefs.set(key, el);
+  } else {
+    setEditorRefs.delete(key);
+  }
+}
+
+/**
+ * Cycle an exercise's intensity tag: none -> heavy -> light -> none
+ * @param {number} exerciseIndex - Index of the exercise
+ */
+function cycleIntensity(exerciseIndex) {
+  const exercise = workout.value.exercises[exerciseIndex];
+  const current = INTENSITIES.indexOf(exercise.intensity);
+  exercise.intensity =
+    current === INTENSITIES.length - 1 ? null : INTENSITIES[current + 1];
+}
+
+/**
+ * Tailwind classes for the intensity pill
+ * @param {string|null} intensity
+ * @returns {string}
+ */
+function intensityClass(intensity) {
+  if (intensity === "heavy") return "bg-red-400 text-black";
+  if (intensity === "light") return "bg-sky-300 text-black";
+  return "bg-nb-overlay text-black opacity-60 dark:bg-zinc-800 dark:text-white";
+}
+
+/**
+ * Summary of the last time this exercise was done (within the compare scope)
+ * @param {Object} exercise - The exercise
+ * @returns {{ date: Date, sets: string, intensity: string|null }|null}
+ */
+function getLastTimeSummary(exercise) {
+  const entry = getLastTime(exercise);
+  if (!entry) return null;
+  const sets = formatEntrySets(entry, { type: exercise.type });
+  return sets ? { date: entry.date, sets, intensity: entry.intensity } : null;
 }
 
 /**
@@ -904,263 +930,6 @@ function applyPlanWeight(weight) {
 }
 
 /**
- * Calculate the percentage of current weight vs max weight for an exercise
- * @param {string} exerciseName - Name of the exercise
- * @param {number} currentWeight - Current weight being lifted
- * @param {string} currentArm - Current arm setting ('left', 'right', 'both', or '')
- * @returns {string} Percentage string or '-' if no data
- */
-function getMaxPercentage(exerciseName, currentWeight, currentArm) {
-  if (!currentWeight || currentWeight <= 0) {
-    return "-";
-  }
-
-  let maxWeight = 0;
-
-  // Check all historical workouts
-  allWorkouts.value.forEach((historicalWorkout) => {
-    if (historicalWorkout.exercises) {
-      historicalWorkout.exercises.forEach((exercise) => {
-        if (exercise.name === exerciseName && exercise.sets) {
-          exercise.sets.forEach((set) => {
-            if (
-              set.weight &&
-              set.weight > maxWeight &&
-              set.type === "regular"
-            ) {
-              // Only consider sets with the same arm setting or compatible arm settings
-              if (isArmCompatible(currentArm, set.arm)) {
-                maxWeight = set.weight;
-              }
-            }
-          });
-        }
-      });
-    }
-  });
-
-  // Also check current workout
-  workout.value.exercises.forEach((exercise) => {
-    if (exercise.name === exerciseName) {
-      exercise.sets.forEach((set) => {
-        if (set.weight && set.weight > maxWeight && set.type === "regular") {
-          // Only consider sets with the same arm setting or compatible arm settings
-          if (isArmCompatible(currentArm, set.arm)) {
-            maxWeight = set.weight;
-          }
-        }
-      });
-    }
-  });
-
-  if (maxWeight === 0) {
-    return "-";
-  }
-
-  const percentage = Math.round((currentWeight / maxWeight) * 100);
-  return `${percentage}%`;
-}
-
-/**
- * Check if two arm settings are compatible for comparison
- * @param {string} currentArm - Current arm setting
- * @param {string} historicalArm - Historical arm setting to compare
- * @returns {boolean} Whether the arms are compatible for comparison
- */
-function isArmCompatible(currentArm, historicalArm) {
-  // If either arm is not specified, they're compatible
-  if (!currentArm || !historicalArm) {
-    return true;
-  }
-
-  // Exact match
-  if (currentArm === historicalArm) {
-    return true;
-  }
-
-  // 'both' is compatible with individual arms (since both arms working together might be stronger)
-  if (
-    historicalArm === "both" &&
-    (currentArm === "left" || currentArm === "right")
-  ) {
-    return true;
-  }
-
-  // Individual arms are not compatible with 'both' (single arm max should not include both-arm sets)
-  // Individual arms are not compatible with each other
-  return false;
-}
-
-/**
- * Get the previous best reps for a given weight and exercise
- * @param {string} exerciseName - Name of the exercise
- * @param {number} weight - Weight to check reps for
- * @param {string} arm - Arm setting
- * @returns {number|null} Previous best reps or null if no data
- */
-function getPreviousReps(exerciseName, weight, arm) {
-  if (!weight || weight <= 0) {
-    return null;
-  }
-
-  let bestReps = 0;
-
-  // Check all historical workouts (excluding current workout)
-  allWorkouts.value.forEach((historicalWorkout) => {
-    // Skip the current workout being edited
-    if (historicalWorkout.id === workout.value.id) {
-      return;
-    }
-
-    if (historicalWorkout.exercises) {
-      historicalWorkout.exercises.forEach((exercise) => {
-        if (exercise.name === exerciseName && exercise.sets) {
-          exercise.sets.forEach((set) => {
-            if (set.weight === weight && set.reps && set.type === "regular") {
-              if (isArmCompatible(arm, set.arm) && set.reps > bestReps) {
-                bestReps = set.reps;
-              }
-            }
-          });
-        }
-      });
-    }
-  });
-
-  return bestReps > 0 ? bestReps : null;
-}
-
-/**
- * Get the highest reps ever achieved for a given weight across all history
- * @param {string} exerciseName - Name of the exercise
- * @param {number} weight - Weight to check reps for
- * @param {string} arm - Arm setting
- * @returns {number|null} Highest reps ever or null if no data
- */
-function getHighestReps(exerciseName, weight, arm) {
-  if (!weight || weight <= 0) {
-    return null;
-  }
-
-  let highestReps = 0;
-
-  // Check all historical workouts (including current workout)
-  allWorkouts.value.forEach((historicalWorkout) => {
-    if (historicalWorkout.exercises) {
-      historicalWorkout.exercises.forEach((exercise) => {
-        if (exercise.name === exerciseName && exercise.sets) {
-          exercise.sets.forEach((set) => {
-            if (set.weight === weight && set.reps && set.type === "regular") {
-              if (isArmCompatible(arm, set.arm) && set.reps > highestReps) {
-                highestReps = set.reps;
-              }
-            }
-          });
-        }
-      });
-    }
-  });
-
-  // Also check the current workout being edited
-  if (workout.value.exercises) {
-    workout.value.exercises.forEach((exercise) => {
-      if (exercise.name === exerciseName && exercise.sets) {
-        exercise.sets.forEach((set) => {
-          if (set.weight === weight && set.reps && set.type === "regular") {
-            if (isArmCompatible(arm, set.arm) && set.reps > highestReps) {
-              highestReps = set.reps;
-            }
-          }
-        });
-      }
-    });
-  }
-
-  return highestReps > 0 ? highestReps : null;
-}
-
-/**
- * Check if current reps is a new record for the weight
- * @param {string} exerciseName - Name of the exercise
- * @param {number} weight - Weight being lifted
- * @param {number} reps - Reps being performed
- * @param {string} arm - Arm setting
- * @returns {boolean} Whether this is a new rep record
- */
-function isRepRecord(exerciseName, weight, reps, arm) {
-  if (!weight || !reps || weight <= 0 || reps <= 0) {
-    return false;
-  }
-
-  const previousBest = getPreviousReps(exerciseName, weight, arm);
-  const beatsHistoricalRecord = previousBest === null || reps > previousBest;
-
-  if (!beatsHistoricalRecord) {
-    return false;
-  }
-
-  // Check if this is the best reps for this weight in the current workout
-  let currentWorkoutBest = 0;
-  workout.value.exercises.forEach((exercise) => {
-    if (exercise.name === exerciseName) {
-      exercise.sets.forEach((set) => {
-        if (set.weight === weight && set.reps && set.type === "regular") {
-          if (isArmCompatible(arm, set.arm) && set.reps > currentWorkoutBest) {
-            currentWorkoutBest = set.reps;
-          }
-        }
-      });
-    }
-  });
-
-  // Only show star if this set has the highest reps for this weight in current workout
-  return reps === currentWorkoutBest;
-}
-
-/**
- * Check if current weight is a new record for the exercise
- * @param {string} exerciseName - Name of the exercise
- * @param {number} weight - Weight being lifted
- * @param {string} arm - Arm setting
- * @returns {boolean} Whether this is a new weight record
- */
-function isWeightRecord(exerciseName, weight, arm) {
-  if (!weight || weight <= 0) {
-    return false;
-  }
-
-  let maxWeight = 0;
-
-  // Check all historical workouts for max weight (excluding current workout)
-  allWorkouts.value.forEach((historicalWorkout) => {
-    // Skip the current workout being edited
-    if (historicalWorkout.id === workout.value.id) {
-      return;
-    }
-
-    if (historicalWorkout.exercises) {
-      historicalWorkout.exercises.forEach((exercise) => {
-        if (exercise.name === exerciseName && exercise.sets) {
-          exercise.sets.forEach((set) => {
-            if (
-              set.weight &&
-              set.weight > maxWeight &&
-              set.type === "regular"
-            ) {
-              if (isArmCompatible(arm, set.arm)) {
-                maxWeight = set.weight;
-              }
-            }
-          });
-        }
-      });
-    }
-  });
-
-  return weight > maxWeight;
-}
-
-/**
  * Duplicate the current workout
  */
 async function duplicateWorkout() {
@@ -1247,10 +1016,7 @@ function goBack() {
 }
 
 onMounted(async () => {
-  await loadAllWorkouts();
-  await loadWorkout();
-  await loadWeightUnit();
-  await loadDistanceUnit();
+  await Promise.all([loadHistory(), loadWorkout()]);
 
   // Allow auto-save after initial load is complete
   await nextTick();
