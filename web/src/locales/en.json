@@ -275,6 +275,12 @@
       "deleteAccountExplain": "Removes your account and every workout, plan, template and setting in it. This cannot be undone.",
       "deleteAccountConfirm": "Type your username to confirm",
       "done": "Done"
+    },
+    "dominantArm": {
+      "title": "Dominant arm",
+      "description": "Plans list single arm weights for this arm, the other arm gets its share.",
+      "right": "Right",
+      "left": "Left"
     }
   },
   "templates": {
@@ -298,6 +304,7 @@
   "tabs": {
     "templates": "Workouts",
     "log": "Log",
+    "plan": "Plan",
     "statistics": "Statistics",
     "settings": "Settings"
   },
@@ -362,6 +369,46 @@
       "recovery_rejected": "The username or recovery code is not right.",
       "last_passkey": "Add another passkey before removing this one.",
       "unauthorized": "Your session has ended. Sign in again."
+    }
+  },
+  "plan": {
+    "title": "Plan",
+    "empty": "No plan yet",
+    "emptyDescription": "Ask your AI assistant to create one.",
+    "allDone": "Every session of this plan is done.",
+    "nextUp": "Next up",
+    "comingUp": "Coming up",
+    "done": "Done",
+    "start": "Start",
+    "continue": "Continue",
+    "skip": "Skip",
+    "skipReason": "Reason (optional)",
+    "confirmSkip": "Skip session",
+    "putBack": "Put back",
+    "skipped": "Skipped",
+    "inProgress": "In progress",
+    "week": "Week {week}",
+    "day": "Day {day}",
+    "to": "to",
+    "exerciseCount": "{count} exercise | {count} exercises",
+    "targetsMet": "{met}/{total} targets met",
+    "offArm": "Off arm {percent}%",
+    "nextPlanned": "Next planned",
+    "chip": "Plan: {label}",
+    "asPlanned": "As planned",
+    "finishWorkout": "Finish workout",
+    "loadError": "Error loading the plan",
+    "startError": "Could not start the session",
+    "skipError": "Could not skip the session",
+    "putBackError": "Could not put the session back",
+    "comparison": {
+      "title": "Planned vs done",
+      "met": "Met",
+      "missed": "Missed",
+      "extraSets": "{count} extra set | {count} extra sets",
+      "unplanned": "Not in the plan",
+      "best1RM": "Best est. 1RM",
+      "loadError": "Error loading the comparison"
     }
   }
 }

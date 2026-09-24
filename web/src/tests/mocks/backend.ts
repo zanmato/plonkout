@@ -7,10 +7,19 @@
  */
 import { http, HttpResponse, type HttpHandler } from "msw";
 import type {
+  ActualSet,
+  Comparison,
   Exercise,
+  ExerciseComparison,
   Me,
+  Plan,
+  PlannedExercise,
   Problem,
+  QueueEntry,
   Result,
+  Session,
+  Target,
+  TargetComparison,
   Template,
   Workout,
   WorkoutExercise,
@@ -53,10 +62,37 @@ export type TemplateSeed = Partial<
   exercises?: WorkoutExerciseSeed[];
 };
 
+export type TargetSeed = Partial<Target> & { setType: string };
+
+export type PlannedExerciseSeed = Partial<Omit<PlannedExercise, "targets">> & {
+  exercise: string;
+  targets?: TargetSeed[];
+};
+
+/**
+ * A session's workout is the stored workout whose plannedSessionId points at
+ * it, like the server's join, so seed that workout rather than workoutId.
+ */
+export type SessionSeed = Partial<
+  Omit<Session, "exercises" | "completedAt" | "comparison" | "workoutId" | "planId" | "position">
+> & {
+  label: string;
+  completedAt?: DateLike | null;
+  exercises?: PlannedExerciseSeed[];
+};
+
+export type PlanSeed = Partial<Omit<Plan, "sessions" | "created" | "updated">> & {
+  name: string;
+  created?: DateLike;
+  updated?: DateLike;
+  sessions?: SessionSeed[];
+};
+
 export interface Seed {
   workouts?: WorkoutSeed[];
   exercises?: ExerciseSeed[];
   templates?: TemplateSeed[];
+  plans?: PlanSeed[];
   settings?: Record<string, unknown>;
 }
 
@@ -72,6 +108,8 @@ const state = {
   workouts: [] as Workout[],
   exercises: [] as Exercise[],
   templates: [] as Template[],
+  // Sessions are stored without workoutId and comparison, both are derived
+  plans: [] as Plan[],
   settings: {} as Record<string, unknown>,
   me: defaultMe(),
 };
@@ -163,6 +201,220 @@ function toTemplate(seed: TemplateSeed): Template {
     updated: seed.updated ? iso(seed.updated) : stamp,
     exercises: (seed.exercises ?? []).map(toWorkoutExercise),
   };
+}
+
+function toTarget(seed: TargetSeed): Target {
+  return {
+    notes: "",
+    reps: null,
+    rpeMax: null,
+    rpeMin: null,
+    sets: 1,
+    time: "",
+    weight: null,
+    ...seed,
+    id: seed.id ?? uuid(),
+  };
+}
+
+/** Plans name exercises, which are linked to the exercise list like the server does. */
+function toPlannedExercise(seed: PlannedExerciseSeed): PlannedExercise {
+  const match = findExerciseByName(seed.exercise);
+  return {
+    exerciseId: match?.id ?? uuid(),
+    muscleGroup: match?.muscleGroup ?? "",
+    type: match?.type ?? "strength",
+    displayType: match?.displayType ?? "reps",
+    singleArm: match?.singleArm ?? false,
+    notes: "",
+    offArmPercent: null,
+    ...seed,
+    id: seed.id ?? uuid(),
+    targets: (seed.targets ?? []).map(toTarget),
+  };
+}
+
+function toSession(seed: SessionSeed, planId: string, position: number): Session {
+  return {
+    week: null,
+    day: null,
+    intensity: null,
+    notes: "",
+    status: "pending",
+    skipReason: "",
+    ...seed,
+    id: seed.id ?? uuid(),
+    planId,
+    position,
+    completedAt: seed.completedAt ? iso(seed.completedAt) : null,
+    // Derived on the way out, see withWorkout
+    workoutId: "",
+    exercises: (seed.exercises ?? []).map(toPlannedExercise),
+  };
+}
+
+function toPlan(seed: PlanSeed): Plan {
+  const stamp = now();
+  const id = seed.id ?? uuid();
+  return {
+    goal: "",
+    notes: "",
+    status: "active",
+    startDate: null,
+    ...seed,
+    id,
+    created: seed.created ? iso(seed.created) : stamp,
+    updated: seed.updated ? iso(seed.updated) : stamp,
+    sessions: (seed.sessions ?? []).map((session, i) => toSession(session, id, i + 1)),
+  };
+}
+
+function findSession(id: unknown): { plan: Plan; session: Session } | undefined {
+  for (const plan of state.plans) {
+    const session = plan.sessions.find((s) => s.id === id);
+    if (session) return { plan, session };
+  }
+  return undefined;
+}
+
+const workoutOfSession = (sessionId: string) =>
+  state.workouts.find((w) => w.plannedSessionId === sessionId);
+
+/** A session as the server answers with it. The server sends null until it is started. */
+function withWorkout(session: Session, actuals = false): Session {
+  const workout = workoutOfSession(session.id);
+  const out: Session = { ...clone(session), workoutId: (workout?.id ?? null) as string };
+  if (actuals && workout) out.comparison = compare(session, workout);
+  return out;
+}
+
+function planOut(plan: Plan, actuals = false): Plan {
+  return {
+    ...clone(plan),
+    sessions: [...plan.sessions].sort((a, b) => a.position - b.position).map((s) => withWorkout(s, actuals)),
+  };
+}
+
+// Planned versus done, a port of the server's compare.go.
+
+const weightTolerance = 0.5;
+
+const epley1RM = (weight: number, reps: number) =>
+  weight <= 0 || reps <= 0 ? 0 : weight * (1 + Math.min(reps, 12) / 30);
+
+interface LoggedSet extends WorkoutSet {
+  name: string;
+  plannedExerciseId?: string;
+}
+
+const isDone = (set: LoggedSet) => (set.reps ?? 0) > 0 || (set.weight ?? 0) > 0 || set.time !== "";
+
+function actual(set: LoggedSet): ActualSet {
+  return {
+    weight: set.weight,
+    reps: set.reps,
+    time: set.time,
+    rpe: set.rpe,
+    arm: set.arm,
+    type: set.type,
+    ...(set.targetSeq !== undefined ? { targetSeq: set.targetSeq } : {}),
+  };
+}
+
+function compareTarget(target: Target, planned: PlannedExercise, sets: LoggedSet[]): TargetComparison {
+  const out: TargetComparison = { target: clone(target), sets: sets.map(actual), done: 0, met: false, topRpe: null };
+  const bySeq = new Map<number, LoggedSet[]>();
+  sets.forEach((set, i) => {
+    const seq = set.targetSeq ?? -1 - i;
+    bySeq.set(seq, [...(bySeq.get(seq) ?? []), set]);
+    if (set.rpe !== null && (out.topRpe === null || set.rpe > out.topRpe)) out.topRpe = set.rpe;
+  });
+
+  let met = true;
+  for (const group of bySeq.values()) {
+    // A number counts once every arm's set of it has something logged
+    if (group.some((set) => !isDone(set))) {
+      met = false;
+      continue;
+    }
+    out.done++;
+    // The heaviest set answers for the dominant arm, the rest for the off arm
+    group.sort((a, b) => (b.weight ?? -Infinity) - (a.weight ?? -Infinity));
+    group.forEach((set, i) => {
+      if (target.reps !== null && (set.reps === null || set.reps < target.reps)) met = false;
+      if (target.weight !== null) {
+        let expected = target.weight;
+        if (i > 0 && planned.offArmPercent !== null) expected = (expected * planned.offArmPercent) / 100;
+        if (set.weight === null || set.weight + weightTolerance < expected) met = false;
+      }
+    });
+  }
+  out.met = met && out.done >= target.sets;
+  return out;
+}
+
+function compare(session: Session, workout: Workout): Comparison {
+  const sets: LoggedSet[] = workout.exercises.flatMap((exercise) =>
+    exercise.sets.map((set) => ({ ...set, name: exercise.name, plannedExerciseId: exercise.plannedExerciseId })),
+  );
+  const unplanned = [...new Set(sets.filter((set) => !set.plannedExerciseId).map((set) => set.name))];
+  const exercises = session.exercises.map((planned): ExerciseComparison => {
+    const logged = sets.filter((set) => set.plannedExerciseId === planned.id);
+    const best = Math.max(
+      0,
+      ...logged
+        .filter((set) => set.type === "regular" && set.weight !== null && set.reps !== null)
+        .map((set) => epley1RM(set.weight!, set.reps!)),
+    );
+    return {
+      plannedExerciseId: planned.id,
+      exercise: planned.exercise,
+      extraSets: logged.filter((set) => !set.targetId).map(actual),
+      bestEstimated1RM: best > 0 ? Math.round(best * 10) / 10 : null,
+      targets: planned.targets.map((target) =>
+        compareTarget(target, planned, logged.filter((set) => set.targetId === target.id)),
+      ),
+    };
+  });
+  return { exercises, unplanned };
+}
+
+/** The workout a session starts, every prescribed set empty and linked to its target. */
+function prefill(plan: Plan, session: Session): WorkoutSeed {
+  const dominant = state.settings.dominantArm === "left" ? "left" : "right";
+  const offArm = dominant === "left" ? "right" : "left";
+  return {
+    name: session.label ? `${plan.name} ${session.label}`.trim() : plan.name,
+    notes: session.notes,
+    started: now(),
+    plannedSessionId: session.id,
+    exercises: session.exercises.map((planned) => ({
+      exerciseId: planned.exerciseId,
+      name: planned.exercise,
+      muscleGroup: planned.muscleGroup,
+      type: planned.type,
+      displayType: planned.displayType,
+      singleArm: planned.singleArm,
+      intensity: session.intensity,
+      plannedExerciseId: planned.id,
+      sets: planned.targets.flatMap((target) =>
+        Array.from({ length: target.sets }, (_, i) => {
+          const set = { targetId: target.id, targetSeq: i + 1 };
+          return planned.singleArm
+            ? [{ ...set, arm: dominant } as const, { ...set, arm: offArm } as const]
+            : [set];
+        }).flat(),
+      ),
+    })),
+  };
+}
+
+/** A planned session follows its workout: in progress until it ends, completed after. */
+function syncSession(workout: Workout) {
+  const found = workout.plannedSessionId ? findSession(workout.plannedSessionId) : undefined;
+  if (!found || found.session.status === "skipped") return;
+  found.session.status = workout.ended ? "completed" : "in_progress";
+  found.session.completedAt = workout.ended;
 }
 
 // Ordering matches the server's queries.
@@ -330,13 +582,20 @@ export const handlers: HttpHandler[] = [
       plannedSessionId: current.plannedSessionId,
     });
     state.workouts[index] = updated;
+    syncSession(updated);
     return HttpResponse.json(clone(updated));
   }),
 
   http.delete(url("/workouts/:id"), ({ params }) => {
     const index = state.workouts.findIndex((w) => w.id === params.id);
     if (index === -1) return notFound("workout");
-    state.workouts.splice(index, 1);
+    const [deleted] = state.workouts.splice(index, 1);
+    // The session it was logged for goes back in the queue
+    const found = deleted!.plannedSessionId ? findSession(deleted!.plannedSessionId) : undefined;
+    if (found && (found.session.status === "in_progress" || found.session.status === "completed")) {
+      found.session.status = "pending";
+      found.session.completedAt = null;
+    }
     return noContent();
   }),
 
@@ -446,6 +705,98 @@ export const handlers: HttpHandler[] = [
     return HttpResponse.json(result);
   }),
 
+  // Plans
+
+  http.get(url("/queue"), () => {
+    const entries: QueueEntry[] = state.plans
+      .filter((plan) => plan.status === "active")
+      .sort((a, b) => new Date(a.created).getTime() - new Date(b.created).getTime())
+      .flatMap((plan) =>
+        [...plan.sessions]
+          .sort((a, b) => a.position - b.position)
+          .filter((session) => session.status === "pending" || session.status === "in_progress")
+          .map((session) => ({ planName: plan.name, session: withWorkout(session) })),
+      );
+    return HttpResponse.json(entries);
+  }),
+
+  http.get(url("/plans"), ({ request }) => {
+    const status = new URL(request.url).searchParams.get("status");
+    const plans = state.plans
+      .filter((plan) => !status || plan.status === status)
+      .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())
+      .map((plan) => planOut(plan));
+    return HttpResponse.json(plans);
+  }),
+
+  http.get(url("/plans/:id"), ({ params, request }) => {
+    const plan = state.plans.find((p) => p.id === params.id);
+    if (!plan) return notFound("plan");
+    const actuals = new URL(request.url).searchParams.get("actuals") === "true";
+    return HttpResponse.json(planOut(plan, actuals));
+  }),
+
+  http.get(url("/planned-sessions/:id"), ({ params }) => {
+    const found = findSession(params.id);
+    return found ? HttpResponse.json(withWorkout(found.session)) : notFound("session");
+  }),
+
+  http.get(url("/planned-sessions/:id/comparison"), ({ params }) => {
+    const found = findSession(params.id);
+    if (!found) return notFound("session");
+    const workout = workoutOfSession(found.session.id);
+    const empty: Comparison = { exercises: [], unplanned: [] };
+    return HttpResponse.json(workout ? compare(found.session, workout) : empty);
+  }),
+
+  http.post(url("/planned-sessions/:id/start"), ({ params }) => {
+    const found = findSession(params.id);
+    if (!found) return notFound("session");
+    // A double tap answers with the workout already logged
+    const existing = workoutOfSession(found.session.id);
+    if (existing) return HttpResponse.json({ workoutId: existing.id });
+    if (found.session.status === "skipped") {
+      return problem(409, "session_skipped", "the session was skipped, put it back before starting it");
+    }
+    const workout = toWorkout(prefill(found.plan, found.session));
+    state.workouts.push(workout);
+    found.session.status = "in_progress";
+    return HttpResponse.json({ workoutId: workout.id });
+  }),
+
+  http.post(url("/planned-sessions/:id/status"), async ({ params, request }) => {
+    const body = await readBody(request);
+    const errors = unknownFields(body, ["status", "reason"], "body");
+    if (errors.length) return invalid(errors);
+    const found = findSession(params.id);
+    if (!found) return notFound("session");
+    const { plan, session } = found;
+    switch (body.status) {
+      case "skipped":
+        if (session.status !== "pending") {
+          return problem(409, "session_not_pending", `the session is ${session.status}, it cannot be skipped`);
+        }
+        session.status = "skipped";
+        session.skipReason = typeof body.reason === "string" ? body.reason : "";
+        break;
+      case "pending":
+        if (session.status !== "skipped" && session.status !== "pending") {
+          return problem(409, "session_started", `the session is ${session.status}, only a skipped session can be put back`);
+        }
+        session.status = "pending";
+        break;
+      case "deleted":
+        if (session.status !== "pending" && session.status !== "skipped") {
+          return problem(409, "session_started", `the session is ${session.status} and has a workout, it cannot be deleted`);
+        }
+        plan.sessions.splice(plan.sessions.indexOf(session), 1);
+        return HttpResponse.json({});
+      default:
+        return invalid([`body.status ${String(body.status)} is unknown`]);
+    }
+    return HttpResponse.json({ session: withWorkout(session) });
+  }),
+
   // Account
 
   http.get(url("/account"), () => HttpResponse.json(clone(state.me))),
@@ -464,6 +815,9 @@ export const backend = {
   get templates(): Template[] {
     return state.templates;
   },
+  get plans(): Plan[] {
+    return state.plans;
+  },
   get settings(): Record<string, unknown> {
     return state.settings;
   },
@@ -481,6 +835,13 @@ export const backend = {
     return workout;
   },
 
+  /** Looks up a stored planned session, failing the test when it is missing. */
+  session(id: string): Session {
+    const found = findSession(id);
+    if (!found) throw new Error(`no planned session ${id} in the fake backend`);
+    return withWorkout(found.session);
+  },
+
   /** Adds records, filling in ids, revisions and timestamps. Returns what was stored. */
   seed(seed: Seed) {
     const exercises = (seed.exercises ?? []).map(toExercise);
@@ -489,8 +850,10 @@ export const backend = {
     state.workouts.push(...workouts);
     const templates = (seed.templates ?? []).map(toTemplate);
     state.templates.push(...templates);
+    const plans = (seed.plans ?? []).map(toPlan);
+    state.plans.push(...plans);
     Object.assign(state.settings, seed.settings ?? {});
-    return { workouts, exercises, templates };
+    return { workouts, exercises, templates, plans };
   },
 
   /** Empties every store. */
@@ -498,6 +861,7 @@ export const backend = {
     state.workouts = [];
     state.exercises = [];
     state.templates = [];
+    state.plans = [];
     state.settings = {};
     state.me = defaultMe();
   },

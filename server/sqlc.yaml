@@ -123,3 +123,15 @@ sql:
         emit_empty_slices: true
         overrides: *type_overrides
 
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/plan/queries
+    gen:
+      go:
+        package: plandb
+        out: internal/plan/plandb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides
+

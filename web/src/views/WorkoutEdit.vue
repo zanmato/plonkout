@@ -105,6 +105,18 @@
       <div class="p-4 space-y-6">
         <!-- Workout Details -->
         <NeoPanel class="space-y-6">
+          <!-- The planned session this workout was started from -->
+          <button
+            v-if="plannedSession"
+            type="button"
+            class="inline-flex items-center gap-1 bg-purple-300 text-black border-2 border-nb-border rounded-full px-3 py-1 text-xs font-bold shadow-brutal-sm"
+            data-testid="plan-chip"
+            @click="router.push({ name: 'plan' })"
+          >
+            <span class="material-icons text-sm!">event_note</span>
+            {{ t("plan.chip", { label: plannedSession.label }) }}
+          </button>
+
           <!-- Workout Name -->
           <div class="floating-label-container">
             <input
@@ -241,6 +253,16 @@
               </div>
             </div>
 
+            <!-- The plan's cues for this exercise -->
+            <p
+              v-if="plannedExercise(exercise)?.notes"
+              class="mt-3 px-1 flex gap-1 text-sm italic text-black dark:text-white opacity-80 whitespace-pre-line"
+              data-testid="planned-notes"
+            >
+              <span class="material-icons text-base! not-italic">lightbulb</span>
+              <span>{{ plannedExercise(exercise)!.notes }}</span>
+            </p>
+
             <!-- Last time summary -->
             <div
               v-if="!isTemplate && getLastTimeSummary(exercise)"
@@ -343,6 +365,8 @@
                     :max-percentage="
                       getMaxPercentage(exercise.name, set.weight, set.arm)
                     "
+                    :target="targetOf(set)"
+                    :target-weight="targetWeightOf(exercise, set)"
                     @toggle-set-type="toggleSetType(exerciseIndex, setIndex)"
                     @update:weight="
                       updateSetField(exerciseIndex, setIndex, 'weight', $event)
@@ -408,6 +432,30 @@
             </template>
             {{ t("workout.addExercise") }}
           </NeoButton>
+
+          <!-- Finish, which completes the planned session of a planned workout -->
+          <NeoButton
+            v-if="!isTemplate && !workout.ended"
+            :variant="workout.plannedSessionId ? 'success' : 'secondary'"
+            :size="workout.plannedSessionId ? 'lg' : 'md'"
+            full-width
+            data-testid="finish-workout"
+            @click="finishWorkout"
+          >
+            <template #icon>
+              <span class="material-icons">flag</span>
+            </template>
+            {{ t("plan.finishWorkout") }}
+          </NeoButton>
+
+          <PlanComparison
+            v-if="
+              !isTemplate && workout.plannedSessionId && workout.ended
+            "
+            :session-id="workout.plannedSessionId"
+            :weight-unit="weightUnit"
+            :revision="workout.revision"
+          />
         </div>
       </div>
     </div>
@@ -468,7 +516,9 @@ import {
   deleteWorkoutTemplate,
   saveWorkoutTemplate,
   toWorkoutExercise,
+  getSetting,
 } from "@/api/data";
+import { getPlannedSession } from "@/api/plans";
 import { ApiError } from "@/api";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
 import ExerciseStats from "@/components/ExerciseStats.vue";
@@ -479,17 +529,22 @@ import NeoHeader from "@/components/NeoHeader.vue";
 import DestructiveButton from "@/components/DestructiveButton.vue";
 import StrengthSetEditor from "@/components/StrengthSetEditor.vue";
 import CardioSetEditor from "@/components/CardioSetEditor.vue";
+import PlanComparison from "@/components/PlanComparison.vue";
 import { useToast } from "@/composables/useToast";
 import { useUnits } from "@/composables/useUnits";
 import { useExerciseHistory } from "@/composables/useExerciseHistory";
 import { INTENSITIES, formatEntrySets } from "@/utils/exerciseHistory";
 import { incrementBlockWorkout } from "@/utils/blockPeriodization";
 import { copyExercise } from "@/utils/copyExercise";
+import { targetWeightFor, type DominantArm } from "@/utils/plan";
 import type {
   Arm,
   DateLike,
   Exercise,
   Intensity,
+  PlannedExercise,
+  PlannedSession,
+  Target,
   Workout,
   WorkoutExercise,
   WorkoutSet,
@@ -539,6 +594,10 @@ let pendingSave = false;
 // the revision change after a save without being edits, so autosave compares
 // against this instead of reacting to every change.
 let lastSnapshot = "";
+
+// The planned session a planned workout was started from
+const plannedSession = ref<PlannedSession | null>(null);
+const dominantArm = ref<DominantArm>("right");
 
 const { weightUnit, distanceUnit } = useUnits();
 const {
@@ -628,6 +687,69 @@ async function loadWorkout(): Promise<void> {
       );
     }
   }
+}
+
+/**
+ * Load the planned session of a planned workout, for its targets and cues
+ */
+async function loadPlannedSession(): Promise<void> {
+  const id = workout.value.plannedSessionId;
+  if (!id || isTemplate.value) return;
+  try {
+    const [session, arm] = await Promise.all([
+      getPlannedSession(id),
+      getSetting<DominantArm>("dominantArm", "right"),
+    ]);
+    plannedSession.value = session ?? null;
+    dominantArm.value = arm;
+  } catch (error) {
+    console.error("Error loading planned session:", error);
+  }
+}
+
+const plannedExercises = computed(
+  () =>
+    new Map(
+      (plannedSession.value?.exercises ?? []).map((planned) => [
+        planned.id,
+        planned,
+      ]),
+    ),
+);
+
+const targets = computed(
+  () =>
+    new Map(
+      (plannedSession.value?.exercises ?? []).flatMap((planned) =>
+        planned.targets.map((target) => [target.id, target] as const),
+      ),
+    ),
+);
+
+function plannedExercise(exercise: WorkoutExercise): PlannedExercise | undefined {
+  return exercise.plannedExerciseId
+    ? plannedExercises.value.get(exercise.plannedExerciseId)
+    : undefined;
+}
+
+function targetOf(set: WorkoutSet): Target | null {
+  return (set.targetId && targets.value.get(set.targetId)) || null;
+}
+
+/**
+ * The weight a set is planned at, the off arm's share on single arm exercises
+ */
+function targetWeightOf(exercise: WorkoutExercise, set: WorkoutSet): number | null {
+  const target = targetOf(set);
+  if (!target) return null;
+  return targetWeightFor(target, plannedExercise(exercise), set.arm, dominantArm.value);
+}
+
+/**
+ * End the workout now, the autosave takes it from there
+ */
+function finishWorkout(): void {
+  workout.value.ended = new Date();
 }
 
 /**
@@ -1091,6 +1213,7 @@ function goBack(): void {
 
 onMounted(async () => {
   await Promise.all([loadHistory(), loadWorkout()]);
+  await loadPlannedSession();
 
   // Allow auto-save after initial load is complete
   await nextTick();

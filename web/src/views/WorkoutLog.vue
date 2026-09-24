@@ -16,6 +16,40 @@
       </template>
     </NeoHeader>
 
+    <!-- The plan's next session, one tap from starting it -->
+    <div
+      v-if="nextPlanned"
+      class="mx-4 mt-4 flex items-center justify-between gap-3 bg-white border-3 border-nb-border rounded-xl p-3 shadow-brutal-sm dark:bg-zinc-700 dark:text-white"
+      data-testid="next-planned"
+    >
+      <div class="min-w-0">
+        <div class="text-xs font-semibold text-black dark:text-white opacity-70">
+          {{ t("plan.nextPlanned") }}
+        </div>
+        <div class="font-bold text-black dark:text-white truncate">
+          {{ nextPlanned.session.label }}
+          <span class="font-normal opacity-70">{{ nextPlanned.planName }}</span>
+        </div>
+      </div>
+      <NeoButton
+        variant="primary"
+        size="sm"
+        class="shrink-0"
+        :disabled="starting !== null"
+        data-testid="start-next-planned"
+        @click="start(nextPlanned.session.id)"
+      >
+        <template #icon>
+          <span class="material-icons text-base!">play_arrow</span>
+        </template>
+        {{
+          nextPlanned.session.status === "in_progress"
+            ? t("plan.continue")
+            : t("plan.start")
+        }}
+      </NeoButton>
+    </div>
+
     <!-- Content -->
     <div class="flex-1 overflow-hidden mt-4">
       <div v-if="loading" class="flex items-center justify-center h-32">
@@ -139,13 +173,21 @@ import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
 import { getWorkouts, saveWorkout } from "@/api/data";
+import { getQueue } from "@/api/plans";
+import { usePlanSession } from "@/composables/usePlanSession";
 import { copyExercise } from "@/utils/copyExercise";
 import { useToast } from "@/composables/useToast";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import MonthCalendar from "@/components/MonthCalendar.vue";
-import type { DateLike, Id, Workout, WorkoutSet } from "@/types/domain";
+import type {
+  DateLike,
+  Id,
+  QueueEntry,
+  Workout,
+  WorkoutSet,
+} from "@/types/domain";
 
 interface MonthGroup {
   monthYear: string;
@@ -168,6 +210,7 @@ type LogItem = HeaderItem | WorkoutItem;
 const router = useRouter();
 const { t, d } = useI18n();
 const { showError } = useToast();
+const { start, starting } = usePlanSession();
 
 // Set page title
 useHead({
@@ -176,6 +219,7 @@ useHead({
 const workouts = ref<Workout[]>([]);
 const loading = ref(true);
 const expandedMonths = ref(new Set<string>());
+const nextPlanned = ref<QueueEntry | null>(null);
 
 /**
  * Group workouts by month and year
@@ -468,7 +512,21 @@ function getWorkoutDuration(workout: Workout): string | null {
   }
 }
 
-onMounted(loadWorkouts);
+/**
+ * Load the next session of the active plans, if there is one
+ */
+async function loadNextPlanned() {
+  try {
+    nextPlanned.value = (await getQueue())[0] ?? null;
+  } catch (error) {
+    console.error("Error loading the plan queue:", error);
+  }
+}
+
+onMounted(() => {
+  loadWorkouts();
+  loadNextPlanned();
+});
 </script>
 
 <style scoped>

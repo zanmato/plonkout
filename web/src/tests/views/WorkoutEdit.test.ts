@@ -5,6 +5,7 @@ import { http, HttpResponse } from "msw";
 import WorkoutEdit from "@/views/WorkoutEdit.vue";
 import type { Exercise } from "@/types/domain";
 import { clearSettingsCache } from "@/api/data";
+import { startSession } from "@/api/plans";
 import { API, server } from "../helpers/msw";
 import { backend } from "../mocks/backend";
 import { mockPush, mockReplace } from "../setup";
@@ -74,8 +75,9 @@ vi.mock("@/components/DestructiveButton.vue", () => ({
 vi.mock("@/components/StrengthSetEditor.vue", () => ({
   default: {
     name: "StrengthSetEditor",
-    template: "<div>StrengthSetEditor</div>",
-    props: ["set", "exercise", "setNumber", "weightUnit", "isWeightRecord", "isRepRecord", "previousReps", "maxPercentage", "rpeOptions"],
+    template:
+      '<div class="strength-set" :data-target="target && target.setType" :data-target-weight="targetWeight">StrengthSetEditor</div>',
+    props: ["set", "exercise", "setNumber", "weightUnit", "isWeightRecord", "isRepRecord", "previousReps", "maxPercentage", "rpeOptions", "target", "targetWeight"],
     emits: ["toggleSetType", "update:weight", "update:reps", "update:time", "update:rpe", "update:arm", "update:notes"],
   },
 }));
@@ -503,6 +505,71 @@ describe("WorkoutEdit.vue", () => {
       expect(newSet).toHaveProperty("rpe", null);
       expect(newSet).toHaveProperty("arm", "");
       expect(newSet).toHaveProperty("notes", "");
+    });
+  });
+  describe("Planned Workout", () => {
+    const sessionId = "20000000-0000-4000-8000-000000000001";
+
+    beforeEach(async () => {
+      backend.seed({
+        exercises: [{ name: "Table Pull", singleArm: true, muscleGroup: "Forearm" }],
+        settings: { dominantArm: "left" },
+        plans: [
+          {
+            name: "Peak block",
+            sessions: [
+              {
+                id: sessionId,
+                label: "W3 A",
+                exercises: [
+                  {
+                    exercise: "Table Pull",
+                    offArmPercent: 80,
+                    notes: "Keep the wrist cupped",
+                    targets: [{ setType: "Top set", sets: 1, reps: 5, weight: 100 }],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      });
+      const workoutId = await startSession(sessionId);
+      wrapper = createWrapper({ id: workoutId });
+      await flushPromises();
+    });
+
+    it("shows the plan and the exercise's cues", () => {
+      expect(wrapper.find('[data-testid="plan-chip"]').text()).toContain("Plan: W3 A");
+      expect(wrapper.find('[data-testid="planned-notes"]').text()).toContain("Keep the wrist cupped");
+    });
+
+    it("hands each set its target, the off arm at its share", () => {
+      const sets = wrapper.findAll(".strength-set");
+      expect(sets).toHaveLength(2);
+      // The dominant arm, left here, comes first
+      expect(sets.map((set) => [set.attributes("data-target"), set.attributes("data-target-weight")])).toEqual([
+        ["Top set", "100"],
+        ["Top set", "80"],
+      ]);
+    });
+
+    it("finishes the workout, completing the session, and compares it with the plan", async () => {
+      expect(wrapper.find('[data-testid="plan-comparison"]').exists()).toBe(false);
+
+      await wrapper.find('[data-testid="finish-workout"]').trigger("click");
+      expect(wrapper.vm.workout.ended).toBeInstanceOf(Date);
+      expect(wrapper.find('[data-testid="finish-workout"]').exists()).toBe(false);
+
+      // Saving is automatic, run it now instead of waiting for the debounce
+      await wrapper.vm.saveWorkout();
+      await flushPromises();
+
+      expect(backend.session(sessionId).status).toBe("completed");
+      const comparison = wrapper.find('[data-testid="plan-comparison"]');
+      expect(comparison.exists()).toBe(true);
+      expect(comparison.text()).toContain("Table Pull");
+      expect(comparison.text()).toContain("0/1");
     });
   });
 });

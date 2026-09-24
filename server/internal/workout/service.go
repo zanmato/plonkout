@@ -113,6 +113,9 @@ func CreateInTx(ctx context.Context, tx pgx.Tx, in WorkoutInput, opts CreateOpti
 	if err != nil {
 		return Workout{}, err
 	}
+	if err := syncSession(ctx, q, row); err != nil {
+		return Workout{}, err
+	}
 	return toWorkout(row, exercises), nil
 }
 
@@ -140,22 +143,40 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, in WorkoutUpdate) (W
 		if err != nil {
 			return err
 		}
+		if err := syncSession(ctx, q, row); err != nil {
+			return err
+		}
 		out = toWorkout(row, exercises)
 		return nil
 	})
 	return out, err
 }
 
-// Delete removes a workout and its sets.
+// Delete removes a workout and its sets. A planned session it was logged for
+// goes back in the queue.
 func (s *Service) Delete(ctx context.Context, id uuid.UUID) error {
-	deleted, err := s.q.DeleteWorkout(ctx, id)
-	if err != nil {
-		return err
+	return db.RunInTx(ctx, s.pool, func(tx pgx.Tx) error {
+		q := s.q.WithTx(tx)
+		sessionID, err := q.DeleteWorkout(ctx, id)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return fmt.Errorf("%w: no such workout", api.ErrNotFound)
+		} else if err != nil {
+			return err
+		}
+		if sessionID != nil {
+			return q.ReleaseSession(ctx, *sessionID)
+		}
+		return nil
+	})
+}
+
+// syncSession keeps the planned session of a workout in step with it: in
+// progress until the workout has ended, completed after.
+func syncSession(ctx context.Context, q *workoutdb.Queries, row workoutdb.Workout) error {
+	if row.PlannedSessionID == nil {
+		return nil
 	}
-	if deleted == 0 {
-		return fmt.Errorf("%w: no such workout", api.ErrNotFound)
-	}
-	return nil
+	return q.SyncSessionStatus(ctx, workoutdb.SyncSessionStatusParams{ID: *row.PlannedSessionID, Ended: row.Ended})
 }
 
 // writeExercises inserts the exercises and sets of a workout in two round

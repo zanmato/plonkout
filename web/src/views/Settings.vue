@@ -86,6 +86,26 @@
           />
         </div>
 
+        <!-- Dominant Arm Setting -->
+        <div class="mb-6">
+          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
+            {{ t("settings.dominantArm.title") }}
+          </h3>
+          <p class="text-sm text-black dark:text-white opacity-70 mb-4">
+            {{ t("settings.dominantArm.description") }}
+          </p>
+          <SelectButton
+            v-model="dominantArm"
+            :options="dominantArmOptions"
+            optionLabel="label"
+            optionValue="value"
+            :allowEmpty="false"
+            class="w-full"
+            data-testid="dominant-arm"
+            @change="saveDominantArm"
+          />
+        </div>
+
         <!-- Block Periodization Settings -->
         <div class="mb-6">
           <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
@@ -259,6 +279,7 @@ import {
   resetAllBlocks,
 } from "@/utils/blockPeriodization";
 import { useToast } from "@/composables/useToast";
+import type { DominantArm } from "@/utils/plan";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import AccountSettings from "@/components/AccountSettings.vue";
@@ -284,6 +305,7 @@ const weightUnit = ref("kg");
 const compareScope = ref<CompareScope>("intensity");
 const distanceUnit = ref("km");
 const theme = ref<Theme>("system");
+const dominantArm = ref<DominantArm>("right");
 const importing = ref(false);
 const importInput = useTemplateRef<HTMLInputElement>("importInput");
 const storageUsed = ref("");
@@ -314,6 +336,11 @@ const compareScopeOptions = computed(() =>
     label: t(`settings.compareScope.${value}`),
   })),
 );
+
+const dominantArmOptions = computed(() => [
+  { value: "right", label: t("settings.dominantArm.right") },
+  { value: "left", label: t("settings.dominantArm.left") },
+]);
 
 const weightUnitOptions = ref([
   { value: "kg", label: t("settings.units.kg") },
@@ -350,6 +377,13 @@ async function saveWeightUnit() {
  */
 async function saveCompareScope() {
   await saveSetting("compareScope", compareScope.value);
+}
+
+/**
+ * Save the dominant arm, which single arm plan weights are listed for
+ */
+async function saveDominantArm() {
+  await saveSetting("dominantArm", dominantArm.value);
 }
 
 /**
@@ -468,6 +502,7 @@ async function loadSettings() {
     );
     weightUnit.value = savedWeightUnit;
     distanceUnit.value = savedDistanceUnit;
+    dominantArm.value = await getSetting<DominantArm>("dominantArm", "right");
 
     // Load block periodization settings
     const blockSettings = await getGlobalSettings();

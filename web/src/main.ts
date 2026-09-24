@@ -57,6 +57,11 @@ const routes: RouteRecordRaw[] = [
     name: "log",
   },
   {
+    path: "/plan",
+    component: () => import("@/views/Plan.vue"),
+    name: "plan",
+  },
+  {
     path: "/workout/:id?",
     component: () => import("@/views/WorkoutEdit.vue"),
     name: "workout-edit",

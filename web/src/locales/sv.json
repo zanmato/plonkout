@@ -270,6 +270,12 @@
       "deleteAccountExplain": "Tar bort ditt konto och alla pass, program, mallar och inställningar i det. Det går inte att ångra.",
       "deleteAccountConfirm": "Skriv ditt användarnamn för att bekräfta",
       "done": "Klar"
+    },
+    "dominantArm": {
+      "title": "Dominant arm",
+      "description": "Program anger vikter för enarmsövningar för denna arm, den andra armen får sin andel.",
+      "right": "Höger",
+      "left": "Vänster"
     }
   },
   "templates": {
@@ -293,6 +299,7 @@
   "tabs": {
     "templates": "Träningspass",
     "log": "Logg",
+    "plan": "Program",
     "statistics": "Statistik",
     "settings": "Inställningar"
   },
@@ -357,6 +364,46 @@
       "recovery_rejected": "Användarnamnet eller återställningskoden stämmer inte.",
       "last_passkey": "Lägg till en passkey till innan du tar bort den här.",
       "unauthorized": "Din session har gått ut. Logga in igen."
+    }
+  },
+  "plan": {
+    "title": "Program",
+    "empty": "Inget program än",
+    "emptyDescription": "Be din AI-assistent att skapa ett.",
+    "allDone": "Alla pass i programmet är klara.",
+    "nextUp": "Nästa pass",
+    "comingUp": "Kommande",
+    "done": "Klara",
+    "start": "Starta",
+    "continue": "Fortsätt",
+    "skip": "Hoppa över",
+    "skipReason": "Anledning (valfritt)",
+    "confirmSkip": "Hoppa över passet",
+    "putBack": "Lägg tillbaka",
+    "skipped": "Överhoppat",
+    "inProgress": "Pågår",
+    "week": "Vecka {week}",
+    "day": "Dag {day}",
+    "to": "till",
+    "exerciseCount": "{count} övning | {count} övningar",
+    "targetsMet": "{met}/{total} mål nådda",
+    "offArm": "Svaga armen {percent}%",
+    "nextPlanned": "Nästa planerade",
+    "chip": "Program: {label}",
+    "asPlanned": "Som planerat",
+    "finishWorkout": "Avsluta passet",
+    "loadError": "Kunde inte ladda programmet",
+    "startError": "Kunde inte starta passet",
+    "skipError": "Kunde inte hoppa över passet",
+    "putBackError": "Kunde inte lägga tillbaka passet",
+    "comparison": {
+      "title": "Planerat mot gjort",
+      "met": "Nått",
+      "missed": "Missat",
+      "extraSets": "{count} extra set | {count} extra set",
+      "unplanned": "Inte i programmet",
+      "best1RM": "Bästa uppsk. 1RM",
+      "loadError": "Kunde inte ladda jämförelsen"
     }
   }
 }

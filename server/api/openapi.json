@@ -1,6 +1,78 @@
 {
   "components": {
     "schemas": {
+      "ActualSet": {
+        "additionalProperties": false,
+        "properties": {
+          "arm": {
+            "type": "string"
+          },
+          "reps": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "rpe": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "targetSeq": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "time": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "weight",
+          "reps",
+          "time",
+          "rpe",
+          "arm",
+          "type"
+        ],
+        "type": "object"
+      },
+      "AddSessionsBody": {
+        "additionalProperties": false,
+        "properties": {
+          "afterSessionId": {
+            "description": "Insert after this session. Omitted appends to the end of the queue.",
+            "type": "string"
+          },
+          "createMissingExercises": {
+            "type": "boolean"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionInput"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "sessions"
+        ],
+        "type": "object"
+      },
       "BeginRecoveryBody": {
         "additionalProperties": false,
         "properties": {
@@ -77,6 +149,28 @@
         ],
         "type": "object"
       },
+      "Comparison": {
+        "additionalProperties": false,
+        "properties": {
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/ExerciseComparison"
+            },
+            "type": "array"
+          },
+          "unplanned": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "exercises",
+          "unplanned"
+        ],
+        "type": "object"
+      },
       "Exercise": {
         "additionalProperties": false,
         "properties": {
@@ -123,6 +217,44 @@
           "singleArm",
           "archived",
           "created"
+        ],
+        "type": "object"
+      },
+      "ExerciseComparison": {
+        "additionalProperties": false,
+        "properties": {
+          "bestEstimated1RM": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "exercise": {
+            "type": "string"
+          },
+          "extraSets": {
+            "items": {
+              "$ref": "#/components/schemas/ActualSet"
+            },
+            "type": "array"
+          },
+          "plannedExerciseId": {
+            "type": "string"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/TargetComparison"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "plannedExerciseId",
+          "exercise",
+          "targets",
+          "extraSets",
+          "bestEstimated1RM"
         ],
         "type": "object"
       },
@@ -299,6 +431,252 @@
         ],
         "type": "object"
       },
+      "Plan": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "goal": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/Session"
+            },
+            "type": "array"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "completed",
+              "archived"
+            ],
+            "type": "string"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "goal",
+          "notes",
+          "status",
+          "startDate",
+          "created",
+          "updated",
+          "sessions"
+        ],
+        "type": "object"
+      },
+      "PlanInput": {
+        "additionalProperties": false,
+        "properties": {
+          "createMissingExercises": {
+            "type": "boolean"
+          },
+          "goal": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "sessions": {
+            "items": {
+              "$ref": "#/components/schemas/SessionInput"
+            },
+            "maxItems": 200,
+            "type": "array"
+          },
+          "startDate": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "sessions"
+        ],
+        "type": "object"
+      },
+      "PlanUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "goal": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 5000,
+            "type": "string"
+          },
+          "startDate": {
+            "format": "date",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "enum": [
+              "active",
+              "completed",
+              "archived"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "goal",
+          "notes",
+          "status",
+          "startDate"
+        ],
+        "type": "object"
+      },
+      "PlannedExercise": {
+        "additionalProperties": false,
+        "properties": {
+          "displayType": {
+            "enum": [
+              "reps",
+              "time"
+            ],
+            "type": "string"
+          },
+          "exercise": {
+            "description": "The exercise's name.",
+            "type": "string"
+          },
+          "exerciseId": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "muscleGroup": {
+            "type": "string"
+          },
+          "notes": {
+            "description": "Cues and conditional rules for this exercise.",
+            "type": "string"
+          },
+          "offArmPercent": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "singleArm": {
+            "type": "boolean"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/Target"
+            },
+            "type": "array"
+          },
+          "type": {
+            "enum": [
+              "strength",
+              "cardio"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "exerciseId",
+          "exercise",
+          "muscleGroup",
+          "type",
+          "displayType",
+          "singleArm",
+          "notes",
+          "offArmPercent",
+          "targets"
+        ],
+        "type": "object"
+      },
+      "PlannedExerciseInput": {
+        "additionalProperties": false,
+        "properties": {
+          "exercise": {
+            "description": "The exercise's name, matched ignoring case.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "muscleGroup": {
+            "description": "Only used when createMissingExercises creates this exercise.",
+            "maxLength": 50,
+            "type": "string"
+          },
+          "notes": {
+            "description": "Cues and conditional rules, e.g. if week 6 moved fast, make attempt 4 182.5.",
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "offArmPercent": {
+            "description": "Non dominant arm works at this percent of the listed weight.",
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 100,
+            "type": "number"
+          },
+          "singleArm": {
+            "description": "Only used when createMissingExercises creates this exercise.",
+            "type": "boolean"
+          },
+          "targets": {
+            "items": {
+              "$ref": "#/components/schemas/TargetInput"
+            },
+            "maxItems": 20,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "exercise",
+          "targets"
+        ],
+        "type": "object"
+      },
       "PowChallenge": {
         "additionalProperties": false,
         "properties": {
@@ -434,6 +812,22 @@
         ],
         "type": "object"
       },
+      "QueueEntry": {
+        "additionalProperties": false,
+        "properties": {
+          "planName": {
+            "type": "string"
+          },
+          "session": {
+            "$ref": "#/components/schemas/Session"
+          }
+        },
+        "required": [
+          "planName",
+          "session"
+        ],
+        "type": "object"
+      },
       "RenameBody": {
         "additionalProperties": false,
         "properties": {
@@ -445,6 +839,22 @@
         },
         "required": [
           "name"
+        ],
+        "type": "object"
+      },
+      "ReorderBody": {
+        "additionalProperties": false,
+        "properties": {
+          "sessionIds": {
+            "description": "Every pending session of the plan, in the new order.",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "sessionIds"
         ],
         "type": "object"
       },
@@ -472,6 +882,198 @@
         ],
         "type": "object"
       },
+      "Session": {
+        "additionalProperties": false,
+        "properties": {
+          "comparison": {
+            "$ref": "#/components/schemas/Comparison"
+          },
+          "completedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "day": {
+            "examples": [
+              "A"
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedExercise"
+            },
+            "type": "array"
+          },
+          "id": {
+            "type": "string"
+          },
+          "intensity": {
+            "enum": [
+              "heavy",
+              "light",
+              null
+            ],
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "label": {
+            "examples": [
+              "W3 A"
+            ],
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "planId": {
+            "type": "string"
+          },
+          "position": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "skipReason": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "pending",
+              "in_progress",
+              "completed",
+              "skipped"
+            ],
+            "type": "string"
+          },
+          "week": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "workoutId": {
+            "description": "The workout logged for this session, once started.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "position",
+          "label",
+          "week",
+          "day",
+          "intensity",
+          "notes",
+          "status",
+          "skipReason",
+          "completedAt",
+          "workoutId",
+          "exercises"
+        ],
+        "type": "object"
+      },
+      "SessionInput": {
+        "additionalProperties": false,
+        "properties": {
+          "day": {
+            "examples": [
+              "A"
+            ],
+            "maxLength": 8,
+            "type": "string"
+          },
+          "exercises": {
+            "items": {
+              "$ref": "#/components/schemas/PlannedExerciseInput"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "type": "array"
+          },
+          "intensity": {
+            "description": "Heavy for a tough day, light for a volume day.",
+            "enum": [
+              "heavy",
+              "light"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "examples": [
+              "W3 A"
+            ],
+            "maxLength": 60,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "week": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "label",
+          "exercises"
+        ],
+        "type": "object"
+      },
+      "SessionUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "createMissingExercises": {
+            "type": "boolean"
+          },
+          "day": {
+            "maxLength": 8,
+            "type": "string"
+          },
+          "exercises": {
+            "description": "Replaces every planned exercise and target of the session.",
+            "items": {
+              "$ref": "#/components/schemas/PlannedExerciseInput"
+            },
+            "maxItems": 30,
+            "type": "array"
+          },
+          "intensity": {
+            "enum": [
+              "heavy",
+              "light"
+            ],
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 60,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "week": {
+            "format": "int32",
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "SignedIn": {
         "additionalProperties": false,
         "properties": {
@@ -487,6 +1089,203 @@
         },
         "required": [
           "user"
+        ],
+        "type": "object"
+      },
+      "StartOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "workoutId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "workoutId"
+        ],
+        "type": "object"
+      },
+      "StatusBody": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "status": {
+            "description": "skipped skips a pending session, pending puts a skipped one back, deleted removes one that was never started.",
+            "enum": [
+              "skipped",
+              "pending",
+              "deleted"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "type": "object"
+      },
+      "StatusOutputBody": {
+        "additionalProperties": false,
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/Session",
+            "description": "Absent when the session was deleted."
+          }
+        },
+        "type": "object"
+      },
+      "Target": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "reps": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "rpeMax": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "rpeMin": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "setType": {
+            "description": "A free label, e.g. Top set, Back-off, Volume (3s hold), TEST attempt 2.",
+            "type": "string"
+          },
+          "sets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "time": {
+            "type": "string"
+          },
+          "weight": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "setType",
+          "sets",
+          "reps",
+          "weight",
+          "time",
+          "rpeMin",
+          "rpeMax",
+          "notes"
+        ],
+        "type": "object"
+      },
+      "TargetComparison": {
+        "additionalProperties": false,
+        "properties": {
+          "done": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "met": {
+            "type": "boolean"
+          },
+          "sets": {
+            "items": {
+              "$ref": "#/components/schemas/ActualSet"
+            },
+            "type": "array"
+          },
+          "target": {
+            "$ref": "#/components/schemas/Target"
+          },
+          "topRpe": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "target",
+          "sets",
+          "done",
+          "met",
+          "topRpe"
+        ],
+        "type": "object"
+      },
+      "TargetInput": {
+        "additionalProperties": false,
+        "properties": {
+          "notes": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "reps": {
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "rpeMax": {
+            "format": "double",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "number"
+          },
+          "rpeMin": {
+            "format": "double",
+            "maximum": 10,
+            "minimum": 0,
+            "type": "number"
+          },
+          "setType": {
+            "description": "A free label, e.g. Top set, Back-off, Volume (3s hold), TEST attempt 2.",
+            "maxLength": 60,
+            "type": "string"
+          },
+          "sets": {
+            "description": "How many sets of this prescription.",
+            "format": "int32",
+            "maximum": 50,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "time": {
+            "description": "For holds and cardio, e.g. 0:30.",
+            "maxLength": 32,
+            "type": "string"
+          },
+          "weight": {
+            "description": "In the user's weight unit, for the dominant arm on single arm exercises.",
+            "format": "double",
+            "minimum": 0,
+            "type": "number"
+          }
+        },
+        "required": [
+          "setType",
+          "sets"
         ],
         "type": "object"
       },
@@ -2181,6 +2980,1082 @@
         "summary": "Import the export file of the local only app",
         "tags": [
           "import"
+        ]
+      }
+    },
+    "/api/planned-sessions/{id}": {
+      "get": {
+        "operationId": "get-planned-session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One planned session with its exercises and targets",
+        "tags": [
+          "plans"
+        ]
+      },
+      "patch": {
+        "description": "Fields left out are kept. exercises, when given, replaces every planned exercise and target.",
+        "operationId": "update-session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a pending session",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "update_session"
+      }
+    },
+    "/api/planned-sessions/{id}/comparison": {
+      "get": {
+        "operationId": "get-session-comparison",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Comparison"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "What a session planned against what was logged",
+        "tags": [
+          "plans"
+        ]
+      }
+    },
+    "/api/planned-sessions/{id}/start": {
+      "post": {
+        "description": "Logs a workout prefilled with the session's targets and links it to the session. A session that already has a workout answers with that workout.",
+        "operationId": "start-session",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Start a session",
+        "tags": [
+          "plans"
+        ]
+      }
+    },
+    "/api/planned-sessions/{id}/status": {
+      "post": {
+        "operationId": "set-session-status",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatusOutputBody"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Skip, unskip or delete a session",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "set_session_status"
+      }
+    },
+    "/api/plans": {
+      "get": {
+        "description": "Every plan with its sessions, exercises and targets, optionally only those with a status.",
+        "operationId": "list-plans",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "status",
+            "schema": {
+              "enum": [
+                "active",
+                "completed",
+                "archived"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Plan"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Training plans, newest first",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "list_plans"
+      },
+      "post": {
+        "description": "Sessions are queued in the order given. Exercises are named as in the exercise list. An unknown name is refused with suggestions unless createMissingExercises is set.",
+        "operationId": "create-plan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a plan with its queue of sessions",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "create_plan"
+      }
+    },
+    "/api/plans/{id}": {
+      "delete": {
+        "description": "Workouts logged for its sessions stay, without the link to the plan.",
+        "operationId": "delete-plan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a plan",
+        "tags": [
+          "plans"
+        ]
+      },
+      "get": {
+        "description": "With actuals, every session that has a workout carries what was planned against what was logged: sets per target, whether the target was met, the top RPE and the best estimated 1RM.",
+        "operationId": "get-plan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "actuals",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "One plan",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "get_plan"
+      },
+      "put": {
+        "operationId": "update-plan",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlanUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a plan's name, goal, notes, status or start date",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "update_plan"
+      }
+    },
+    "/api/plans/{id}/order": {
+      "put": {
+        "description": "Sessions already started, completed or skipped keep their place.",
+        "operationId": "reorder-sessions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reorder a plan's pending sessions",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "reorder_sessions"
+      }
+    },
+    "/api/plans/{id}/sessions": {
+      "post": {
+        "operationId": "add-sessions",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddSessionsBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Plan"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add sessions to a plan's queue",
+        "tags": [
+          "plans"
+        ],
+        "x-mcp-tool": "add_sessions"
+      }
+    },
+    "/api/queue": {
+      "get": {
+        "operationId": "get-queue",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/QueueEntry"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sessions still to do in active plans, in order",
+        "tags": [
+          "plans"
         ]
       }
     },

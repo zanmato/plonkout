@@ -57,3 +57,19 @@ export interface WorkoutTemplate {
   created?: DateLike;
   updated?: DateLike;
 }
+
+/** A training plan, an ordered queue of sessions. */
+export type Plan = api.Plan;
+
+/** One session of a plan, with its planned exercises. */
+export type PlannedSession = api.Session;
+
+export type PlannedExercise = api.PlannedExercise;
+
+/** A group of prescribed sets, e.g. "Back-off, 3 × 5 @ 130". */
+export type Target = api.Target;
+
+export type QueueEntry = api.QueueEntry;
+
+/** What a session planned against what its workout logged. */
+export type Comparison = api.Comparison;

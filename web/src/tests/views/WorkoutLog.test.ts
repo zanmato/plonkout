@@ -268,4 +268,40 @@ describe("WorkoutLog.vue", () => {
       expect(mockPush).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: workoutId } });
     });
   });
+  describe("Next Planned Session", () => {
+    it("is not shown without a plan", async () => {
+      wrapper = createWrapper();
+      await flushPromises();
+      expect(wrapper.find('[data-testid="next-planned"]').exists()).toBe(false);
+    });
+
+    it("starts the next session of the plan", async () => {
+      const sessionId = "20000000-0000-4000-8000-000000000001";
+      backend.seed({
+        plans: [
+          {
+            name: "Peak block",
+            sessions: [
+              { id: sessionId, label: "W3 A", exercises: [{ exercise: "Pronation", targets: [{ setType: "Volume", sets: 2 }] }] },
+              { label: "W3 B", exercises: [] },
+            ],
+          },
+        ],
+      });
+      wrapper = createWrapper();
+      await flushPromises();
+
+      const card = wrapper.find('[data-testid="next-planned"]');
+      expect(card.text()).toContain("Next planned");
+      expect(card.text()).toContain("W3 A");
+      expect(card.text()).not.toContain("W3 B");
+
+      await card.find('[data-testid="start-next-planned"]').trigger("click");
+      await flushPromises();
+
+      const workout = backend.workouts[0]!;
+      expect(workout.plannedSessionId).toBe(sessionId);
+      expect(mockPush).toHaveBeenCalledWith({ name: "workout-edit", params: { id: workout.id } });
+    });
+  });
 });

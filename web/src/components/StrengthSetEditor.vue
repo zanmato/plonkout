@@ -4,6 +4,30 @@
     :data-exercise-index="exerciseIndex"
     :data-set-index="setIndex"
   >
+    <!-- What the plan asks of this set -->
+    <div
+      v-if="target"
+      class="flex items-center justify-between gap-2 mb-2"
+      data-testid="set-target"
+    >
+      <div
+        class="text-xs font-semibold text-purple-700 dark:text-purple-300 min-w-0"
+      >
+        {{ targetLabel }}
+      </div>
+      <button
+        v-if="canFillTarget"
+        type="button"
+        class="shrink-0 inline-flex items-center gap-1 bg-purple-300 text-black border-2 border-nb-border rounded-md px-2 py-0.5 text-xs font-bold shadow-brutal-sm transition-all duration-200 hover:shadow-none hover:translate-x-0.5 hover:translate-y-0.5 active:shadow-none active:translate-x-0.5 active:translate-y-0.5"
+        :title="t('plan.asPlanned')"
+        data-testid="as-planned"
+        @click="fillTarget"
+      >
+        <span class="material-icons text-sm!">check</span>
+        {{ t("plan.asPlanned") }}
+      </button>
+    </div>
+
     <div class="flex items-center justify-between mb-3">
       <!-- Set Number -->
       <button
@@ -31,7 +55,7 @@
               step="0.5"
               tabindex="0"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
-              placeholder="0"
+              :placeholder="weightPlaceholder"
               @input="
                 $emit(
                   'update:weight',
@@ -57,7 +81,7 @@
               inputmode="decimal"
               tabindex="0"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
-              placeholder="0"
+              :placeholder="repsPlaceholder"
               @input="
                 $emit(
                   'update:reps',
@@ -71,7 +95,7 @@
               type="text"
               tabindex="0"
               class="text-base font-bold text-black bg-transparent border-none text-center w-16 focus:outline-none dark:text-white"
-              placeholder="0:00"
+              :placeholder="target?.time || '0:00'"
               @input="$emit('update:time', ($event.target as HTMLInputElement).value)"
             />
           </div>
@@ -251,7 +275,8 @@ import { ref, computed } from "vue";
 import { useI18n } from "vue-i18n";
 import Popover from "@/volt/Popover.vue";
 import DestructiveButton from "@/components/DestructiveButton.vue";
-import type { Arm, WorkoutExercise, WorkoutSet } from "@/types/domain";
+import { formatSetTarget } from "@/utils/plan";
+import type { Arm, Target, WorkoutExercise, WorkoutSet } from "@/types/domain";
 
 const { t } = useI18n();
 
@@ -277,14 +302,56 @@ const props = withDefaults(
     previousReps?: number | null;
     highestReps?: number | null;
     maxPercentage: string;
+    /** The plan's target this set was prefilled for */
+    target?: Target | null;
+    /** The target's weight for this set's arm */
+    targetWeight?: number | null;
   }>(),
   {
     isWeightRecord: false,
     isRepRecord: false,
     previousReps: null,
     highestReps: null,
+    target: null,
+    targetWeight: null,
   },
 );
+
+const targetLabel = computed(() =>
+  props.target
+    ? formatSetTarget(props.target, {
+        unit: props.weightUnit,
+        to: t("plan.to"),
+        weight: props.targetWeight,
+      })
+    : "",
+);
+
+// The target shows through an empty input as a hint of what to lift
+const weightPlaceholder = computed(() =>
+  props.targetWeight !== null ? String(props.targetWeight) : "0",
+);
+const repsPlaceholder = computed(() =>
+  props.target?.reps != null ? String(props.target.reps) : "0",
+);
+
+const isEmpty = (value: unknown) =>
+  value === null || value === undefined || value === "";
+
+// Offered until something is logged, so a set done as planned is one tap
+const canFillTarget = computed(() => {
+  if (!props.target || !isEmpty(props.set.weight)) return false;
+  const hasTarget =
+    props.targetWeight !== null ||
+    (props.exercise.displayType === "reps"
+      ? props.target.reps !== null
+      : Boolean(props.target.time));
+  const logged =
+    props.exercise.displayType === "reps"
+      ? !isEmpty(props.set.reps)
+      : Boolean(props.set.time);
+  return hasTarget && !logged;
+});
 
 // Check if this is the last set in the exercise (only last set shows add-set field)
 const isLastSet = computed(() => {
@@ -302,6 +369,20 @@ const emit = defineEmits<{
   "add-set": [];
   "delete-set": [];
 }>();
+
+/**
+ * Log the set exactly as the target prescribes
+ */
+function fillTarget() {
+  const target = props.target;
+  if (!target) return;
+  if (props.targetWeight !== null) emit("update:weight", props.targetWeight);
+  if (props.exercise.displayType === "reps") {
+    if (target.reps !== null) emit("update:reps", target.reps);
+  } else if (target.time) {
+    emit("update:time", target.time);
+  }
+}
 
 function handleSelectBlur() {
   // Force viewport update for iOS when select loses focus

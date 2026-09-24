@@ -41,8 +41,8 @@ SET name = $3, started = $4, ended = $5, notes = $6, revision = revision + 1, up
 WHERE id = $1 AND revision = $2
 RETURNING *;
 
--- name: DeleteWorkout :execrows
-DELETE FROM workouts WHERE id = $1;
+-- name: DeleteWorkout :one
+DELETE FROM workouts WHERE id = $1 RETURNING planned_session_id;
 
 -- name: DeleteWorkoutExercises :exec
 DELETE FROM workout_exercises WHERE workout_id = $1;
@@ -61,3 +61,17 @@ INSERT INTO workout_sets (
 -- name: ExerciseIDsByName :many
 -- Links logged exercises to the exercise list when the client only sent a name.
 SELECT id, lower(name)::text AS key FROM exercises WHERE lower(name) = ANY(sqlc.arg(names)::text[]);
+
+-- name: SyncSessionStatus :exec
+-- A planned session follows its workout: in progress until the workout ends,
+-- completed once it has.
+UPDATE planned_sessions
+SET status = CASE WHEN sqlc.narg(ended)::timestamptz IS NULL THEN 'in_progress' ELSE 'completed' END,
+    completed_at = sqlc.narg(ended),
+    updated_at = now()
+WHERE id = sqlc.arg(id) AND status <> 'skipped';
+
+-- name: ReleaseSession :exec
+-- The workout of a session was deleted, so the session is to do again.
+UPDATE planned_sessions SET status = 'pending', completed_at = NULL, updated_at = now()
+WHERE id = $1 AND status IN ('in_progress', 'completed');

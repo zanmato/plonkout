@@ -14,12 +14,12 @@
       class="border-t-2 border-black bg-white dark:bg-zinc-800 dark:text-white safe-area-bottom"
       style="box-shadow: 0 -4px 0px black"
     >
-      <div class="flex justify-around gap-3 items-center p-3">
+      <div class="flex justify-around gap-2 items-center p-3">
         <router-link
           v-for="tab in tabs"
           :key="tab.name"
           :to="tab.path"
-          class="flex flex-col flex-1 items-center px-4 py-2 text-xs font-semibold rounded-md border-3 border-black"
+          class="flex flex-col flex-1 min-w-0 items-center px-1 py-2 text-xs font-semibold rounded-md border-3 border-black"
           :class="
             isActiveTab(tab.name)
               ? 'bg-purple-500 text-white'
@@ -27,7 +27,7 @@
           "
         >
           <span class="material-icons text-xl mb-1">{{ tab.icon }}</span>
-          <span>{{ t(`tabs.${tab.name}`) }}</span>
+          <span class="max-w-full truncate">{{ t(`tabs.${tab.name}`) }}</span>
         </router-link>
       </div>
     </nav>
@@ -108,6 +108,11 @@ const tabs = [
     name: "log",
     path: "/log",
     icon: "list_alt",
+  },
+  {
+    name: "plan",
+    path: "/plan",
+    icon: "event_note",
   },
   {
     name: "templates",

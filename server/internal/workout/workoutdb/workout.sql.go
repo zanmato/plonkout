@@ -60,16 +60,15 @@ func (q *Queries) CreateWorkout(ctx context.Context, arg CreateWorkoutParams) (W
 	return i, err
 }
 
-const deleteWorkout = `-- name: DeleteWorkout :execrows
-DELETE FROM workouts WHERE id = $1
+const deleteWorkout = `-- name: DeleteWorkout :one
+DELETE FROM workouts WHERE id = $1 RETURNING planned_session_id
 `
 
-func (q *Queries) DeleteWorkout(ctx context.Context, id uuid.UUID) (int64, error) {
-	result, err := q.db.Exec(ctx, deleteWorkout, id)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
+func (q *Queries) DeleteWorkout(ctx context.Context, id uuid.UUID) (*uuid.UUID, error) {
+	row := q.db.QueryRow(ctx, deleteWorkout, id)
+	var planned_session_id *uuid.UUID
+	err := row.Scan(&planned_session_id)
+	return planned_session_id, err
 }
 
 const deleteWorkoutExercises = `-- name: DeleteWorkoutExercises :exec
@@ -293,6 +292,37 @@ func (q *Queries) ListWorkouts(ctx context.Context, arg ListWorkoutsParams) ([]W
 		return nil, err
 	}
 	return items, nil
+}
+
+const releaseSession = `-- name: ReleaseSession :exec
+UPDATE planned_sessions SET status = 'pending', completed_at = NULL, updated_at = now()
+WHERE id = $1 AND status IN ('in_progress', 'completed')
+`
+
+// The workout of a session was deleted, so the session is to do again.
+func (q *Queries) ReleaseSession(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, releaseSession, id)
+	return err
+}
+
+const syncSessionStatus = `-- name: SyncSessionStatus :exec
+UPDATE planned_sessions
+SET status = CASE WHEN $1::timestamptz IS NULL THEN 'in_progress' ELSE 'completed' END,
+    completed_at = $1,
+    updated_at = now()
+WHERE id = $2 AND status <> 'skipped'
+`
+
+type SyncSessionStatusParams struct {
+	Ended *time.Time
+	ID    uuid.UUID
+}
+
+// A planned session follows its workout: in progress until the workout ends,
+// completed once it has.
+func (q *Queries) SyncSessionStatus(ctx context.Context, arg SyncSessionStatusParams) error {
+	_, err := q.db.Exec(ctx, syncSessionStatus, arg.Ended, arg.ID)
+	return err
 }
 
 const updateWorkout = `-- name: UpdateWorkout :one

@@ -15,6 +15,7 @@ import (
 	"github.com/zanmato/plonkout/server/internal/account"
 	"github.com/zanmato/plonkout/server/internal/exercise"
 	"github.com/zanmato/plonkout/server/internal/importer"
+	"github.com/zanmato/plonkout/server/internal/plan"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
 	"github.com/zanmato/plonkout/server/internal/platform/web"
@@ -99,6 +100,7 @@ func New(deps Deps) (*Server, error) {
 	template.Register(reg, template.NewService(deps.Pool))
 	setting.Register(reg, setting.NewService(deps.Pool))
 	importer.Register(reg, importer.NewService(deps.Pool))
+	plan.Register(reg, plan.NewService(deps.Pool))
 	api.FixNullableEnums(humaAPI.OpenAPI())
 
 	if cfg.Frontend.Path != "" {

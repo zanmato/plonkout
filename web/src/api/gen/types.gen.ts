@@ -4,6 +4,25 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type ActualSet = {
+    arm: string;
+    reps: number | null;
+    rpe: number | null;
+    targetSeq?: number;
+    time: string;
+    type: string;
+    weight: number | null;
+};
+
+export type AddSessionsBody = {
+    /**
+     * Insert after this session. Omitted appends to the end of the queue.
+     */
+    afterSessionId?: string;
+    createMissingExercises?: boolean;
+    sessions: Array<SessionInput>;
+};
+
 export type BeginRecoveryBody = {
     recoveryCode: string;
     username: string;
@@ -37,6 +56,11 @@ export type CeremonyStart = {
     options: unknown;
 };
 
+export type Comparison = {
+    exercises: Array<ExerciseComparison>;
+    unplanned: Array<string>;
+};
+
 export type Exercise = {
     archived: boolean;
     created: string;
@@ -46,6 +70,14 @@ export type Exercise = {
     name: string;
     singleArm: boolean;
     type: 'strength' | 'cardio';
+};
+
+export type ExerciseComparison = {
+    bestEstimated1RM: number | null;
+    exercise: string;
+    extraSets: Array<ActualSet>;
+    plannedExerciseId: string;
+    targets: Array<TargetComparison>;
 };
 
 export type ExerciseInput = {
@@ -106,6 +138,78 @@ export type Passkey = {
     synced: boolean;
 };
 
+export type Plan = {
+    created: string;
+    goal: string;
+    id: string;
+    name: string;
+    notes: string;
+    sessions: Array<Session>;
+    startDate: string | null;
+    status: 'active' | 'completed' | 'archived';
+    updated: string;
+};
+
+export type PlanInput = {
+    createMissingExercises?: boolean;
+    goal?: string;
+    name: string;
+    notes?: string;
+    sessions: Array<SessionInput>;
+    startDate?: string;
+};
+
+export type PlanUpdate = {
+    goal: string;
+    name: string;
+    notes: string;
+    startDate: string | null;
+    status: 'active' | 'completed' | 'archived';
+};
+
+export type PlannedExercise = {
+    displayType: 'reps' | 'time';
+    /**
+     * The exercise's name.
+     */
+    exercise: string;
+    exerciseId: string;
+    id: string;
+    muscleGroup: string;
+    /**
+     * Cues and conditional rules for this exercise.
+     */
+    notes: string;
+    offArmPercent: number | null;
+    singleArm: boolean;
+    targets: Array<Target>;
+    type: 'strength' | 'cardio';
+};
+
+export type PlannedExerciseInput = {
+    /**
+     * The exercise's name, matched ignoring case.
+     */
+    exercise: string;
+    /**
+     * Only used when createMissingExercises creates this exercise.
+     */
+    muscleGroup?: string;
+    /**
+     * Cues and conditional rules, e.g. if week 6 moved fast, make attempt 4 182.5.
+     */
+    notes?: string;
+    /**
+     * Non dominant arm works at this percent of the listed weight.
+     */
+    offArmPercent?: number;
+    /**
+     * Only used when createMissingExercises creates this exercise.
+     */
+    singleArm?: boolean;
+    targets: Array<TargetInput>;
+};
+
 export type PowChallenge = {
     algorithm: string;
     /**
@@ -149,8 +253,20 @@ export type PutBody = {
     value: unknown;
 };
 
+export type QueueEntry = {
+    planName: string;
+    session: Session;
+};
+
 export type RenameBody = {
     name: string;
+};
+
+export type ReorderBody = {
+    /**
+     * Every pending session of the plan, in the new order.
+     */
+    sessionIds: Array<string>;
 };
 
 export type Result = {
@@ -162,9 +278,119 @@ export type Result = {
     skipped: number;
 };
 
+export type Session = {
+    comparison?: Comparison;
+    completedAt: string | null;
+    day: string | null;
+    exercises: Array<PlannedExercise>;
+    id: string;
+    intensity: 'heavy' | 'light' | null;
+    label: string;
+    notes: string;
+    planId: string;
+    position: number;
+    skipReason: string;
+    status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+    week: number | null;
+    /**
+     * The workout logged for this session, once started.
+     */
+    workoutId: string | null;
+};
+
+export type SessionInput = {
+    day?: string;
+    exercises: Array<PlannedExerciseInput>;
+    /**
+     * Heavy for a tough day, light for a volume day.
+     */
+    intensity?: 'heavy' | 'light';
+    label: string;
+    notes?: string;
+    week?: number;
+};
+
+export type SessionUpdate = {
+    createMissingExercises?: boolean;
+    day?: string;
+    /**
+     * Replaces every planned exercise and target of the session.
+     */
+    exercises?: Array<PlannedExerciseInput>;
+    intensity?: 'heavy' | 'light';
+    label?: string;
+    notes?: string;
+    week?: number;
+};
+
 export type SignedIn = {
     recoveryCodes?: Array<string>;
     user: User;
+};
+
+export type StartOutputBody = {
+    workoutId: string;
+};
+
+export type StatusBody = {
+    reason?: string;
+    /**
+     * skipped skips a pending session, pending puts a skipped one back, deleted removes one that was never started.
+     */
+    status: 'skipped' | 'pending' | 'deleted';
+};
+
+export type StatusOutputBody = {
+    /**
+     * Absent when the session was deleted.
+     */
+    session?: Session;
+};
+
+export type Target = {
+    id: string;
+    notes: string;
+    reps: number | null;
+    rpeMax: number | null;
+    rpeMin: number | null;
+    /**
+     * A free label, e.g. Top set, Back-off, Volume (3s hold), TEST attempt 2.
+     */
+    setType: string;
+    sets: number;
+    time: string;
+    weight: number | null;
+};
+
+export type TargetComparison = {
+    done: number;
+    met: boolean;
+    sets: Array<ActualSet>;
+    target: Target;
+    topRpe: number | null;
+};
+
+export type TargetInput = {
+    notes?: string;
+    reps?: number;
+    rpeMax?: number;
+    rpeMin?: number;
+    /**
+     * A free label, e.g. Top set, Back-off, Volume (3s hold), TEST attempt 2.
+     */
+    setType: string;
+    /**
+     * How many sets of this prescription.
+     */
+    sets: number;
+    /**
+     * For holds and cardio, e.g. 0:30.
+     */
+    time?: string;
+    /**
+     * In the user's weight unit, for the dominant arm on single arm exercises.
+     */
+    weight?: number;
 };
 
 export type Template = {
@@ -919,6 +1145,507 @@ export type ImportLegacyExportResponses = {
 };
 
 export type ImportLegacyExportResponse = ImportLegacyExportResponses[keyof ImportLegacyExportResponses];
+
+export type GetPlannedSessionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/planned-sessions/{id}';
+};
+
+export type GetPlannedSessionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetPlannedSessionError = GetPlannedSessionErrors[keyof GetPlannedSessionErrors];
+
+export type GetPlannedSessionResponses = {
+    /**
+     * OK
+     */
+    200: Session;
+};
+
+export type GetPlannedSessionResponse = GetPlannedSessionResponses[keyof GetPlannedSessionResponses];
+
+export type UpdateSessionData = {
+    body: SessionUpdate;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/planned-sessions/{id}';
+};
+
+export type UpdateSessionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateSessionError = UpdateSessionErrors[keyof UpdateSessionErrors];
+
+export type UpdateSessionResponses = {
+    /**
+     * OK
+     */
+    200: Session;
+};
+
+export type UpdateSessionResponse = UpdateSessionResponses[keyof UpdateSessionResponses];
+
+export type GetSessionComparisonData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/planned-sessions/{id}/comparison';
+};
+
+export type GetSessionComparisonErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetSessionComparisonError = GetSessionComparisonErrors[keyof GetSessionComparisonErrors];
+
+export type GetSessionComparisonResponses = {
+    /**
+     * OK
+     */
+    200: Comparison;
+};
+
+export type GetSessionComparisonResponse = GetSessionComparisonResponses[keyof GetSessionComparisonResponses];
+
+export type StartSessionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/planned-sessions/{id}/start';
+};
+
+export type StartSessionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type StartSessionError = StartSessionErrors[keyof StartSessionErrors];
+
+export type StartSessionResponses = {
+    /**
+     * OK
+     */
+    200: StartOutputBody;
+};
+
+export type StartSessionResponse = StartSessionResponses[keyof StartSessionResponses];
+
+export type SetSessionStatusData = {
+    body: StatusBody;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/planned-sessions/{id}/status';
+};
+
+export type SetSessionStatusErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SetSessionStatusError = SetSessionStatusErrors[keyof SetSessionStatusErrors];
+
+export type SetSessionStatusResponses = {
+    /**
+     * OK
+     */
+    200: StatusOutputBody;
+};
+
+export type SetSessionStatusResponse = SetSessionStatusResponses[keyof SetSessionStatusResponses];
+
+export type ListPlansData = {
+    body?: never;
+    path?: never;
+    query?: {
+        status?: 'active' | 'completed' | 'archived';
+    };
+    url: '/api/plans';
+};
+
+export type ListPlansErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListPlansError = ListPlansErrors[keyof ListPlansErrors];
+
+export type ListPlansResponses = {
+    /**
+     * OK
+     */
+    200: Array<Plan>;
+};
+
+export type ListPlansResponse = ListPlansResponses[keyof ListPlansResponses];
+
+export type CreatePlanData = {
+    body: PlanInput;
+    path?: never;
+    query?: never;
+    url: '/api/plans';
+};
+
+export type CreatePlanErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreatePlanError = CreatePlanErrors[keyof CreatePlanErrors];
+
+export type CreatePlanResponses = {
+    /**
+     * Created
+     */
+    201: Plan;
+};
+
+export type CreatePlanResponse = CreatePlanResponses[keyof CreatePlanResponses];
+
+export type DeletePlanData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/plans/{id}';
+};
+
+export type DeletePlanErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeletePlanError = DeletePlanErrors[keyof DeletePlanErrors];
+
+export type DeletePlanResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeletePlanResponse = DeletePlanResponses[keyof DeletePlanResponses];
+
+export type GetPlanData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        actuals?: boolean;
+    };
+    url: '/api/plans/{id}';
+};
+
+export type GetPlanErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetPlanError = GetPlanErrors[keyof GetPlanErrors];
+
+export type GetPlanResponses = {
+    /**
+     * OK
+     */
+    200: Plan;
+};
+
+export type GetPlanResponse = GetPlanResponses[keyof GetPlanResponses];
+
+export type UpdatePlanData = {
+    body: PlanUpdate;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/plans/{id}';
+};
+
+export type UpdatePlanErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdatePlanError = UpdatePlanErrors[keyof UpdatePlanErrors];
+
+export type UpdatePlanResponses = {
+    /**
+     * OK
+     */
+    200: Plan;
+};
+
+export type UpdatePlanResponse = UpdatePlanResponses[keyof UpdatePlanResponses];
+
+export type ReorderSessionsData = {
+    body: ReorderBody;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/plans/{id}/order';
+};
+
+export type ReorderSessionsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ReorderSessionsError = ReorderSessionsErrors[keyof ReorderSessionsErrors];
+
+export type ReorderSessionsResponses = {
+    /**
+     * OK
+     */
+    200: Plan;
+};
+
+export type ReorderSessionsResponse = ReorderSessionsResponses[keyof ReorderSessionsResponses];
+
+export type AddSessionsData = {
+    body: AddSessionsBody;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/plans/{id}/sessions';
+};
+
+export type AddSessionsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type AddSessionsError = AddSessionsErrors[keyof AddSessionsErrors];
+
+export type AddSessionsResponses = {
+    /**
+     * OK
+     */
+    200: Plan;
+};
+
+export type AddSessionsResponse = AddSessionsResponses[keyof AddSessionsResponses];
+
+export type GetQueueData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/queue';
+};
+
+export type GetQueueErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetQueueError = GetQueueErrors[keyof GetQueueErrors];
+
+export type GetQueueResponses = {
+    /**
+     * OK
+     */
+    200: Array<QueueEntry>;
+};
+
+export type GetQueueResponse = GetQueueResponses[keyof GetQueueResponses];
 
 export type ListSettingsData = {
     body?: never;

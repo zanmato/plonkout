@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogoutData, LogoutErrors, LogoutResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
+import type { AddSessionsData, AddSessionsErrors, AddSessionsResponses, BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreatePlanData, CreatePlanErrors, CreatePlanResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeletePlanData, DeletePlanErrors, DeletePlanResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetPlanData, GetPlanErrors, GetPlannedSessionData, GetPlannedSessionErrors, GetPlannedSessionResponses, GetPlanResponses, GetQueueData, GetQueueErrors, GetQueueResponses, GetSessionComparisonData, GetSessionComparisonErrors, GetSessionComparisonResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListPlansData, ListPlansErrors, ListPlansResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogoutData, LogoutErrors, LogoutResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ReorderSessionsData, ReorderSessionsErrors, ReorderSessionsResponses, SetSessionStatusData, SetSessionStatusErrors, SetSessionStatusResponses, StartSessionData, StartSessionErrors, StartSessionResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdatePlanData, UpdatePlanErrors, UpdatePlanResponses, UpdateSessionData, UpdateSessionErrors, UpdateSessionResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -294,6 +294,213 @@ export const importLegacyExport = <ThrowOnError extends boolean = false>(options
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * One planned session with its exercises and targets
+ */
+export const getPlannedSession = <ThrowOnError extends boolean = false>(options: Options<GetPlannedSessionData, ThrowOnError>): RequestResult<GetPlannedSessionResponses, GetPlannedSessionErrors, ThrowOnError> => (options.client ?? client).get<GetPlannedSessionResponses, GetPlannedSessionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/planned-sessions/{id}',
+    ...options
+});
+
+/**
+ * Change a pending session
+ *
+ * Fields left out are kept. exercises, when given, replaces every planned exercise and target.
+ */
+export const updateSession = <ThrowOnError extends boolean = false>(options: Options<UpdateSessionData, ThrowOnError>): RequestResult<UpdateSessionResponses, UpdateSessionErrors, ThrowOnError> => (options.client ?? client).patch<UpdateSessionResponses, UpdateSessionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/planned-sessions/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * What a session planned against what was logged
+ */
+export const getSessionComparison = <ThrowOnError extends boolean = false>(options: Options<GetSessionComparisonData, ThrowOnError>): RequestResult<GetSessionComparisonResponses, GetSessionComparisonErrors, ThrowOnError> => (options.client ?? client).get<GetSessionComparisonResponses, GetSessionComparisonErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/planned-sessions/{id}/comparison',
+    ...options
+});
+
+/**
+ * Start a session
+ *
+ * Logs a workout prefilled with the session's targets and links it to the session. A session that already has a workout answers with that workout.
+ */
+export const startSession = <ThrowOnError extends boolean = false>(options: Options<StartSessionData, ThrowOnError>): RequestResult<StartSessionResponses, StartSessionErrors, ThrowOnError> => (options.client ?? client).post<StartSessionResponses, StartSessionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/planned-sessions/{id}/start',
+    ...options
+});
+
+/**
+ * Skip, unskip or delete a session
+ */
+export const setSessionStatus = <ThrowOnError extends boolean = false>(options: Options<SetSessionStatusData, ThrowOnError>): RequestResult<SetSessionStatusResponses, SetSessionStatusErrors, ThrowOnError> => (options.client ?? client).post<SetSessionStatusResponses, SetSessionStatusErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/planned-sessions/{id}/status',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Training plans, newest first
+ *
+ * Every plan with its sessions, exercises and targets, optionally only those with a status.
+ */
+export const listPlans = <ThrowOnError extends boolean = false>(options?: Options<ListPlansData, ThrowOnError>): RequestResult<ListPlansResponses, ListPlansErrors, ThrowOnError> => (options?.client ?? client).get<ListPlansResponses, ListPlansErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans',
+    ...options
+});
+
+/**
+ * Create a plan with its queue of sessions
+ *
+ * Sessions are queued in the order given. Exercises are named as in the exercise list. An unknown name is refused with suggestions unless createMissingExercises is set.
+ */
+export const createPlan = <ThrowOnError extends boolean = false>(options: Options<CreatePlanData, ThrowOnError>): RequestResult<CreatePlanResponses, CreatePlanErrors, ThrowOnError> => (options.client ?? client).post<CreatePlanResponses, CreatePlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a plan
+ *
+ * Workouts logged for its sessions stay, without the link to the plan.
+ */
+export const deletePlan = <ThrowOnError extends boolean = false>(options: Options<DeletePlanData, ThrowOnError>): RequestResult<DeletePlanResponses, DeletePlanErrors, ThrowOnError> => (options.client ?? client).delete<DeletePlanResponses, DeletePlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans/{id}',
+    ...options
+});
+
+/**
+ * One plan
+ *
+ * With actuals, every session that has a workout carries what was planned against what was logged: sets per target, whether the target was met, the top RPE and the best estimated 1RM.
+ */
+export const getPlan = <ThrowOnError extends boolean = false>(options: Options<GetPlanData, ThrowOnError>): RequestResult<GetPlanResponses, GetPlanErrors, ThrowOnError> => (options.client ?? client).get<GetPlanResponses, GetPlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans/{id}',
+    ...options
+});
+
+/**
+ * Change a plan's name, goal, notes, status or start date
+ */
+export const updatePlan = <ThrowOnError extends boolean = false>(options: Options<UpdatePlanData, ThrowOnError>): RequestResult<UpdatePlanResponses, UpdatePlanErrors, ThrowOnError> => (options.client ?? client).put<UpdatePlanResponses, UpdatePlanErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Reorder a plan's pending sessions
+ *
+ * Sessions already started, completed or skipped keep their place.
+ */
+export const reorderSessions = <ThrowOnError extends boolean = false>(options: Options<ReorderSessionsData, ThrowOnError>): RequestResult<ReorderSessionsResponses, ReorderSessionsErrors, ThrowOnError> => (options.client ?? client).put<ReorderSessionsResponses, ReorderSessionsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans/{id}/order',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Add sessions to a plan's queue
+ */
+export const addSessions = <ThrowOnError extends boolean = false>(options: Options<AddSessionsData, ThrowOnError>): RequestResult<AddSessionsResponses, AddSessionsErrors, ThrowOnError> => (options.client ?? client).post<AddSessionsResponses, AddSessionsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/plans/{id}/sessions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Sessions still to do in active plans, in order
+ */
+export const getQueue = <ThrowOnError extends boolean = false>(options?: Options<GetQueueData, ThrowOnError>): RequestResult<GetQueueResponses, GetQueueErrors, ThrowOnError> => (options?.client ?? client).get<GetQueueResponses, GetQueueErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/queue',
+    ...options
 });
 
 /**
