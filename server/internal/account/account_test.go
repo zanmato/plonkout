@@ -291,6 +291,29 @@ func TestPasskeyManagement(t *testing.T) {
 	h.Expect(h.login(laptop), http.StatusOK)
 }
 
+func TestPasskeysAreNamedByProvider(t *testing.T) {
+	h := newHarness(t)
+	_, session, _ := h.signup("named")
+
+	var begin ceremony
+	h.Expect(h.Do(http.MethodPost, "/account/passkeys/begin", nil, session), http.StatusOK).Decode(t, &begin)
+	// A passkey created on a Linux laptop by scanning the QR code with an
+	// Android phone lives in Google Password Manager, whatever the laptop says.
+	phone := newDevice()
+	aaguid, _ := hex.DecodeString("ea9b8d664d011d213ce4b6b48cb575d4")
+	copy(phone.authenticator.Aaguid[:], aaguid)
+	h.Expect(h.Do(http.MethodPost, "/account/passkeys/finish", map[string]any{
+		"ceremony": begin.Ceremony, "credential": phone.create(t, begin), "passkeyName": "Linux",
+	}, session), http.StatusCreated)
+
+	var passkeys []struct{ Name string }
+	h.Expect(h.Do(http.MethodGet, "/account/passkeys", nil, session), http.StatusOK).Decode(t, &passkeys)
+	// The first came from an unknown authenticator, so the browser's guess stays.
+	if len(passkeys) != 2 || passkeys[0].Name != "Phone" || passkeys[1].Name != "Google Password Manager" {
+		t.Fatalf("unexpected names %+v", passkeys)
+	}
+}
+
 func TestPasskeysBelongToTheirUser(t *testing.T) {
 	h := newHarness(t)
 	_, alice, _ := h.signup("alice")

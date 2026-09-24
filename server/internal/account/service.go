@@ -376,7 +376,12 @@ func (s *Service) FinishAddPasskey(ctx context.Context, userID, ceremonyID uuid.
 	if err := s.savePasskey(ctx, s.q, userID, created, name); err != nil {
 		return Passkey{}, err
 	}
-	return Passkey{ID: encodeCredentialID(created.ID), Name: passkeyNameOr(name), Created: s.now(), Synced: created.Flags.BackupEligible}, nil
+	return Passkey{
+		ID:      encodeCredentialID(created.ID),
+		Name:    passkeyName(created.Authenticator.AAGUID, name),
+		Created: s.now(),
+		Synced:  created.Flags.BackupEligible,
+	}, nil
 }
 
 // Passkey is one registered passkey as the API shows it.
@@ -625,7 +630,7 @@ func (s *Service) savePasskey(ctx context.Context, q *accountdb.Queries, userID 
 		Transports:      transports,
 		BackupEligible:  credential.Flags.BackupEligible,
 		BackupState:     credential.Flags.BackupState,
-		Name:            passkeyNameOr(name),
+		Name:            passkeyName(credential.Authenticator.AAGUID, name),
 	})
 	return uniqueAs(err, api.Errorf(http.StatusConflict, "passkey_exists", "this passkey is already registered"))
 }
