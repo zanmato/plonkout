@@ -1,0 +1,25 @@
+# Copy to config.toml (ignored by git) and adjust. Secrets and connection
+# strings can instead come from PLONKOUT_SERVER_BASE_URL, PLONKOUT_DATABASE_APP,
+# PLONKOUT_DATABASE_MIGRATE and PLONKOUT_AUTH_SECRET_KEY.
+development = true
+log_level = "debug"
+
+[server]
+addr = "127.0.0.1:8090"
+# The origin the browser uses. In development that is the Vite dev server,
+# which proxies /api, /oauth, /.well-known and /mcp to this process.
+base_url = "http://localhost:5173"
+
+[database]
+app = "postgres://plonkout_app:plonkout_app@127.0.0.1:5449/plonkout?sslmode=disable"
+migrate = "postgres://plonkout_migrate:plonkout_migrate@127.0.0.1:5449/plonkout?sslmode=disable"
+
+[auth]
+secret_key = "development-secret-key-change-me-please"
+
+[frontend]
+# Serve a built SPA, e.g. "../web/dist". Leave empty when using the Vite dev server.
+path = ""
+
+[oauth]
+allow_dynamic_registration = true

@@ -25,3 +25,6 @@ dist-ssr
 # Agent instructions
 AGENTS.md
 CLAUDE.md
+
+# Server
+server/config.toml

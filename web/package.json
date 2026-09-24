@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "lint": "eslint .",
-    "type-check": "vue-tsc --build"
+    "type-check": "vue-tsc --build",
+    "generate": "node scripts/generate-client.mjs"
   },
   "dependencies": {
     "@primevue/icons": "^4.5.5",
@@ -31,6 +32,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@hey-api/openapi-ts": "^0.99.0",
     "@tailwindcss/vite": "^4.3.0",
     "@types/node": "^24.13.6",
     "@vitejs/plugin-vue": "^6.0.7",

@@ -62,6 +62,15 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    // The Go server answers everything that is not the SPA.
+    proxy: Object.fromEntries(
+      ["/api", "/oauth", "/.well-known", "/mcp"].map((path) => [
+        path,
+        { target: "http://127.0.0.1:8090", changeOrigin: false },
+      ]),
+    ),
+  },
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

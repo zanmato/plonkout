@@ -1,0 +1,23 @@
+# Configuration for the Go test suite, committed because it holds only the
+# credentials of the local development database from docker compose.
+#
+# The provision connection is a superuser, because marking a database as a
+# template is a write to pg_database. The databases it creates are owned by the
+# migrate role and migrated as it, and tests connect as the app role, so no pool
+# a test touches bypasses row level security by accident.
+development = true
+log_level = "warn"
+
+[server]
+base_url = "http://localhost:5173"
+
+[database]
+app = "postgres://plonkout_app:plonkout_app@127.0.0.1:5449/plonkout?sslmode=disable"
+migrate = "postgres://plonkout_migrate:plonkout_migrate@127.0.0.1:5449/plonkout?sslmode=disable"
+provision = "postgres://postgres:postgres@127.0.0.1:5449/postgres?sslmode=disable"
+
+[auth]
+secret_key = "test-secret-key-that-is-long-enough"
+
+[oauth]
+allow_dynamic_registration = true

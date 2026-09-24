@@ -1,0 +1,22 @@
+# The configuration baked into the image. Everything specific to a deployment
+# comes from the environment:
+#
+#   PLONKOUT_SERVER_BASE_URL    https://plonkout.example
+#   PLONKOUT_DATABASE_APP       postgres://plonkout_app:...@db:5432/plonkout
+#   PLONKOUT_DATABASE_MIGRATE   postgres://plonkout_migrate:...@db:5432/plonkout
+#   PLONKOUT_AUTH_SECRET_KEY    at least 32 random characters
+#
+# Mount a file over /app/config.toml to change anything else.
+log_level = "info"
+
+[server]
+addr = ":8080"
+
+[database]
+migrations_path = "/app/migrations"
+
+[frontend]
+path = "/app/web"
+
+[oauth]
+allow_dynamic_registration = true

@@ -1,0 +1,170 @@
+{
+  "components": {
+    "schemas": {
+      "Health": {
+        "additionalProperties": false,
+        "properties": {
+          "database": {
+            "description": "The database clock, which proves it answered.",
+            "format": "date-time",
+            "type": "string"
+          },
+          "status": {
+            "examples": [
+              "ok"
+            ],
+            "type": "string"
+          },
+          "version": {
+            "examples": [
+              "dev"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "version",
+          "database"
+        ],
+        "type": "object"
+      },
+      "Problem": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "examples": [
+              "not_found"
+            ],
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "errors": {
+            "items": {
+              "$ref": "#/components/schemas/ProblemDetail"
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
+          "status": {
+            "examples": [
+              404
+            ],
+            "format": "int64",
+            "type": "integer"
+          },
+          "title": {
+            "examples": [
+              "Not Found"
+            ],
+            "type": "string"
+          },
+          "type": {
+            "examples": [
+              "about:blank"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code"
+        ],
+        "type": "object"
+      },
+      "ProblemDetail": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "message"
+        ],
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "bearer": {
+        "description": "An OAuth access token, as issued to MCP clients.",
+        "scheme": "bearer",
+        "type": "http"
+      },
+      "session": {
+        "description": "The web session cookie set by signing in with a passkey.",
+        "in": "cookie",
+        "name": "__Host-plonkout_sid",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "description": "Workout logging and training plans.",
+    "title": "Plonkout API",
+    "version": "dev"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "get-health",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Health"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          },
+          "503": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Service Unavailable"
+          }
+        },
+        "security": [],
+        "summary": "Report whether the server and its database are up",
+        "tags": [
+          "system"
+        ],
+        "x-public": true
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ]
+}

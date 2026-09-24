@@ -1,0 +1,64 @@
+version: "2"
+
+# One entry per module. The schema is the migration directory, so generated row
+# shapes come from the same DDL the database runs, and a column renamed in a
+# migration breaks the build rather than a request.
+#
+# Queries on user data never mention user_id. The column defaults to
+# current_user_id() and the row level security policy filters on it, so a query
+# that named the user would be a second, forgettable source of truth.
+#
+# The type overrides are written once and aliased by every entry.
+sql:
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/system/queries
+    gen:
+      go:
+        package: systemdb
+        out: internal/system/systemdb
+        sql_package: pgx/v5
+        # A nullable column becomes a pointer, so JSON can carry null and a
+        # mapper tests it with one comparison.
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: &type_overrides
+          - db_type: "uuid"
+            go_type:
+              import: "github.com/gofrs/uuid/v5"
+              package: "uuid"
+              type: "UUID"
+          - db_type: "uuid"
+            nullable: true
+            go_type:
+              import: "github.com/gofrs/uuid/v5"
+              package: "uuid"
+              type: "UUID"
+              pointer: true
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "timestamptz"
+            nullable: true
+            go_type:
+              type: "time.Time"
+              pointer: true
+          - db_type: "date"
+            go_type: "time.Time"
+          - db_type: "date"
+            nullable: true
+            go_type:
+              type: "time.Time"
+              pointer: true
+          # Weights and distances. Training loads are not money, and float64
+          # carries every value numeric(7,2) can hold exactly enough to display.
+          - db_type: "pg_catalog.numeric"
+            go_type: "float64"
+          - db_type: "pg_catalog.numeric"
+            nullable: true
+            go_type:
+              type: "float64"
+              pointer: true
+          - db_type: "citext"
+            go_type: "string"
+          - db_type: "jsonb"
+            go_type: "encoding/json.RawMessage"
