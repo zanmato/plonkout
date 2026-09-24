@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetMeData, GetMeErrors, GetMeResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, LogoutData, LogoutErrors, LogoutResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses } from './types.gen';
+import type { BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogoutData, LogoutErrors, LogoutResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -224,6 +224,269 @@ export const finishSignup = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 /**
+ * The exercise list
+ */
+export const listExercises = <ThrowOnError extends boolean = false>(options?: Options<ListExercisesData, ThrowOnError>): RequestResult<ListExercisesResponses, ListExercisesErrors, ThrowOnError> => (options?.client ?? client).get<ListExercisesResponses, ListExercisesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/exercises',
+    ...options
+});
+
+/**
+ * Add an exercise
+ */
+export const createExercise = <ThrowOnError extends boolean = false>(options: Options<CreateExerciseData, ThrowOnError>): RequestResult<CreateExerciseResponses, CreateExerciseErrors, ThrowOnError> => (options.client ?? client).post<CreateExerciseResponses, CreateExerciseErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/exercises',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Change an exercise
+ *
+ * Renaming also renames it in logged workouts and in the block periodization state.
+ */
+export const updateExercise = <ThrowOnError extends boolean = false>(options: Options<UpdateExerciseData, ThrowOnError>): RequestResult<UpdateExerciseResponses, UpdateExerciseErrors, ThrowOnError> => (options.client ?? client).put<UpdateExerciseResponses, UpdateExerciseErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/exercises/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Report whether the server and its database are up
  */
 export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>): RequestResult<GetHealthResponses, GetHealthErrors, ThrowOnError> => (options?.client ?? client).get<GetHealthResponses, GetHealthErrors, ThrowOnError>({ url: '/api/health', ...options });
+
+/**
+ * Import the export file of the local only app
+ *
+ * Creates exercises for names the account does not have, then stores every workout. Importing the same file again skips workouts already imported.
+ */
+export const importLegacyExport = <ThrowOnError extends boolean = false>(options: Options<ImportLegacyExportData, ThrowOnError>): RequestResult<ImportLegacyExportResponses, ImportLegacyExportErrors, ThrowOnError> => (options.client ?? client).post<ImportLegacyExportResponses, ImportLegacyExportErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/import/legacy',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Every setting, as key and JSON value
+ */
+export const listSettings = <ThrowOnError extends boolean = false>(options?: Options<ListSettingsData, ThrowOnError>): RequestResult<ListSettingsResponses, ListSettingsErrors, ThrowOnError> => (options?.client ?? client).get<ListSettingsResponses, ListSettingsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/settings',
+    ...options
+});
+
+/**
+ * Store a setting
+ */
+export const putSetting = <ThrowOnError extends boolean = false>(options: Options<PutSettingData, ThrowOnError>): RequestResult<PutSettingResponses, PutSettingErrors, ThrowOnError> => (options.client ?? client).put<PutSettingResponses, PutSettingErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/settings/{key}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Workout templates, newest first
+ */
+export const listTemplates = <ThrowOnError extends boolean = false>(options?: Options<ListTemplatesData, ThrowOnError>): RequestResult<ListTemplatesResponses, ListTemplatesErrors, ThrowOnError> => (options?.client ?? client).get<ListTemplatesResponses, ListTemplatesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/templates',
+    ...options
+});
+
+/**
+ * Save a template
+ */
+export const createTemplate = <ThrowOnError extends boolean = false>(options: Options<CreateTemplateData, ThrowOnError>): RequestResult<CreateTemplateResponses, CreateTemplateErrors, ThrowOnError> => (options.client ?? client).post<CreateTemplateResponses, CreateTemplateErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/templates',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a template
+ */
+export const deleteTemplate = <ThrowOnError extends boolean = false>(options: Options<DeleteTemplateData, ThrowOnError>): RequestResult<DeleteTemplateResponses, DeleteTemplateErrors, ThrowOnError> => (options.client ?? client).delete<DeleteTemplateResponses, DeleteTemplateErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/templates/{id}',
+    ...options
+});
+
+/**
+ * One template
+ */
+export const getTemplate = <ThrowOnError extends boolean = false>(options: Options<GetTemplateData, ThrowOnError>): RequestResult<GetTemplateResponses, GetTemplateErrors, ThrowOnError> => (options.client ?? client).get<GetTemplateResponses, GetTemplateErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/templates/{id}',
+    ...options
+});
+
+/**
+ * Replace a template
+ */
+export const updateTemplate = <ThrowOnError extends boolean = false>(options: Options<UpdateTemplateData, ThrowOnError>): RequestResult<UpdateTemplateResponses, UpdateTemplateErrors, ThrowOnError> => (options.client ?? client).put<UpdateTemplateResponses, UpdateTemplateErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/templates/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Workouts, newest first
+ *
+ * Every workout with its exercises and sets, optionally between from (inclusive) and to (exclusive).
+ */
+export const listWorkouts = <ThrowOnError extends boolean = false>(options?: Options<ListWorkoutsData, ThrowOnError>): RequestResult<ListWorkoutsResponses, ListWorkoutsErrors, ThrowOnError> => (options?.client ?? client).get<ListWorkoutsResponses, ListWorkoutsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/workouts',
+    ...options
+});
+
+/**
+ * Log a new workout
+ */
+export const createWorkout = <ThrowOnError extends boolean = false>(options: Options<CreateWorkoutData, ThrowOnError>): RequestResult<CreateWorkoutResponses, CreateWorkoutErrors, ThrowOnError> => (options.client ?? client).post<CreateWorkoutResponses, CreateWorkoutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/workouts',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * The most recent workout with a name
+ *
+ * Used to suggest the exercises of the last workout with the same name.
+ */
+export const getLatestWorkout = <ThrowOnError extends boolean = false>(options?: Options<GetLatestWorkoutData, ThrowOnError>): RequestResult<GetLatestWorkoutResponses, GetLatestWorkoutErrors, ThrowOnError> => (options?.client ?? client).get<GetLatestWorkoutResponses, GetLatestWorkoutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/workouts/latest',
+    ...options
+});
+
+/**
+ * Delete a workout
+ */
+export const deleteWorkout = <ThrowOnError extends boolean = false>(options: Options<DeleteWorkoutData, ThrowOnError>): RequestResult<DeleteWorkoutResponses, DeleteWorkoutErrors, ThrowOnError> => (options.client ?? client).delete<DeleteWorkoutResponses, DeleteWorkoutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/workouts/{id}',
+    ...options
+});
+
+/**
+ * One workout
+ */
+export const getWorkout = <ThrowOnError extends boolean = false>(options: Options<GetWorkoutData, ThrowOnError>): RequestResult<GetWorkoutResponses, GetWorkoutErrors, ThrowOnError> => (options.client ?? client).get<GetWorkoutResponses, GetWorkoutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/workouts/{id}',
+    ...options
+});
+
+/**
+ * Replace a workout
+ *
+ * The body carries the revision the client last read. A newer revision on the server answers 409 stale_revision.
+ */
+export const updateWorkout = <ThrowOnError extends boolean = false>(options: Options<UpdateWorkoutData, ThrowOnError>): RequestResult<UpdateWorkoutResponses, UpdateWorkoutErrors, ThrowOnError> => (options.client ?? client).put<UpdateWorkoutResponses, UpdateWorkoutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/workouts/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});

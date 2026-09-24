@@ -1,13 +1,11 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { mount, type VueWrapper } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { nextTick } from "vue";
+import { delay, http, HttpResponse } from "msw";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
-import * as database from "@/utils/database";
 import type { Exercise } from "@/types/domain";
-import { partial } from "../helpers/fixtures";
-
-const getExercises = vi.mocked(database.getExercises);
-const saveExercise = vi.mocked(database.saveExercise);
+import { API, server } from "../helpers/msw";
+import { backend } from "../mocks/backend";
 
 // Mock useToast composable
 const mockShowError = vi.fn();
@@ -51,18 +49,8 @@ describe("ExerciseSelector.vue", () => {
   // any so tests can reach the script setup internals through wrapper.vm
   let wrapper: VueWrapper<any>;
 
-  // Left without type and displayType on purpose, the list renders a type badge when set
-  const mockExercises = partial<Exercise[]>([
-    { id: 1, name: "Wrist Curl", muscleGroup: "Wrist", singleArm: true },
-    { id: 2, name: "Hook Training", muscleGroup: "Hand", singleArm: true },
-    { id: 3, name: "Side Pressure", muscleGroup: "Side", singleArm: true },
-    {
-      id: 4,
-      name: "Resistance Band Pull",
-      muscleGroup: "Back",
-      singleArm: false,
-    },
-  ]);
+  // Stored exercises, as the fake backend answers with them
+  let storedExercises: Exercise[];
 
   const createWrapper = () => {
     return mount(ExerciseSelector, {
@@ -72,7 +60,14 @@ describe("ExerciseSelector.vue", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    getExercises.mockResolvedValue(mockExercises);
+    storedExercises = backend.seed({
+      exercises: [
+        { name: "Wrist Curl", muscleGroup: "Wrist", singleArm: true },
+        { name: "Hook Training", muscleGroup: "Hand", singleArm: true },
+        { name: "Side Pressure", muscleGroup: "Side", singleArm: true },
+        { name: "Resistance Band Pull", muscleGroup: "Back", singleArm: false },
+      ],
+    }).exercises;
   });
 
   afterEach(() => {
@@ -84,9 +79,8 @@ describe("ExerciseSelector.vue", () => {
   describe("Component Rendering", () => {
     beforeEach(async () => {
       wrapper = createWrapper();
-      await nextTick();
       // Wait for exercises to load
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("renders the modal overlay and content", () => {
@@ -123,12 +117,17 @@ describe("ExerciseSelector.vue", () => {
   describe("Exercise Loading and Display", () => {
     beforeEach(async () => {
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("loads exercises on mount", () => {
-      expect(getExercises).toHaveBeenCalled();
+      expect(wrapper.vm.loading).toBe(false);
+      expect(wrapper.vm.exercises.map((e: Exercise) => e.name).sort()).toEqual([
+        "Hook Training",
+        "Resistance Band Pull",
+        "Side Pressure",
+        "Wrist Curl",
+      ]);
     });
 
     it("displays all exercises initially", () => {
@@ -155,8 +154,7 @@ describe("ExerciseSelector.vue", () => {
   describe("Exercise Search and Filtering", () => {
     beforeEach(async () => {
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("filters exercises by name", async () => {
@@ -200,8 +198,7 @@ describe("ExerciseSelector.vue", () => {
   describe("Exercise Selection", () => {
     beforeEach(async () => {
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("emits select event when exercise is clicked", async () => {
@@ -213,7 +210,7 @@ describe("ExerciseSelector.vue", () => {
         await exerciseButtons[0]!.trigger("click");
 
         expect(wrapper.emitted("select")).toBeTruthy();
-        expect(wrapper.emitted("select")![0]![0]).toEqual(mockExercises[0]);
+        expect(wrapper.emitted("select")![0]![0]).toEqual(storedExercises[0]);
       }
     });
   });
@@ -221,8 +218,7 @@ describe("ExerciseSelector.vue", () => {
   describe("New Exercise Creation", () => {
     beforeEach(async () => {
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("shows new exercise form when new button is clicked", async () => {
@@ -240,8 +236,6 @@ describe("ExerciseSelector.vue", () => {
     });
 
     it("creates new exercise successfully", async () => {
-      saveExercise.mockResolvedValueOnce(5);
-
       // Show form
       const vm = wrapper.vm;
       vm.showNewExerciseForm = true;
@@ -255,21 +249,21 @@ describe("ExerciseSelector.vue", () => {
       // Submit form
       await vm.createExercise();
 
-      expect(saveExercise).toHaveBeenCalledWith({
+      const created = backend.exercises.find((e) => e.name === "New Test Exercise");
+      expect(created).toMatchObject({
         name: "New Test Exercise",
         muscleGroup: "biceps",
         singleArm: false,
         type: "strength",
         displayType: "reps",
+        archived: false,
       });
 
-      expect(wrapper.emitted("select")).toBeTruthy();
+      expect(wrapper.emitted("select")![0]![0]).toEqual(created);
       expect(vm.showNewExerciseForm).toBe(false);
     });
 
     it("uses default muscle group when empty", async () => {
-      saveExercise.mockResolvedValueOnce(5);
-
       const vm = wrapper.vm;
       vm.showNewExerciseForm = true;
       vm.newExercise.name = "Test Exercise";
@@ -277,7 +271,7 @@ describe("ExerciseSelector.vue", () => {
 
       await vm.createExercise();
 
-      expect(saveExercise).toHaveBeenCalledWith({
+      expect(backend.exercises.find((e) => e.name === "Test Exercise")).toMatchObject({
         name: "Test Exercise",
         muscleGroup: "Shoulders",
         singleArm: true,
@@ -293,19 +287,21 @@ describe("ExerciseSelector.vue", () => {
 
       await vm.createExercise();
 
-      expect(saveExercise).not.toHaveBeenCalled();
+      expect(backend.exercises).toHaveLength(4);
+      expect(wrapper.emitted("select")).toBeFalsy();
     });
 
     it("handles exercise creation errors", async () => {
-      saveExercise.mockRejectedValueOnce(new Error("Creation failed"));
-
+      // The server refuses a second exercise with the same name
       const vm = wrapper.vm;
       vm.showNewExerciseForm = true;
-      vm.newExercise.name = "Test Exercise";
+      vm.newExercise.name = "wrist curl";
 
       await vm.createExercise();
 
       expect(mockShowError).toHaveBeenCalledWith("Error creating exercise");
+      expect(backend.exercises).toHaveLength(4);
+      expect(vm.showNewExerciseForm).toBe(true);
     });
 
     it("closes new exercise form when cancel is clicked", async () => {
@@ -322,8 +318,6 @@ describe("ExerciseSelector.vue", () => {
     });
 
     it("resets form after successful creation", async () => {
-      saveExercise.mockResolvedValueOnce(5);
-
       const vm = wrapper.vm;
       vm.showNewExerciseForm = true;
       vm.newExercise.name = "Test Exercise";
@@ -340,8 +334,11 @@ describe("ExerciseSelector.vue", () => {
 
   describe("Loading States", () => {
     it("shows loading message while exercises are loading", async () => {
-      getExercises.mockImplementationOnce(
-        () => new Promise<Exercise[]>((resolve) => setTimeout(resolve, 100))
+      server.use(
+        http.get(`${API}/api/exercises`, async () => {
+          await delay(100);
+          return HttpResponse.json([]);
+        })
       );
 
       wrapper = createWrapper();
@@ -354,11 +351,17 @@ describe("ExerciseSelector.vue", () => {
 
   describe("Error Handling", () => {
     it("handles exercise loading errors gracefully", async () => {
-      getExercises.mockRejectedValueOnce(new Error("Loading failed"));
+      server.use(
+        http.get(`${API}/api/exercises`, () =>
+          HttpResponse.json(
+            { type: "about:blank", title: "Internal Server Error", status: 500, code: "internal_error" },
+            { status: 500, headers: { "Content-Type": "application/problem+json" } }
+          )
+        )
+      );
 
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
 
       expect(wrapper.vm.loading).toBe(false);
       expect(wrapper.vm.exercises).toEqual([]);

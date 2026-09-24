@@ -4,7 +4,7 @@
  * based on block periodization principles.
  */
 
-import { getSetting, saveSetting } from "./database";
+import { getSetting, saveSetting } from "@/api/data";
 import {
   buildExerciseHistory,
   getMaxWeight as historyMaxWeight,

@@ -1,3 +1,5 @@
+import type { Id } from "@/types/domain";
+
 /**
  * Test fixtures usually fill in only the fields the code under test reads.
  * DeepPartial keeps the field names and value types checked while letting
@@ -16,7 +18,7 @@ export const partial = <T>(value: DeepPartial<T>): T => value as T;
 
 /** Workout fields the WorkoutLog sorting and grouping simulations use */
 export interface SortableWorkout {
-  id: number;
+  id: Id;
   name?: string;
   started: string | Date;
   ended?: string;

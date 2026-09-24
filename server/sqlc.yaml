@@ -74,3 +74,52 @@ sql:
         emit_pointers_for_null_types: true
         emit_empty_slices: true
         overrides: *type_overrides
+
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/exercise/queries
+    gen:
+      go:
+        package: exercisedb
+        out: internal/exercise/exercisedb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides
+
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/workout/queries
+    gen:
+      go:
+        package: workoutdb
+        out: internal/workout/workoutdb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides
+
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/template/queries
+    gen:
+      go:
+        package: templatedb
+        out: internal/template/templatedb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides
+
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/setting/queries
+    gen:
+      go:
+        package: settingdb
+        out: internal/setting/settingdb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides
+

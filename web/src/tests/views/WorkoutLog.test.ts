@@ -1,13 +1,11 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mount, type VueWrapper } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { nextTick } from "vue";
+import { http, HttpResponse } from "msw";
 import WorkoutLog from "@/views/WorkoutLog.vue";
-import * as database from "@/utils/database";
-import type { Workout } from "@/types/domain";
-import { partial } from "../helpers/fixtures";
+import { API, server } from "../helpers/msw";
+import { backend } from "../mocks/backend";
 import { mockPush } from "../setup";
-
-const getWorkouts = vi.mocked(database.getWorkouts);
 
 // Mock virtual scroller components
 vi.mock("vue3-virtual-scroller", () => ({
@@ -48,9 +46,7 @@ describe("WorkoutLog.vue", () => {
     });
 
     it("shows loading state initially", () => {
-      // Keep getWorkouts pending so the component stays in its loading state,
-      // then assert synchronously before the load resolves.
-      getWorkouts.mockReturnValueOnce(new Promise(() => {}));
+      // Assert synchronously, before the workouts request can answer.
       const loadingWrapper = createWrapper();
       expect(loadingWrapper.find(".text-gray-500").text()).toBe("Loading...");
     });
@@ -65,10 +61,8 @@ describe("WorkoutLog.vue", () => {
 
   describe("Data Loading and Display", () => {
     beforeEach(async () => {
-      // Mock successful data loading
-      getWorkouts.mockResolvedValueOnce(partial<Workout[]>([
+      backend.seed({ workouts: [
         {
-          id: 1,
           name: "Test Workout 1",
           started: new Date("2024-01-15T10:00:00"),
           ended: new Date("2024-01-15T11:30:00"),
@@ -83,7 +77,6 @@ describe("WorkoutLog.vue", () => {
           ],
         },
         {
-          id: 2,
           name: "Test Workout 2",
           started: new Date("2024-01-16T14:00:00"),
           ended: new Date("2024-01-16T15:45:00"),
@@ -102,7 +95,6 @@ describe("WorkoutLog.vue", () => {
           ],
         },
         {
-          id: 3,
           name: "Cardio Workout",
           started: new Date("2024-01-17T09:00:00"),
           ended: new Date("2024-01-17T10:00:00"),
@@ -110,6 +102,7 @@ describe("WorkoutLog.vue", () => {
             {
               name: "Running",
               type: "cardio",
+              displayType: "time",
               sets: [
                 { type: "regular", time: "30m", distance: 5 },
                 { type: "regular", time: "15m", distance: 2 },
@@ -117,16 +110,19 @@ describe("WorkoutLog.vue", () => {
             },
           ],
         },
-      ]));
+      ] });
 
       wrapper = createWrapper();
-      await nextTick();
       // Wait for data to load
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("loads and displays workouts", async () => {
-      expect(getWorkouts).toHaveBeenCalled();
+      expect(wrapper.vm.workouts.map((w: { name: string }) => w.name)).toEqual([
+        "Cardio Workout",
+        "Test Workout 2",
+        "Test Workout 1",
+      ]);
 
       // Check that loading state is gone
       expect(wrapper.find(".text-gray-500").exists()).toBe(false);
@@ -159,26 +155,24 @@ describe("WorkoutLog.vue", () => {
       const summary2 = vm.getWorkoutSummary(workout2);
       const summary3 = vm.getWorkoutSummary(workout3);
 
-      // Workout1 (newest, id: 3): Cardio workout with Running
+      // Workout1 (newest): Cardio workout with Running
       // Running: 30m + 15m = 45m total
       expect(summary1).toEqual(["45m of Running"]);
 
-      // Workout2 (middle, id: 2): 2 exercises (Hook Training + Side Pressure)
+      // Workout2 (middle): 2 exercises (Hook Training + Side Pressure)
       // Hook Training: 1 warmup + 1 regular = 1 regular set
       // Side Pressure: 1 regular set
       expect(summary2).toEqual(["1 sets of Hook Training", "1 sets of Side Pressure"]);
 
-      // Workout3 (oldest, id: 1): 1 exercise (Wrist Curl), 2 regular sets
+      // Workout3 (oldest): 1 exercise (Wrist Curl), 2 regular sets
       expect(summary3).toEqual(["2 sets of Wrist Curl"]);
     });
   });
 
   describe("Empty State", () => {
     beforeEach(async () => {
-      getWorkouts.mockResolvedValueOnce([]);
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("shows empty state when no workouts exist", () => {
@@ -188,8 +182,9 @@ describe("WorkoutLog.vue", () => {
   });
 
   describe("Date Formatting", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = createWrapper();
+      await flushPromises();
     });
 
     it("formats dates correctly", () => {
@@ -225,10 +220,17 @@ describe("WorkoutLog.vue", () => {
 
   describe("Error Handling", () => {
     beforeEach(async () => {
-      getWorkouts.mockRejectedValueOnce(new Error("Database error"));
+      backend.seed({ workouts: [{ name: "Unreachable" }] });
+      server.use(
+        http.get(`${API}/api/workouts`, () =>
+          HttpResponse.json(
+            { type: "about:blank", title: "Internal Server Error", status: 500, code: "internal_error" },
+            { status: 500, headers: { "Content-Type": "application/problem+json" } },
+          ),
+        ),
+      );
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("handles loading errors gracefully", () => {
@@ -238,20 +240,20 @@ describe("WorkoutLog.vue", () => {
   });
 
   describe("Navigation", () => {
+    let workoutId: string;
+
     beforeEach(async () => {
-      getWorkouts.mockResolvedValueOnce(partial<Workout[]>([
+      workoutId = backend.seed({ workouts: [
         {
-          id: 1,
           name: "Test Workout",
           started: new Date(),
           ended: new Date(),
           exercises: [],
         },
-      ]));
+      ] }).workouts[0]!.id;
 
       wrapper = createWrapper();
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
     it("navigates to workout edit when workout is clicked", async () => {
@@ -261,8 +263,9 @@ describe("WorkoutLog.vue", () => {
       expect(typeof vm.editWorkout).toBe("function");
 
       // Test navigation function directly - it should use named routes
-      vm.editWorkout(1);
-      expect(mockPush).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: '1' } });
+      expect(vm.workouts[0].id).toBe(workoutId);
+      vm.editWorkout(workoutId);
+      expect(mockPush).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: workoutId } });
     });
   });
 });

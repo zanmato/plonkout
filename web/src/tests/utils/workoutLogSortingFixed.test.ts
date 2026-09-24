@@ -5,10 +5,10 @@ describe('WorkoutLog Sorting - Verification of Fix', () => {
   it('verifies the fix ensures correct month group sorting', () => {
     // Test data that could cause the original bug
     const workouts = [
-      { id: 1, started: '2024-01-05T08:00:00Z', exercises: [] }, // Early January (processed first)
-      { id: 2, started: '2024-01-25T16:00:00Z', exercises: [] }, // Late January (processed second)
-      { id: 3, started: '2024-02-01T09:00:00Z', exercises: [] }, // Early February (processed third)
-      { id: 4, started: '2024-02-15T14:00:00Z', exercises: [] }  // Late February (processed fourth)
+      { id: '1', started: '2024-01-05T08:00:00Z', exercises: [] }, // Early January (processed first)
+      { id: '2', started: '2024-01-25T16:00:00Z', exercises: [] }, // Late January (processed second)
+      { id: '3', started: '2024-02-01T09:00:00Z', exercises: [] }, // Early February (processed third)
+      { id: '4', started: '2024-02-15T14:00:00Z', exercises: [] }  // Late February (processed fourth)
     ]
 
     // Simulate the fixed grouping logic
@@ -50,24 +50,24 @@ describe('WorkoutLog Sorting - Verification of Fix', () => {
     const febGroup = groupedWorkouts[0]!
     expect(febGroup.monthYear).toBe('February 2024')
     expect(febGroup.sortDate).toEqual(new Date('2024-02-15T14:00:00Z')) // Latest February date
-    expect(febGroup.workouts[0]!.id).toBe(4) // Feb 15 (newest in February)
-    expect(febGroup.workouts[1]!.id).toBe(3) // Feb 1 (oldest in February)
+    expect(febGroup.workouts[0]!.id).toBe('4') // Feb 15 (newest in February)
+    expect(febGroup.workouts[1]!.id).toBe('3') // Feb 1 (oldest in February)
 
     // January should be second (older month)
     const janGroup = groupedWorkouts[1]!
     expect(janGroup.monthYear).toBe('January 2024')
     expect(janGroup.sortDate).toEqual(new Date('2024-01-25T16:00:00Z')) // Latest January date
-    expect(janGroup.workouts[0]!.id).toBe(2) // Jan 25 (newest in January)
-    expect(janGroup.workouts[1]!.id).toBe(1) // Jan 5 (oldest in January)
+    expect(janGroup.workouts[0]!.id).toBe('2') // Jan 25 (newest in January)
+    expect(janGroup.workouts[1]!.id).toBe('1') // Jan 5 (oldest in January)
   })
 
   it('verifies sorting works correctly when workouts are pre-sorted by loadWorkouts', () => {
     // Test the actual scenario: workouts come pre-sorted from loadWorkouts
     const workouts = [
-      { id: 4, started: '2024-02-15T14:00:00Z', exercises: [] }, // Newest overall
-      { id: 3, started: '2024-02-01T09:00:00Z', exercises: [] }, 
-      { id: 2, started: '2024-01-25T16:00:00Z', exercises: [] },
-      { id: 1, started: '2024-01-05T08:00:00Z', exercises: [] }  // Oldest overall
+      { id: '4', started: '2024-02-15T14:00:00Z', exercises: [] }, // Newest overall
+      { id: '3', started: '2024-02-01T09:00:00Z', exercises: [] }, 
+      { id: '2', started: '2024-01-25T16:00:00Z', exercises: [] },
+      { id: '1', started: '2024-01-05T08:00:00Z', exercises: [] }  // Oldest overall
     ]
 
     // Since workouts are pre-sorted, the first workout in each month group
@@ -110,11 +110,11 @@ describe('WorkoutLog Sorting - Verification of Fix', () => {
     expect(groupedWorkouts[1]!.monthYear).toBe('January 2024')
 
     // Verify correct workout order within months
-    expect(groupedWorkouts[0]!.workouts[0]!.id).toBe(4) // Feb 15
-    expect(groupedWorkouts[0]!.workouts[1]!.id).toBe(3) // Feb 1
+    expect(groupedWorkouts[0]!.workouts[0]!.id).toBe('4') // Feb 15
+    expect(groupedWorkouts[0]!.workouts[1]!.id).toBe('3') // Feb 1
 
-    expect(groupedWorkouts[1]!.workouts[0]!.id).toBe(2) // Jan 25  
-    expect(groupedWorkouts[1]!.workouts[1]!.id).toBe(1) // Jan 5
+    expect(groupedWorkouts[1]!.workouts[0]!.id).toBe('2') // Jan 25  
+    expect(groupedWorkouts[1]!.workouts[1]!.id).toBe('1') // Jan 5
   })
 
   it('tests edge case where month groups could be created in wrong order', () => {
@@ -122,10 +122,10 @@ describe('WorkoutLog Sorting - Verification of Fix', () => {
     // cause groups to be created with wrong sortDates
 
     const workouts = [
-      { id: 1, started: '2024-01-01T00:00:00Z', exercises: [] }, // Very early January
-      { id: 2, started: '2024-02-28T23:59:59Z', exercises: [] }, // Very late February  
-      { id: 3, started: '2024-01-31T23:59:59Z', exercises: [] }, // Very late January
-      { id: 4, started: '2024-02-01T00:00:01Z', exercises: [] }  // Very early February
+      { id: '1', started: '2024-01-01T00:00:00Z', exercises: [] }, // Very early January
+      { id: '2', started: '2024-02-28T23:59:59Z', exercises: [] }, // Very late February  
+      { id: '3', started: '2024-01-31T23:59:59Z', exercises: [] }, // Very late January
+      { id: '4', started: '2024-02-01T00:00:01Z', exercises: [] }  // Very early February
     ]
 
     // Without the fix, if these are processed in this order:
@@ -175,19 +175,19 @@ describe('WorkoutLog Sorting - Verification of Fix', () => {
 
     const workouts = [
       { 
-        id: 1, 
+        id: '1', 
         name: 'Morning workout',
         started: '2024-12-05T09:00:00Z', 
         exercises: [] 
       },
       { 
-        id: 2, 
+        id: '2', 
         name: 'Evening workout',
         started: '2024-12-20T18:00:00Z', 
         exercises: [] 
       },
       { 
-        id: 3, 
+        id: '3', 
         name: 'Afternoon workout',
         started: '2024-12-15T15:00:00Z', 
         exercises: [] 
@@ -238,9 +238,9 @@ describe('WorkoutLog Sorting - Verification of Fix', () => {
     })
 
     // Verify the correct order: Evening (20th), Afternoon (15th), Morning (5th)
-    expect(decemberGroup.workouts[0]!.id).toBe(2) // Dec 20 (newest)
-    expect(decemberGroup.workouts[1]!.id).toBe(3) // Dec 15 (middle)
-    expect(decemberGroup.workouts[2]!.id).toBe(1) // Dec 5 (oldest)
+    expect(decemberGroup.workouts[0]!.id).toBe('2') // Dec 20 (newest)
+    expect(decemberGroup.workouts[1]!.id).toBe('3') // Dec 15 (middle)
+    expect(decemberGroup.workouts[2]!.id).toBe('1') // Dec 5 (oldest)
 
     console.log('✓ Fix confirmed: Workouts are properly sorted by date descending within the month')
   })

@@ -137,7 +137,7 @@ import {
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import { Chart, registerables } from "chart.js";
-import { getWorkouts } from "@/utils/database";
+import { getWorkouts } from "@/api/data";
 import type { DateLike, Workout } from "@/types/domain";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";

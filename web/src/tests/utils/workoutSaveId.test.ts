@@ -1,56 +1,32 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-
-// Mock the database function
-const mockSaveWorkoutToDB = vi.fn()
-vi.mock('@/utils/database', () => ({
-  saveWorkout: mockSaveWorkoutToDB
-}))
+import { describe, it, expect } from 'vitest'
+import { saveWorkout } from '@/api/data'
+import type { Workout } from '@/types/domain'
+import { backend } from '../mocks/backend'
 
 describe('Workout ID Preservation', () => {
-  beforeEach(() => {
-    vi.clearAllMocks()
-  })
-
   it('preserves ID when saving existing workout', async () => {
-    // Test data
-    const existingWorkout = {
-      id: 42,
-      name: 'Test Workout',
-      started: new Date('2024-01-01T10:00:00'),
-      ended: new Date('2024-01-01T11:00:00'),
-      notes: 'Test notes',
-      exercises: []
-    }
+    const [existing] = backend.seed({
+      workouts: [{
+        name: 'Test Workout',
+        started: new Date('2024-01-01T10:00:00'),
+        ended: new Date('2024-01-01T11:00:00'),
+        notes: 'Test notes',
+        exercises: []
+      }]
+    }).workouts
 
-    // Mock the database function to return the same ID
-    mockSaveWorkoutToDB.mockResolvedValueOnce(42)
+    // The editor round trips the loaded workout through JSON before saving
+    const workoutData: Workout = JSON.parse(JSON.stringify({ ...existing, notes: 'Changed' }))
 
-    // Simulate what happens in saveWorkout function
-    const workoutData = JSON.parse(
-      JSON.stringify({
-        ...existingWorkout,
-        updated: new Date(),
-      })
-    )
+    const saved = await saveWorkout(workoutData)
 
-    const id = await mockSaveWorkoutToDB(workoutData)
-
-    // Verify the workout data includes the ID
-    expect(mockSaveWorkoutToDB).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: 42,
-        name: 'Test Workout'
-      })
-    )
-
-    // Verify the same ID is returned
-    expect(id).toBe(42)
+    expect(saved.id).toBe(existing!.id)
+    expect(backend.workouts).toHaveLength(1)
+    expect(backend.workout(existing!.id)).toMatchObject({ name: 'Test Workout', notes: 'Changed' })
   })
 
   it('creates new ID for new workout', async () => {
-    // Test data without ID
-    const newWorkout = {
-      id: null,
+    const newWorkout: Workout = {
       name: 'New Workout',
       started: new Date('2024-01-01T10:00:00'),
       ended: null,
@@ -58,28 +34,11 @@ describe('Workout ID Preservation', () => {
       exercises: []
     }
 
-    // Mock the database function to return a new ID
-    mockSaveWorkoutToDB.mockResolvedValueOnce(123)
+    const workoutData: Workout = JSON.parse(JSON.stringify(newWorkout))
 
-    // Simulate what happens in saveWorkout function
-    const workoutData = JSON.parse(
-      JSON.stringify({
-        ...newWorkout,
-        updated: new Date(),
-      })
-    )
+    const saved = await saveWorkout(workoutData)
 
-    const id = await mockSaveWorkoutToDB(workoutData)
-
-    // Verify the workout data is passed correctly
-    expect(mockSaveWorkoutToDB).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: null,
-        name: 'New Workout'
-      })
-    )
-
-    // Verify a new ID is returned
-    expect(id).toBe(123)
+    expect(saved.id).toMatch(/^[0-9a-f-]{36}$/)
+    expect(backend.workouts).toEqual([expect.objectContaining({ id: saved.id, name: 'New Workout' })])
   })
 })

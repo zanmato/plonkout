@@ -1,0 +1,1238 @@
+{
+ "version": "1.0.0",
+ "exportDate": "2026-09-24T09:02:34.388Z",
+ "workouts": [
+  {
+   "id": 35,
+   "name": "Ben",
+   "started": "2025-09-19T15:47:02.720Z",
+   "ended": null,
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Squat",
+     "muscleGroup": "Legs",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 35,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 70,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 120,
+       "distance": null,
+       "reps": 3,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 150,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 170,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 190,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 200,
+       "distance": null,
+       "reps": null,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    }
+   ],
+   "updated": "2025-09-19T16:01:51.073Z"
+  },
+  {
+   "id": 2,
+   "name": "Test 1",
+   "started": "2025-07-11T12:14:04.299Z",
+   "ended": "2025-07-11T13:09:00.000Z",
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Pronation Curl",
+     "muscleGroup": "Forearm",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 2,
+     "sets": [
+      {
+       "type": "warmup",
+       "weight": 7,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "warmup",
+       "weight": 7,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 15,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 25,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 20,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 20,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 20,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 20,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Squat",
+     "muscleGroup": "Legs",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 35,
+     "sets": [
+      {
+       "type": "warmup",
+       "weight": 20,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 60,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 100,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Hantel curl",
+     "muscleGroup": "Biceps",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 68,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": "B\u00f6rjade g\u00f6ra ont"
+      },
+      {
+       "type": "regular",
+       "weight": 25,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 30,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 32.5,
+       "distance": null,
+       "reps": 3,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      }
+     ]
+    }
+   ],
+   "updated": "2025-07-11T17:58:16.982Z"
+  },
+  {
+   "id": 3,
+   "name": "BAYB",
+   "started": "2025-07-12T11:30:02.773Z",
+   "ended": "2025-07-12T12:13:00.000Z",
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Bench Press",
+     "muscleGroup": "Chest",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 8,
+     "sets": [
+      {
+       "type": "warmup",
+       "weight": 70,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 100,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 120,
+       "distance": null,
+       "reps": 3,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 140,
+       "distance": null,
+       "reps": 2,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 140,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 100,
+       "distance": null,
+       "reps": 11,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Preacher hantel",
+     "muscleGroup": "Biceps",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 69,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 30,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 40,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 40,
+       "distance": null,
+       "reps": 5,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 35,
+       "distance": null,
+       "reps": null,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Pronation Curl",
+     "muscleGroup": "Forearm",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 2,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 10,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 25,
+       "distance": null,
+       "reps": 2,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      }
+     ]
+    }
+   ],
+   "updated": "2025-07-12T12:13:39.671Z"
+  },
+  {
+   "name": "Br\u00f6st",
+   "started": "2026-08-31T15:45:49.311Z",
+   "ended": "2026-08-31T16:22:00.000Z",
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Bench Press",
+     "muscleGroup": "Chest",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 8,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 145,
+       "distance": null,
+       "reps": 5,
+       "time": "",
+       "rpe": 8,
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 5,
+       "time": "",
+       "rpe": 7,
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 5,
+       "time": "",
+       "rpe": 7,
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 5,
+       "time": "",
+       "rpe": 7,
+       "arm": "",
+       "notes": ""
+      }
+     ],
+     "intensity": "heavy"
+    }
+   ],
+   "created": "2026-08-31T15:45:49.315Z",
+   "updated": "2026-08-31T16:33:37.412Z",
+   "id": 157
+  },
+  {
+   "id": 4,
+   "name": "Rygg",
+   "started": "2025-07-15T12:26:40.587Z",
+   "ended": "2025-07-15T13:36:00.000Z",
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Deadlift",
+     "muscleGroup": "Back",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 17,
+     "sets": [
+      {
+       "type": "warmup",
+       "weight": 70,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 120,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 160,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 200,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 210,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 220,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 120,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Seated row",
+     "muscleGroup": "Back",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 70,
+     "sets": [
+      {
+       "type": "warmup",
+       "weight": 30,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 55,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 80,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 100,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Tricep Extension",
+     "muscleGroup": "Triceps",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 48,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 25,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 35,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 40,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 45,
+       "distance": null,
+       "reps": 2,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 50,
+       "distance": null,
+       "reps": null,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Hantel curl",
+     "muscleGroup": "Biceps",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 68,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 25,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 30,
+       "distance": null,
+       "reps": 3,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 32.5,
+       "distance": null,
+       "reps": null,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      }
+     ]
+    }
+   ],
+   "updated": "2025-07-15T13:36:58.564Z"
+  },
+  {
+   "id": 9,
+   "name": "Br\u00f6st",
+   "started": "2025-07-28T15:48:47.459Z",
+   "ended": "2025-07-28T16:47:00.000Z",
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Bench Press",
+     "muscleGroup": "Chest",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 8,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 60,
+       "distance": null,
+       "reps": 12,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 100,
+       "distance": null,
+       "reps": 10,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 130,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 140,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 150,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 155,
+       "distance": null,
+       "reps": 1,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 100,
+       "distance": null,
+       "reps": 20,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Pronation Curl",
+     "muscleGroup": "Forearm",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 2,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 7.5,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 7.5,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 12.5,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "left",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 12.5,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 17.5,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 22.5,
+       "distance": null,
+       "reps": 5,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 27.5,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 15,
+       "distance": null,
+       "reps": 20,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      }
+     ]
+    }
+   ],
+   "updated": "2025-07-28T16:47:42.026Z"
+  },
+  {
+   "id": 5,
+   "name": "Ben",
+   "started": "2025-07-19T09:30:00.088Z",
+   "ended": "2025-07-19T10:09:00.000Z",
+   "notes": "",
+   "exercises": [
+    {
+     "name": "Squat",
+     "muscleGroup": "Legs",
+     "singleArm": false,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 35,
+     "sets": [
+      {
+       "type": "warmup",
+       "weight": 20,
+       "distance": null,
+       "reps": 8,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 60,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 110,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 140,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 140,
+       "distance": null,
+       "reps": 3,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 110,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "",
+       "notes": ""
+      }
+     ]
+    },
+    {
+     "name": "Preacher hantel",
+     "muscleGroup": "Biceps",
+     "singleArm": true,
+     "type": "strength",
+     "displayType": "reps",
+     "id": 69,
+     "sets": [
+      {
+       "type": "regular",
+       "weight": 20,
+       "distance": null,
+       "reps": 6,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 30,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 35,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      },
+      {
+       "type": "regular",
+       "weight": 40,
+       "distance": null,
+       "reps": 4,
+       "time": "",
+       "rpe": "",
+       "arm": "right",
+       "notes": ""
+      }
+     ]
+    }
+   ],
+   "updated": "2025-07-19T10:09:59.274Z"
+  }
+ ]
+}

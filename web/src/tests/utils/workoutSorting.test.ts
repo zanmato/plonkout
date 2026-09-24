@@ -9,21 +9,21 @@ describe('Workout Sorting Logic', () => {
     // Test data with mixed dates
     const workouts = [
       {
-        id: 1,
+        id: '1',
         name: 'Workout 1',
         started: '2024-01-15T10:00:00Z', // Middle
         ended: '2024-01-15T11:00:00Z',
         exercises: []
       },
       {
-        id: 2,
+        id: '2',
         name: 'Workout 2', 
         started: '2024-01-20T10:00:00Z', // Newest
         ended: '2024-01-20T11:00:00Z',
         exercises: []
       },
       {
-        id: 3,
+        id: '3',
         name: 'Workout 3',
         started: '2024-01-10T10:00:00Z', // Oldest
         ended: '2024-01-10T11:00:00Z',
@@ -35,37 +35,37 @@ describe('Workout Sorting Logic', () => {
     const sorted = workouts.sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
 
     expect(sorted).toHaveLength(3)
-    expect(sorted[0]!.id).toBe(2) // 2024-01-20 (newest first)
-    expect(sorted[1]!.id).toBe(1) // 2024-01-15 (middle)
-    expect(sorted[2]!.id).toBe(3) // 2024-01-10 (oldest last)
+    expect(sorted[0]!.id).toBe('2') // 2024-01-20 (newest first)
+    expect(sorted[1]!.id).toBe('1') // 2024-01-15 (middle)
+    expect(sorted[2]!.id).toBe('3') // 2024-01-10 (oldest last)
   })
 
   it('groups workouts by month and sorts within groups by date descending', () => {
     // Test data with workouts in same month but different dates
     const workouts = [
       {
-        id: 1,
+        id: '1',
         name: 'Early January',
         started: '2024-01-05T10:00:00Z',
         ended: '2024-01-05T11:00:00Z',
         exercises: []
       },
       {
-        id: 2,
+        id: '2',
         name: 'Late January',
         started: '2024-01-25T10:00:00Z',
         ended: '2024-01-25T11:00:00Z',
         exercises: []
       },
       {
-        id: 3,
+        id: '3',
         name: 'Mid January',
         started: '2024-01-15T10:00:00Z',
         ended: '2024-01-15T11:00:00Z',
         exercises: []
       },
       {
-        id: 4,
+        id: '4',
         name: 'February Workout',
         started: '2024-02-10T10:00:00Z',
         ended: '2024-02-10T11:00:00Z',
@@ -109,29 +109,29 @@ describe('Workout Sorting Logic', () => {
     // February should be first (newest month)
     const febGroup = groupedWorkouts[0]!
     expect(febGroup.workouts).toHaveLength(1)
-    expect(febGroup.workouts[0]!.id).toBe(4)
+    expect(febGroup.workouts[0]!.id).toBe('4')
 
     // January should be second
     const janGroup = groupedWorkouts[1]! 
     expect(janGroup.workouts).toHaveLength(3)
     
     // Within January, should be sorted newest first
-    expect(janGroup.workouts[0]!.id).toBe(2) // 2024-01-25 (latest)
-    expect(janGroup.workouts[1]!.id).toBe(3) // 2024-01-15 (middle)
-    expect(janGroup.workouts[2]!.id).toBe(1) // 2024-01-05 (earliest)
+    expect(janGroup.workouts[0]!.id).toBe('2') // 2024-01-25 (latest)
+    expect(janGroup.workouts[1]!.id).toBe('3') // 2024-01-15 (middle)
+    expect(janGroup.workouts[2]!.id).toBe('1') // 2024-01-05 (earliest)
   })
 
   it('handles edge case with same started dates', () => {
     const workouts = [
       {
-        id: 1,
+        id: '1',
         name: 'Workout 1',
         started: '2024-01-15T10:00:00Z',
         ended: '2024-01-15T11:00:00Z',
         exercises: []
       },
       {
-        id: 2,
+        id: '2',
         name: 'Workout 2',
         started: '2024-01-15T10:00:00Z', // Same exact time
         ended: '2024-01-15T11:30:00Z',
@@ -147,8 +147,8 @@ describe('Workout Sorting Logic', () => {
     
     // Order might be either way since dates are identical, but both should be there
     const ids = sorted.map(w => w.id)
-    expect(ids).toContain(1)
-    expect(ids).toContain(2)
+    expect(ids).toContain('1')
+    expect(ids).toContain('2')
   })
 
   it('verifies date comparison logic works correctly', () => {
@@ -177,19 +177,19 @@ describe('Workout Sorting Logic', () => {
 
     const workouts = [
       {
-        id: 1,
+        id: '1',
         name: 'Workout A',
         started: '2024-01-05T10:00:00Z',
         exercises: []
       },
       {
-        id: 2, 
+        id: '2', 
         name: 'Workout B',
         started: '2024-01-25T10:00:00Z',
         exercises: []
       },
       {
-        id: 3,
+        id: '3',
         name: 'Workout C', 
         started: '2024-02-10T10:00:00Z',
         exercises: []
@@ -233,11 +233,11 @@ describe('Workout Sorting Logic', () => {
     
     // February group should be first
     expect(groupedWorkouts[0]!.monthYear).toBe('2024-02')
-    expect(groupedWorkouts[0]!.workouts[0]!.id).toBe(3)
+    expect(groupedWorkouts[0]!.workouts[0]!.id).toBe('3')
     
     // January group should be second  
     expect(groupedWorkouts[1]!.monthYear).toBe('2024-01')
-    expect(groupedWorkouts[1]!.workouts[0]!.id).toBe(2) // Jan 25th first
-    expect(groupedWorkouts[1]!.workouts[1]!.id).toBe(1) // Jan 5th second
+    expect(groupedWorkouts[1]!.workouts[0]!.id).toBe('2') // Jan 25th first
+    expect(groupedWorkouts[1]!.workouts[1]!.id).toBe('1') // Jan 5th second
   })
 })

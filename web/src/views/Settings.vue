@@ -208,15 +208,33 @@
               </div>
             </NeoButton>
 
-            <DestructiveButton
-              :confirm-text="t('settings.dataManagement.clear')"
+            <NeoButton
+              variant="secondary"
               full-width
-              @confirm="clearAllData"
+              class="text-left"
+              :disabled="importing"
+              @click="importInput?.click()"
             >
               <template #icon>
-                <span class="material-icons">delete</span>
+                <span class="material-icons">upload</span>
               </template>
-            </DestructiveButton>
+              <div class="flex flex-col">
+                <div class="font-medium">
+                  {{ t("settings.dataManagement.import") }}
+                </div>
+                <div class="text-sm text-gray-600 dark:text-gray-400">
+                  {{ t("settings.dataManagement.importDescription") }}
+                </div>
+              </div>
+            </NeoButton>
+            <input
+              ref="importInput"
+              type="file"
+              accept="application/json,.json"
+              class="hidden"
+              data-testid="import-file-input"
+              @change="importData"
+            />
           </div>
         </div>
       </NeoPanel>
@@ -225,10 +243,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, useTemplateRef } from "vue";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
-import { getSetting, saveSetting, getWorkouts } from "@/utils/database";
+import {
+  getSetting,
+  saveSetting,
+  exportAll,
+  importLegacyExport,
+} from "@/api/data";
+import { getLocalPref, setLocalPref, type Theme } from "@/utils/localPrefs";
 import {
   getGlobalSettings,
   saveGlobalSettings,
@@ -259,7 +283,9 @@ const currentLocale = ref("en");
 const weightUnit = ref("kg");
 const compareScope = ref<CompareScope>("intensity");
 const distanceUnit = ref("km");
-const theme = ref("system");
+const theme = ref<Theme>("system");
+const importing = ref(false);
+const importInput = useTemplateRef<HTMLInputElement>("importInput");
 const storageUsed = ref("");
 
 // Block periodization settings
@@ -307,9 +333,9 @@ onMounted(() => {
 /**
  * Change application language
  */
-async function changeLanguage() {
+function changeLanguage() {
   locale.value = currentLocale.value;
-  await saveSetting("locale", currentLocale.value);
+  setLocalPref("locale", currentLocale.value);
 }
 
 /**
@@ -356,8 +382,8 @@ async function handleResetAllBlocks() {
 /**
  * Save theme preference and apply it
  */
-async function saveTheme() {
-  await saveSetting("theme", theme.value);
+function saveTheme() {
+  setLocalPref("theme", theme.value);
   applyTheme();
 }
 
@@ -378,16 +404,11 @@ function applyTheme() {
 }
 
 /**
- * Export workout data as JSON file
+ * Export everything in the account as a JSON backup file
  */
 async function exportData() {
   try {
-    const workouts = await getWorkouts();
-    const data = {
-      version: "1.0.0",
-      exportDate: new Date().toISOString(),
-      workouts: workouts,
-    };
+    const data = await exportAll();
 
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
@@ -396,7 +417,7 @@ async function exportData() {
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = `plonkout-export-${
+    link.download = `plonkout-backup-${
       new Date().toISOString().split("T")[0]
     }.json`;
     document.body.appendChild(link);
@@ -410,57 +431,43 @@ async function exportData() {
 }
 
 /**
- * Clear all application data
+ * Import a JSON file exported by the old local only app
  */
-async function clearAllData() {
+async function importData(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  if (!file) return;
+
+  importing.value = true;
   try {
-    // Clear IndexedDB
-    if ("indexedDB" in window) {
-      const databases = await indexedDB.databases();
-      await Promise.all(
-        databases.map((db) => {
-          return new Promise<void>((resolve, reject) => {
-            // databases() always reports a name for existing databases
-            const deleteReq = indexedDB.deleteDatabase(db.name!);
-            deleteReq.onsuccess = () => resolve();
-            deleteReq.onerror = () => reject(deleteReq.error);
-          });
-        }),
-      );
-    }
-
-    // Clear localStorage
-    localStorage.clear();
-
-    // Clear sessionStorage
-    sessionStorage.clear();
-
-    showSuccess(t("settings.dataManagement.clearSuccess"));
-    window.location.reload();
+    const result = await importLegacyExport(JSON.parse(await file.text()));
+    showSuccess(t("settings.dataManagement.importSuccess", { ...result }));
   } catch (error) {
-    console.error(t("settings.dataManagement.clearError"), error);
-    showError(t("settings.dataManagement.clearError"));
+    console.error(t("settings.dataManagement.importError"), error);
+    showError(t("settings.dataManagement.importError"));
+  } finally {
+    importing.value = false;
+    // Let the same file be picked again
+    input.value = "";
   }
 }
 
 /**
- * Load settings from database
+ * Load settings, theme and language are stored on this device
  */
 async function loadSettings() {
+  currentLocale.value = getLocalPref("locale");
+  theme.value = getLocalPref("theme");
+
   try {
-    const savedLocale = await getSetting("locale", "en");
     const savedWeightUnit = await getSetting("weightUnit", "kg");
     const savedDistanceUnit = await getSetting("distanceUnit", "km");
-    const savedTheme = await getSetting("theme", "system");
     compareScope.value = await getSetting<CompareScope>(
       "compareScope",
       "intensity",
     );
-    currentLocale.value = savedLocale;
-    locale.value = savedLocale;
     weightUnit.value = savedWeightUnit;
     distanceUnit.value = savedDistanceUnit;
-    theme.value = savedTheme;
 
     // Load block periodization settings
     const blockSettings = await getGlobalSettings();
@@ -468,8 +475,6 @@ async function loadSettings() {
     blockWorkoutsPerWeek.value = blockSettings.workoutsPerWeek;
     blockStartPercentage.value = blockSettings.startPercentage;
     blockProgressionPerWeek.value = blockSettings.progressionPerWeek;
-
-    applyTheme();
   } catch (error) {
     console.error(t("settings.loadError"), error);
   }

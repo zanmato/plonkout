@@ -1,5 +1,5 @@
 import { ref, computed, type Ref } from "vue";
-import { getWorkouts, getSetting } from "@/utils/database";
+import { getWorkouts, getSetting } from "@/api/data";
 import {
   buildExerciseHistory,
   getMaxWeight,

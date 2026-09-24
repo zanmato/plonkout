@@ -1,16 +1,27 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { mount, type VueWrapper } from "@vue/test-utils";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
 import { nextTick } from "vue";
+import { http, HttpResponse } from "msw";
 import WorkoutEdit from "@/views/WorkoutEdit.vue";
-import * as database from "@/utils/database";
 import type { Exercise } from "@/types/domain";
+import { clearSettingsCache } from "@/api/data";
+import { API, server } from "../helpers/msw";
+import { backend } from "../mocks/backend";
 import { mockPush, mockReplace } from "../setup";
 
-const getWorkout = vi.mocked(database.getWorkout);
-const saveWorkoutToDB = vi.mocked(database.saveWorkout);
-const deleteWorkout = vi.mocked(database.deleteWorkout);
-const getSetting = vi.mocked(database.getSetting);
 const confirm = vi.mocked(global.confirm);
+
+/** An entry of the exercise list, as the exercise selector hands it over */
+const listExercise = (fields: Partial<Exercise> & { name: string }): Exercise => ({
+  id: crypto.randomUUID(),
+  muscleGroup: "Forearm",
+  singleArm: false,
+  type: "strength",
+  displayType: "reps",
+  archived: false,
+  created: "2024-01-01T00:00:00.000Z",
+  ...fields,
+});
 
 // Mock useToast composable
 const mockShowSuccess = vi.fn();
@@ -93,26 +104,41 @@ describe("WorkoutEdit.vue", () => {
     });
   };
 
+  /** Opens the header's context menu and finds one of its buttons */
+  const contextMenuButton = async (label: string) => {
+    const menuButton = wrapper
+      .findAll("button")
+      .find((btn) => btn.text().includes("more_vert"));
+    expect(menuButton).toBeDefined();
+    await menuButton!.trigger("click");
+    const button = wrapper.findAll("button").find((btn) => btn.text().includes(label));
+    expect(button).toBeDefined();
+    return button!;
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     mockPush.mockClear();
     mockReplace.mockClear();
 
-    // Mock getSetting to return default values
-    // Cast needed because the real getSetting is overloaded
-    getSetting.mockImplementation(((key: string, defaultValue: unknown) => {
-      const settings: Record<string, string> = {
+    backend.seed({
+      settings: {
         weightUnit: "kg",
         distanceUnit: "km",
         exerciseDisplay: "reps",
-      };
-      return Promise.resolve(settings[key] || defaultValue);
-    }) as typeof database.getSetting);
+      },
+    });
+  });
+
+  afterEach(() => {
+    // Unmounting clears a pending auto-save, so it cannot land in a later test
+    wrapper?.unmount();
   });
 
   describe("New Workout", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = createWrapper();
+      await flushPromises();
     });
 
     it("renders new workout form", () => {
@@ -131,45 +157,53 @@ describe("WorkoutEdit.vue", () => {
         '[data-testid="add-exercise-button"]'
       );
 
-      if (addExerciseButton) {
-        await addExerciseButton.trigger("click");
-        await nextTick();
-        expect(wrapper.vm.showExerciseSelector).toBe(true);
-      }
+      expect(addExerciseButton.exists()).toBe(true);
+      await addExerciseButton.trigger("click");
+      await nextTick();
+      expect(wrapper.vm.showExerciseSelector).toBe(true);
     });
 
     it("saves new workout successfully", async () => {
-      saveWorkoutToDB.mockResolvedValueOnce(123);
-
       // Set workout data
       await wrapper.find('input[type="text"]').setValue("Test Workout");
 
-      // Find and click save button
-      const saveButton = wrapper
-        .findAll("button")
-        .find((btn) => btn.text().includes("workout.save"));
+      // Saving is automatic, run it now instead of waiting for the debounce
+      await wrapper.vm.saveWorkout();
+      await flushPromises();
 
-      if (saveButton) {
-        await saveButton.trigger("click");
-        await nextTick();
-
-        expect(saveWorkoutToDB).toHaveBeenCalled();
-        expect(mockShowSuccess).toHaveBeenCalledWith("Workout saved successfully");
-        expect(mockReplace).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: '123' } });
-      }
+      expect(backend.workouts).toHaveLength(1);
+      const saved = backend.workouts[0]!;
+      expect(saved).toMatchObject({ name: "Test Workout", revision: 1 });
+      expect(wrapper.vm.workout.id).toBe(saved.id);
+      expect(mockShowError).not.toHaveBeenCalled();
+      expect(mockReplace).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: saved.id } });
     });
   });
 
   describe("Edit Existing Workout", () => {
+    let workoutId: string;
+
     beforeEach(async () => {
-      wrapper = createWrapper({ id: "1" });
-      await nextTick();
+      workoutId = backend.seed({
+        workouts: [
+          {
+            name: "Test Workout",
+            started: new Date("2024-01-15T10:00:00"),
+            ended: null,
+            notes: "",
+            exercises: [{ name: "Wrist Curl", muscleGroup: "Forearm", sets: [{ weight: 20, reps: 10 }] }],
+          },
+        ],
+      }).workouts[0]!.id;
+      wrapper = createWrapper({ id: workoutId });
+      // Wait for the component to load the data
+      await flushPromises();
     });
 
     it("loads existing workout data", async () => {
-      expect(getWorkout).toHaveBeenCalledWith(1);
-      // Wait for the component to load the data
-      await nextTick();
+      expect(wrapper.vm.workout.id).toBe(workoutId);
+      expect(wrapper.find<HTMLInputElement>('input[type="text"]').element.value).toBe("Test Workout");
+      expect(wrapper.vm.workout.exercises[0].name).toBe("Wrist Curl");
     });
 
     it("renders edit workout form", () => {
@@ -177,103 +211,96 @@ describe("WorkoutEdit.vue", () => {
     });
 
     it("can duplicate workout", async () => {
-      saveWorkoutToDB.mockResolvedValueOnce(456);
+      const duplicateBtn = await contextMenuButton("Duplicate Workout");
+      await duplicateBtn.trigger("click");
+      await flushPromises();
 
-      // Find context menu button (three dots)
-      const contextMenuBtn = wrapper
-        .findAll("button")
-        .find((btn) => btn.find("svg")?.exists());
-
-      if (contextMenuBtn) {
-        await contextMenuBtn.trigger("click");
-        await nextTick();
-
-        // Find duplicate button in context menu
-        const duplicateBtn = wrapper
-          .findAll("button")
-          .find((btn) => btn.text().includes("workout.duplicate"));
-
-        if (duplicateBtn) {
-          await duplicateBtn.trigger("click");
-          await nextTick();
-
-          expect(saveWorkoutToDB).toHaveBeenCalled();
-          expect(mockPush).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: '456' } });
-        }
-      }
+      expect(backend.workouts).toHaveLength(2);
+      const copy = backend.workouts.find((w) => w.id !== workoutId)!;
+      expect(copy).toMatchObject({ name: "Test Workout", ended: null, revision: 1 });
+      expect(copy.exercises.map((e) => e.name)).toEqual(["Wrist Curl"]);
+      expect(mockPush).toHaveBeenCalledWith({ name: 'workout-edit', params: { id: copy.id } });
     });
 
     it("preserves workout ID when saving existing workout", async () => {
-      // Mock existing workout data
-      getWorkout.mockResolvedValueOnce({
-        id: 1,
+      wrapper.vm.workout.notes = "Felt strong";
+      await wrapper.vm.saveWorkout();
+      await flushPromises();
+
+      // The stored workout was updated in place, not copied
+      expect(backend.workouts).toHaveLength(1);
+      expect(backend.workout(workoutId)).toMatchObject({
+        id: workoutId,
         name: "Test Workout",
-        started: new Date(),
-        ended: null,
-        notes: "",
-        exercises: [],
+        notes: "Felt strong",
+        revision: 2,
       });
+      expect(wrapper.vm.workout.revision).toBe(2);
+      expect(mockReplace).not.toHaveBeenCalled();
+    });
 
-      saveWorkoutToDB.mockResolvedValueOnce(1); // Should return the same ID
+    it("saves again after its own save without a conflict", async () => {
+      wrapper.vm.workout.notes = "First";
+      await wrapper.vm.saveWorkout();
+      wrapper.vm.workout.notes = "Second";
+      await wrapper.vm.saveWorkout();
+      await flushPromises();
 
-      // Create wrapper for existing workout
-      wrapper = createWrapper({ id: "1" });
-      await nextTick();
-      await new Promise((resolve) => setTimeout(resolve, 50)); // Wait for loading
+      expect(mockShowError).not.toHaveBeenCalled();
+      expect(backend.workout(workoutId)).toMatchObject({ notes: "Second", revision: 3 });
+    });
 
-      // Trigger save
-      const vm = wrapper.vm;
-      await vm.saveWorkout();
+    it("reloads the stored workout when another device saved first", async () => {
+      // Another device saves a newer revision after this editor loaded
+      Object.assign(backend.workout(workoutId), { name: "From phone", revision: 2 });
 
-      // Verify that saveWorkoutToDB was called with the workout including ID
-      expect(saveWorkoutToDB).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 1,
-          name: "Test Workout",
-        })
+      wrapper.vm.workout.name = "From laptop";
+      await wrapper.vm.saveWorkout();
+      await flushPromises();
+
+      expect(mockShowError).toHaveBeenCalledWith(
+        "This workout was changed on another device. Reloaded the latest version."
       );
+      expect(backend.workout(workoutId)).toMatchObject({ name: "From phone", revision: 2 });
+      expect(wrapper.vm.workout).toMatchObject({ name: "From phone", revision: 2 });
+    });
+
+    it("can save workout as a template", async () => {
+      const templateBtn = await contextMenuButton("Save as template");
+      await templateBtn.trigger("click");
+      await flushPromises();
+
+      expect(backend.templates).toHaveLength(1);
+      expect(backend.templates[0]).toMatchObject({ name: "Test Workout" });
+      expect(backend.templates[0]!.exercises.map((e) => e.name)).toEqual(["Wrist Curl"]);
+      expect(mockShowSuccess).toHaveBeenCalledWith("Workout template saved");
     });
 
     it("can delete workout", async () => {
       confirm.mockReturnValueOnce(true);
 
-      // Find context menu button
-      const contextMenuBtn = wrapper
-        .findAll("button")
-        .find((btn) => btn.find("svg")?.exists());
+      const deleteBtn = await contextMenuButton("Delete Workout");
+      await deleteBtn.trigger("click");
+      await flushPromises();
 
-      if (contextMenuBtn) {
-        await contextMenuBtn.trigger("click");
-        await nextTick();
-
-        // Find delete button in context menu
-        const deleteBtn = wrapper
-          .findAll("button")
-          .find((btn) => btn.text().includes("workout.delete"));
-
-        if (deleteBtn) {
-          await deleteBtn.trigger("click");
-          await nextTick();
-
-          expect(deleteWorkout).toHaveBeenCalledWith(1);
-          expect(mockPush).toHaveBeenCalledWith({ name: 'log' });
-        }
-      }
+      expect(backend.workouts).toEqual([]);
+      expect(mockPush).toHaveBeenCalledWith({ name: 'log' });
     });
   });
 
   describe("Exercise Management", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = createWrapper();
+      await flushPromises();
     });
 
     it("can add sets to exercises", async () => {
       // First add an exercise
-      const mockExercise = {
+      const mockExercise = listExercise({
         name: "Wrist Curl",
         muscleGroup: "Wrist",
         singleArm: true,
-      };
+      });
       wrapper.vm.addExercise(mockExercise);
       await nextTick();
 
@@ -291,11 +318,11 @@ describe("WorkoutEdit.vue", () => {
       confirm.mockReturnValueOnce(true);
 
       // Add an exercise first
-      const mockExercise = {
+      const mockExercise = listExercise({
         name: "Wrist Curl",
         muscleGroup: "Wrist",
         singleArm: true,
-      };
+      });
       wrapper.vm.addExercise(mockExercise);
       await nextTick();
 
@@ -310,11 +337,11 @@ describe("WorkoutEdit.vue", () => {
 
     it("can toggle set type between regular and warmup", async () => {
       // Add an exercise with a set
-      const mockExercise = {
+      const mockExercise = listExercise({
         name: "Wrist Curl",
         muscleGroup: "Wrist",
         singleArm: true,
-      };
+      });
       wrapper.vm.addExercise(mockExercise);
       await nextTick();
 
@@ -336,23 +363,27 @@ describe("WorkoutEdit.vue", () => {
   });
 
   describe("Form Validation and Error Handling", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = createWrapper();
+      await flushPromises();
     });
 
     it("handles save errors gracefully", async () => {
-      saveWorkoutToDB.mockRejectedValueOnce(new Error("Save failed"));
+      server.use(
+        http.post(`${API}/api/workouts`, () =>
+          HttpResponse.json(
+            { type: "about:blank", title: "Internal Server Error", status: 500, code: "internal_error" },
+            { status: 500, headers: { "Content-Type": "application/problem+json" } }
+          )
+        )
+      );
 
-      const saveButton = wrapper
-        .findAll("button")
-        .find((btn) => btn.text().includes("workout.save"));
+      await wrapper.vm.saveWorkout();
+      await flushPromises();
 
-      if (saveButton) {
-        await saveButton.trigger("click");
-        await nextTick();
-
-        expect(mockShowError).toHaveBeenCalledWith("Error saving workout");
-      }
+      expect(mockShowError).toHaveBeenCalledWith("Error saving workout");
+      expect(backend.workouts).toEqual([]);
+      expect(mockReplace).not.toHaveBeenCalled();
     });
 
     it("formats datetime correctly for inputs", () => {
@@ -380,44 +411,51 @@ describe("WorkoutEdit.vue", () => {
   });
 
   describe("Navigation", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = createWrapper();
+      await flushPromises();
     });
 
     it("navigates back when back button is clicked", async () => {
       const backButton = wrapper.find('[data-testid="back-button"]');
 
-      if (backButton) {
-        await backButton.trigger("click");
-        expect(mockPush).toHaveBeenCalledWith({ name: 'log' });
-      }
+      expect(backButton.exists()).toBe(true);
+      await backButton.trigger("click");
+      expect(mockPush).toHaveBeenCalledWith({ name: 'log' });
     });
   });
 
   describe("Exercise Display Settings", () => {
     beforeEach(async () => {
       wrapper = createWrapper();
-      await nextTick();
       // Wait for settings to load
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
     });
 
-    it("loads weight and distance unit settings on mount", () => {
-      expect(getSetting).toHaveBeenCalledWith("weightUnit", "kg");
-      expect(getSetting).toHaveBeenCalledWith("distanceUnit", "km");
+    it("loads weight and distance unit settings on mount", async () => {
       expect(wrapper.vm.weightUnit).toBe("kg");
       expect(wrapper.vm.distanceUnit).toBe("km");
+
+      // Units other than the defaults show they come from the stored settings
+      wrapper.unmount();
+      backend.seed({ settings: { weightUnit: "lbs", distanceUnit: "mi" } });
+      clearSettingsCache();
+      wrapper = createWrapper();
+      await flushPromises();
+
+      expect(wrapper.vm.weightUnit).toBe("lbs");
+      expect(wrapper.vm.distanceUnit).toBe("mi");
     });
 
     it("uses StrengthSetEditor for strength exercises", async () => {
       // Add a strength exercise
-      const mockExercise: Exercise = {
+      const mockExercise = listExercise({
         name: "Wrist Curl",
         muscleGroup: "Wrist",
         singleArm: true,
         type: "strength",
         displayType: "reps"
-      };
+      });
       wrapper.vm.addExercise(mockExercise);
       await nextTick();
 
@@ -428,13 +466,13 @@ describe("WorkoutEdit.vue", () => {
 
     it("uses CardioSetEditor for cardio exercises", async () => {
       // Add a cardio exercise
-      const mockExercise: Exercise = {
+      const mockExercise = listExercise({
         name: "Running",
         muscleGroup: "Legs",
         singleArm: false,
         type: "cardio",
         displayType: "time"
-      };
+      });
       wrapper.vm.addExercise(mockExercise);
       await nextTick();
 
@@ -445,13 +483,13 @@ describe("WorkoutEdit.vue", () => {
 
     it("creates new sets with all required fields", async () => {
       // Add an exercise
-      const mockExercise: Exercise = {
+      const mockExercise = listExercise({
         name: "Wrist Curl",
         muscleGroup: "Wrist",
         singleArm: true,
         type: "strength",
         displayType: "reps"
-      };
+      });
       wrapper.vm.addExercise(mockExercise);
       await nextTick();
 

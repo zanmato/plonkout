@@ -1,21 +1,19 @@
 import { setupServer } from "msw/node";
-import { afterAll, afterEach, beforeAll } from "vitest";
-import { client } from "@/api/gen/client.gen";
+import { API, backend } from "../mocks/backend";
 
-/** Origin the API is served from in tests. Node's fetch needs absolute URLs. */
-export const API = "http://localhost";
+export { API };
 
 /**
- * An MSW server for a test file. Handlers are added per test with
- * server.use, and anything unhandled fails the test.
+ * The one MSW server of a test run, serving the fake backend. setup.ts starts
+ * it for every test file and resets the backend and any per test handlers
+ * after each test. Anything unhandled fails the test.
+ */
+export const server = setupServer(...backend.handlers);
+
+/**
+ * The shared MSW server, for test files that add handlers of their own with
+ * server.use. Those take precedence over the fake backend for the test.
  */
 export function useApiServer() {
-  const server = setupServer();
-  beforeAll(() => {
-    client.setConfig({ baseUrl: API });
-    server.listen({ onUnhandledRequest: "error" });
-  });
-  afterEach(() => server.resetHandlers());
-  afterAll(() => server.close());
   return server;
 }

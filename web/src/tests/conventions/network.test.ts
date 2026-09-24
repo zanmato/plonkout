@@ -18,7 +18,8 @@ describe("network access", () => {
       .map((path) => relative(srcRoot, path))
       .filter((path) => !path.startsWith("api/") && !path.startsWith("tests/"))
       .filter((path) => {
-        const source = readFileSync(join(srcRoot, path), "utf8");
+        // Type only imports of the generated API types carry no runtime code
+        const source = readFileSync(join(srcRoot, path), "utf8").replace(/^import type [^;]*;/gm, "");
         return /\bfetch\(|XMLHttpRequest|["'`]\/api\/|from ["']@\/api\/gen/.test(source);
       });
 

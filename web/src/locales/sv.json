@@ -20,6 +20,7 @@
     "duplicateError": "Fel vid duplicering av träningspass",
     "deleteError": "Fel vid borttagning av träningspass",
     "saveError": "Fel vid sparning av träningspass",
+    "staleRevision": "Träningspasset ändrades på en annan enhet. Den senaste versionen har laddats.",
     "saveSuccess": "Träningspass sparat framgångsrikt",
     "templateSaved": "Träningspassmall sparad",
     "loadError": "Fel vid laddning av träningspass",
@@ -225,7 +226,11 @@
       "clearConfirm": "Är du säker på att du vill rensa all data? Detta kommer att ta bort alla träningspass, övningar och inställningar. Detta kan inte ångras.",
       "clearFinalWarning": "Detta är din sista varning. All data kommer att tas bort permanent. Är du absolut säker?",
       "clearSuccess": "All data har rensats. Appen kommer nu att laddas om.",
-      "clearError": "Fel vid rensning av data. Vänligen försök igen."
+      "clearError": "Fel vid rensning av data. Vänligen försök igen.",
+      "import": "Importera från den gamla appen",
+      "importDescription": "Lägg till träningspassen från en fil exporterad från den gamla appen",
+      "importSuccess": "{imported} träningspass importerade, {skipped} fanns redan, {exercisesCreated} nya övningar",
+      "importError": "Fel vid import av filen. Kontrollera att det är en export från den gamla appen."
     },
     "blockPeriodization": {
       "title": "Blockperiodisering",

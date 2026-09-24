@@ -90,7 +90,8 @@ import {
   getWorkoutTemplates,
   deleteWorkoutTemplate,
   saveWorkout as saveWorkoutToDB,
-} from "@/utils/database";
+} from "@/api/data";
+import { copyExercise } from "@/utils/copyExercise";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
@@ -148,19 +149,21 @@ async function startWorkout(template: WorkoutTemplate) {
       started: new Date(),
       ended: null,
       notes: template.notes || "",
-      exercises: template.exercises.map((exercise) => ({
-        ...exercise,
-        sets: exercise.sets.map((set) => ({
-          ...set,
-          weight: null,
-          reps: null,
-          notes: "",
-        })),
-      })),
+      exercises: template.exercises.map((exercise) =>
+        copyExercise(
+          exercise,
+          exercise.sets.map((set) => ({
+            ...set,
+            weight: null,
+            reps: null,
+            notes: "",
+          })),
+        ),
+      ),
     };
 
-    const id = await saveWorkoutToDB(newWorkout);
-    router.push({ name: 'workout-edit', params: { id: id.toString() } });
+    const saved = await saveWorkoutToDB(newWorkout);
+    router.push({ name: 'workout-edit', params: { id: saved.id! } });
   } catch (error) {
     console.error("Error starting workout:", error);
     showError(t("templates.startError"));
@@ -171,7 +174,7 @@ async function startWorkout(template: WorkoutTemplate) {
  * Edit a template
  */
 function editTemplate(templateId: Id) {
-  router.push({ name: 'template-edit', params: { id: templateId.toString() } });
+  router.push({ name: 'template-edit', params: { id: templateId } });
 }
 
 /**

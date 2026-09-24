@@ -1,11 +1,9 @@
 package account_test
 
 import (
-	"bytes"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -14,98 +12,20 @@ import (
 
 	"github.com/descope/virtualwebauthn"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
-	"github.com/zanmato/plonkout/server/internal/platform/config"
-	"github.com/zanmato/plonkout/server/internal/platform/dbtest"
-	"github.com/zanmato/plonkout/server/internal/server"
+	"github.com/zanmato/plonkout/server/internal/platform/apitest"
 )
 
-const origin = "http://localhost:5173"
+var rp = virtualwebauthn.RelyingParty{ID: "localhost", Name: "Plonkout", Origin: apitest.Origin}
 
-var rp = virtualwebauthn.RelyingParty{ID: "localhost", Name: "Plonkout", Origin: origin}
-
-// harness drives the real handler against a real database.
+// harness adds the passkey flows to the shared API harness.
 type harness struct {
-	t       *testing.T
-	db      *dbtest.DB
-	handler http.Handler
+	*apitest.Harness
+	t *testing.T
 }
 
 func newHarness(t *testing.T) *harness {
 	t.Helper()
-	d := dbtest.New(t)
-	cfg := &config.Config{
-		Server:   config.Server{BaseURL: origin},
-		Auth:     config.Auth{SecretKey: "test-secret-key-that-is-long-enough", SessionTTL: config.Duration(3600e9), SessionAbsoluteTTL: config.Duration(7200e9)},
-		WebAuthn: config.WebAuthn{RPID: "localhost", RPName: "Plonkout", Origins: []string{origin}},
-	}
-	srv, err := server.New(server.Deps{Config: cfg, Pool: d.App, Logger: slog.New(slog.DiscardHandler)})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return &harness{t: t, db: d, handler: srv.Handler()}
-}
-
-type response struct {
-	status int
-	body   []byte
-	cookie string
-}
-
-func (r response) decode(t *testing.T, into any) {
-	t.Helper()
-	if err := json.Unmarshal(r.body, into); err != nil {
-		t.Fatalf("decode %s: %v", r.body, err)
-	}
-}
-
-func (r response) code(t *testing.T) string {
-	t.Helper()
-	var problem api.Problem
-	r.decode(t, &problem)
-	return problem.Code
-}
-
-// do sends a request as the SPA would, with the session cookie by hand since
-// the __Host- cookie is Secure and httptest is plain http.
-func (h *harness) do(method, path string, body any, session string) response {
-	h.t.Helper()
-	var reader *bytes.Reader
-	if body != nil {
-		raw, err := json.Marshal(body)
-		if err != nil {
-			h.t.Fatal(err)
-		}
-		reader = bytes.NewReader(raw)
-	} else {
-		reader = bytes.NewReader(nil)
-	}
-	req := httptest.NewRequest(method, "/api"+path, reader)
-	req.Header.Set("Origin", origin)
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-	if session != "" {
-		req.AddCookie(&http.Cookie{Name: api.SessionCookie, Value: session})
-	}
-	rec := httptest.NewRecorder()
-	h.handler.ServeHTTP(rec, req)
-
-	out := response{status: rec.Code, body: rec.Body.Bytes()}
-
-	for _, c := range rec.Result().Cookies() {
-		if c.Name == api.SessionCookie {
-			out.cookie = c.Value
-		}
-	}
-	return out
-}
-
-func (h *harness) expect(r response, status int) response {
-	h.t.Helper()
-	if r.status != status {
-		h.t.Fatalf("expected %d, got %d: %s", status, r.status, r.body)
-	}
-	return r
+	return &harness{Harness: apitest.New(t), t: t}
 }
 
 type ceremony struct {
@@ -161,7 +81,7 @@ type powChallenge struct {
 func (h *harness) solve() map[string]any {
 	h.t.Helper()
 	var c powChallenge
-	h.expect(h.do(http.MethodGet, "/auth/signup/challenge", nil, ""), http.StatusOK).decode(h.t, &c)
+	h.Expect(h.Do(http.MethodGet, "/auth/signup/challenge", nil, ""), http.StatusOK).Decode(h.t, &c)
 	for n := 0; n <= c.MaxNumber; n++ {
 		sum := sha256.Sum256([]byte(c.Salt + strconv.Itoa(n)))
 		if hex.EncodeToString(sum[:]) == c.Challenge {
@@ -185,28 +105,28 @@ type signedIn struct {
 func (h *harness) signup(username string) (*device, string, signedIn) {
 	h.t.Helper()
 	var begin ceremony
-	h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{
+	h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{
 		"username": username, "pow": h.solve(),
-	}, ""), http.StatusOK).decode(h.t, &begin)
+	}, ""), http.StatusOK).Decode(h.t, &begin)
 
 	phone := newDevice()
-	finished := h.expect(h.do(http.MethodPost, "/auth/signup/finish", map[string]any{
+	finished := h.Expect(h.Do(http.MethodPost, "/auth/signup/finish", map[string]any{
 		"ceremony": begin.Ceremony, "credential": phone.create(h.t, begin), "passkeyName": "Phone",
 	}, ""), http.StatusOK)
 
 	var out signedIn
-	finished.decode(h.t, &out)
-	if finished.cookie == "" {
+	finished.Decode(h.t, &out)
+	if finished.Cookie == "" {
 		h.t.Fatal("signup did not set a session cookie")
 	}
-	return phone, finished.cookie, out
+	return phone, finished.Cookie, out
 }
 
-func (h *harness) login(d *device) response {
+func (h *harness) login(d *device) apitest.Response {
 	h.t.Helper()
 	var begin ceremony
-	h.expect(h.do(http.MethodPost, "/auth/login/begin", nil, ""), http.StatusOK).decode(h.t, &begin)
-	return h.do(http.MethodPost, "/auth/login/finish", map[string]any{
+	h.Expect(h.Do(http.MethodPost, "/auth/login/begin", nil, ""), http.StatusOK).Decode(h.t, &begin)
+	return h.Do(http.MethodPost, "/auth/login/finish", map[string]any{
 		"ceremony": begin.Ceremony, "credential": d.get(h.t, begin),
 	}, "")
 }
@@ -226,25 +146,25 @@ func TestSignupLoginLogout(t *testing.T) {
 	}
 
 	var who me
-	h.expect(h.do(http.MethodGet, "/account", nil, session), http.StatusOK).decode(t, &who)
+	h.Expect(h.Do(http.MethodGet, "/account", nil, session), http.StatusOK).Decode(t, &who)
 	if who.Username != "andreas" || who.Passkeys != 1 || who.RecoveryCodesLeft != 10 {
 		t.Fatalf("unexpected account %+v", who)
 	}
 
 	// The default exercises were written as the new user, through RLS.
 	var exercises int
-	if err := h.db.Owner.QueryRow(t.Context(), `SELECT count(*) FROM exercises WHERE user_id = $1`, out.User.ID).Scan(&exercises); err != nil {
+	if err := h.DB.Owner.QueryRow(t.Context(), `SELECT count(*) FROM exercises WHERE user_id = $1`, out.User.ID).Scan(&exercises); err != nil {
 		t.Fatal(err)
 	}
 	if exercises != 67 {
 		t.Fatalf("expected 67 seeded exercises, got %d", exercises)
 	}
 
-	h.expect(h.do(http.MethodPost, "/auth/logout", nil, session), http.StatusNoContent)
-	h.expect(h.do(http.MethodGet, "/account", nil, session), http.StatusUnauthorized)
+	h.Expect(h.Do(http.MethodPost, "/auth/logout", nil, session), http.StatusNoContent)
+	h.Expect(h.Do(http.MethodGet, "/account", nil, session), http.StatusUnauthorized)
 
-	again := h.expect(h.login(phone), http.StatusOK)
-	h.expect(h.do(http.MethodGet, "/account", nil, again.cookie), http.StatusOK)
+	again := h.Expect(h.login(phone), http.StatusOK)
+	h.Expect(h.Do(http.MethodGet, "/account", nil, again.Cookie), http.StatusOK)
 }
 
 func TestSignupRefusals(t *testing.T) {
@@ -252,37 +172,37 @@ func TestSignupRefusals(t *testing.T) {
 	h.signup("taken")
 
 	t.Run("taken username", func(t *testing.T) {
-		r := h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "Taken", "pow": h.solve()}, ""), http.StatusConflict)
-		if r.code(t) != "username_taken" {
-			t.Fatalf("unexpected problem %s", r.body)
+		r := h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "Taken", "pow": h.solve()}, ""), http.StatusConflict)
+		if r.Code(t) != "username_taken" {
+			t.Fatalf("unexpected problem %s", r.Body)
 		}
 	})
 
 	t.Run("honeypot", func(t *testing.T) {
-		h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{
+		h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{
 			"username": "bot", "website": "http://spam", "pow": h.solve(),
 		}, ""), http.StatusUnprocessableEntity)
 	})
 
 	t.Run("reused proof of work", func(t *testing.T) {
 		solution := h.solve()
-		h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "first", "pow": solution}, ""), http.StatusOK)
-		r := h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "second", "pow": solution}, ""), http.StatusUnprocessableEntity)
-		if r.code(t) != "signup_refused" {
-			t.Fatalf("unexpected problem %s", r.body)
+		h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "first", "pow": solution}, ""), http.StatusOK)
+		r := h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "second", "pow": solution}, ""), http.StatusUnprocessableEntity)
+		if r.Code(t) != "signup_refused" {
+			t.Fatalf("unexpected problem %s", r.Body)
 		}
 	})
 
 	t.Run("wrong number", func(t *testing.T) {
 		solution := h.solve()
 		solution["number"] = solution["number"].(int) + 1
-		h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "third", "pow": solution}, ""), http.StatusUnprocessableEntity)
+		h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "third", "pow": solution}, ""), http.StatusUnprocessableEntity)
 	})
 
 	t.Run("forged signature", func(t *testing.T) {
 		solution := h.solve()
 		solution["signature"] = strings.Repeat("0", 64)
-		h.expect(h.do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "fourth", "pow": solution}, ""), http.StatusUnprocessableEntity)
+		h.Expect(h.Do(http.MethodPost, "/auth/signup/begin", map[string]any{"username": "fourth", "pow": solution}, ""), http.StatusUnprocessableEntity)
 	})
 }
 
@@ -291,12 +211,12 @@ func TestCeremonyCannotBeFinishedTwice(t *testing.T) {
 	phone, _, _ := h.signup("once")
 
 	var begin ceremony
-	h.expect(h.do(http.MethodPost, "/auth/login/begin", nil, ""), http.StatusOK).decode(t, &begin)
+	h.Expect(h.Do(http.MethodPost, "/auth/login/begin", nil, ""), http.StatusOK).Decode(t, &begin)
 	body := map[string]any{"ceremony": begin.Ceremony, "credential": phone.get(t, begin)}
-	h.expect(h.do(http.MethodPost, "/auth/login/finish", body, ""), http.StatusOK)
-	r := h.expect(h.do(http.MethodPost, "/auth/login/finish", body, ""), http.StatusUnprocessableEntity)
-	if r.code(t) != "ceremony_expired" {
-		t.Fatalf("unexpected problem %s", r.body)
+	h.Expect(h.Do(http.MethodPost, "/auth/login/finish", body, ""), http.StatusOK)
+	r := h.Expect(h.Do(http.MethodPost, "/auth/login/finish", body, ""), http.StatusUnprocessableEntity)
+	if r.Code(t) != "ceremony_expired" {
+		t.Fatalf("unexpected problem %s", r.Body)
 	}
 }
 
@@ -307,7 +227,7 @@ func TestUnknownPasskeyCannotSignIn(t *testing.T) {
 	stranger := newDevice()
 	stranger.authenticator.Options.UserHandle = []byte("not a user of this site")
 	stranger.authenticator.AddCredential(stranger.credential)
-	h.expect(h.login(stranger), http.StatusUnauthorized)
+	h.Expect(h.login(stranger), http.StatusUnauthorized)
 }
 
 func TestRecovery(t *testing.T) {
@@ -315,27 +235,27 @@ func TestRecovery(t *testing.T) {
 	_, _, out := h.signup("forgetful")
 	code := out.RecoveryCodes[3]
 
-	h.expect(h.do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "forgetful", "recoveryCode": "wrong-code0"}, ""), http.StatusUnauthorized)
-	h.expect(h.do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "nobody", "recoveryCode": code}, ""), http.StatusUnauthorized)
+	h.Expect(h.Do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "forgetful", "recoveryCode": "wrong-code0"}, ""), http.StatusUnauthorized)
+	h.Expect(h.Do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "nobody", "recoveryCode": code}, ""), http.StatusUnauthorized)
 
 	// Codes are forgiving about case and dashes, the way people type them.
 	var begin ceremony
 	typed := strings.ToUpper(strings.ReplaceAll(code, "-", ""))
-	h.expect(h.do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "forgetful", "recoveryCode": typed}, ""), http.StatusOK).decode(t, &begin)
+	h.Expect(h.Do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "forgetful", "recoveryCode": typed}, ""), http.StatusOK).Decode(t, &begin)
 
 	newPhone := newDevice()
-	recovered := h.expect(h.do(http.MethodPost, "/auth/recover/finish", map[string]any{
+	recovered := h.Expect(h.Do(http.MethodPost, "/auth/recover/finish", map[string]any{
 		"ceremony": begin.Ceremony, "credential": newPhone.create(t, begin), "passkeyName": "New phone",
 	}, ""), http.StatusOK)
 
 	var who me
-	h.expect(h.do(http.MethodGet, "/account", nil, recovered.cookie), http.StatusOK).decode(t, &who)
+	h.Expect(h.Do(http.MethodGet, "/account", nil, recovered.Cookie), http.StatusOK).Decode(t, &who)
 	if who.Passkeys != 2 || who.RecoveryCodesLeft != 9 {
 		t.Fatalf("unexpected account after recovery %+v", who)
 	}
 
-	h.expect(h.do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "forgetful", "recoveryCode": code}, ""), http.StatusUnauthorized)
-	h.expect(h.login(newPhone), http.StatusOK)
+	h.Expect(h.Do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "forgetful", "recoveryCode": code}, ""), http.StatusUnauthorized)
+	h.Expect(h.login(newPhone), http.StatusOK)
 }
 
 func TestPasskeyManagement(t *testing.T) {
@@ -343,9 +263,9 @@ func TestPasskeyManagement(t *testing.T) {
 	_, session, _ := h.signup("collector")
 
 	var begin ceremony
-	h.expect(h.do(http.MethodPost, "/account/passkeys/begin", nil, session), http.StatusOK).decode(t, &begin)
+	h.Expect(h.Do(http.MethodPost, "/account/passkeys/begin", nil, session), http.StatusOK).Decode(t, &begin)
 	laptop := newDevice()
-	h.expect(h.do(http.MethodPost, "/account/passkeys/finish", map[string]any{
+	h.Expect(h.Do(http.MethodPost, "/account/passkeys/finish", map[string]any{
 		"ceremony": begin.Ceremony, "credential": laptop.create(t, begin), "passkeyName": "Laptop",
 	}, session), http.StatusCreated)
 
@@ -355,20 +275,20 @@ func TestPasskeyManagement(t *testing.T) {
 		Synced bool   `json:"synced"`
 	}
 	var passkeys []passkey
-	h.expect(h.do(http.MethodGet, "/account/passkeys", nil, session), http.StatusOK).decode(t, &passkeys)
+	h.Expect(h.Do(http.MethodGet, "/account/passkeys", nil, session), http.StatusOK).Decode(t, &passkeys)
 	if len(passkeys) != 2 || passkeys[0].Name != "Phone" || passkeys[1].Name != "Laptop" || !passkeys[0].Synced {
 		t.Fatalf("unexpected passkeys %+v", passkeys)
 	}
 
-	h.expect(h.do(http.MethodPatch, "/account/passkeys/"+passkeys[1].ID, map[string]any{"name": "Work laptop"}, session), http.StatusNoContent)
-	h.expect(h.do(http.MethodDelete, "/account/passkeys/"+passkeys[0].ID, nil, session), http.StatusNoContent)
-	r := h.expect(h.do(http.MethodDelete, "/account/passkeys/"+passkeys[1].ID, nil, session), http.StatusConflict)
-	if r.code(t) != "last_passkey" {
-		t.Fatalf("unexpected problem %s", r.body)
+	h.Expect(h.Do(http.MethodPatch, "/account/passkeys/"+passkeys[1].ID, map[string]any{"name": "Work laptop"}, session), http.StatusNoContent)
+	h.Expect(h.Do(http.MethodDelete, "/account/passkeys/"+passkeys[0].ID, nil, session), http.StatusNoContent)
+	r := h.Expect(h.Do(http.MethodDelete, "/account/passkeys/"+passkeys[1].ID, nil, session), http.StatusConflict)
+	if r.Code(t) != "last_passkey" {
+		t.Fatalf("unexpected problem %s", r.Body)
 	}
 
 	// The remaining passkey is the laptop, and it still signs in.
-	h.expect(h.login(laptop), http.StatusOK)
+	h.Expect(h.login(laptop), http.StatusOK)
 }
 
 func TestPasskeysBelongToTheirUser(t *testing.T) {
@@ -379,8 +299,8 @@ func TestPasskeysBelongToTheirUser(t *testing.T) {
 	var passkeys []struct {
 		ID string `json:"id"`
 	}
-	h.expect(h.do(http.MethodGet, "/account/passkeys", nil, alice), http.StatusOK).decode(t, &passkeys)
-	h.expect(h.do(http.MethodPatch, "/account/passkeys/"+passkeys[0].ID, map[string]any{"name": "mine now"}, bob), http.StatusNotFound)
+	h.Expect(h.Do(http.MethodGet, "/account/passkeys", nil, alice), http.StatusOK).Decode(t, &passkeys)
+	h.Expect(h.Do(http.MethodPatch, "/account/passkeys/"+passkeys[0].ID, map[string]any{"name": "mine now"}, bob), http.StatusNotFound)
 }
 
 func TestRegenerateRecoveryCodes(t *testing.T) {
@@ -388,12 +308,12 @@ func TestRegenerateRecoveryCodes(t *testing.T) {
 	_, session, out := h.signup("careful")
 
 	var codes []string
-	h.expect(h.do(http.MethodPost, "/account/recovery-codes", nil, session), http.StatusOK).decode(t, &codes)
+	h.Expect(h.Do(http.MethodPost, "/account/recovery-codes", nil, session), http.StatusOK).Decode(t, &codes)
 	if len(codes) != 10 || codes[0] == out.RecoveryCodes[0] {
 		t.Fatalf("expected a fresh set of codes, got %v", codes)
 	}
-	h.expect(h.do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "careful", "recoveryCode": out.RecoveryCodes[0]}, ""), http.StatusUnauthorized)
-	h.expect(h.do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "careful", "recoveryCode": codes[0]}, ""), http.StatusOK)
+	h.Expect(h.Do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "careful", "recoveryCode": out.RecoveryCodes[0]}, ""), http.StatusUnauthorized)
+	h.Expect(h.Do(http.MethodPost, "/auth/recover/begin", map[string]any{"username": "careful", "recoveryCode": codes[0]}, ""), http.StatusOK)
 }
 
 func TestCookieWritesMustComeFromTheApp(t *testing.T) {
@@ -404,23 +324,23 @@ func TestCookieWritesMustComeFromTheApp(t *testing.T) {
 	req.Header.Set("Origin", "https://evil.example")
 	req.AddCookie(&http.Cookie{Name: api.SessionCookie, Value: session})
 	rec := httptest.NewRecorder()
-	h.handler.ServeHTTP(rec, req)
+	h.Handler.ServeHTTP(rec, req)
 	if rec.Code != http.StatusForbidden {
 		t.Fatalf("expected a cross origin write to be refused, got %d", rec.Code)
 	}
-	h.expect(h.do(http.MethodGet, "/account", nil, session), http.StatusOK)
+	h.Expect(h.Do(http.MethodGet, "/account", nil, session), http.StatusOK)
 }
 
 func TestDeleteAccount(t *testing.T) {
 	h := newHarness(t)
 	phone, session, out := h.signup("leaving")
 
-	h.expect(h.do(http.MethodDelete, "/account", nil, session), http.StatusNoContent)
-	h.expect(h.do(http.MethodGet, "/account", nil, session), http.StatusUnauthorized)
-	h.expect(h.login(phone), http.StatusUnauthorized)
+	h.Expect(h.Do(http.MethodDelete, "/account", nil, session), http.StatusNoContent)
+	h.Expect(h.Do(http.MethodGet, "/account", nil, session), http.StatusUnauthorized)
+	h.Expect(h.login(phone), http.StatusUnauthorized)
 
 	var left int
-	if err := h.db.Owner.QueryRow(t.Context(), `SELECT count(*) FROM exercises WHERE user_id = $1`, out.User.ID).Scan(&left); err != nil {
+	if err := h.DB.Owner.QueryRow(t.Context(), `SELECT count(*) FROM exercises WHERE user_id = $1`, out.User.ID).Scan(&left); err != nil {
 		t.Fatal(err)
 	}
 	if left != 0 {

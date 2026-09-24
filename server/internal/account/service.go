@@ -29,8 +29,8 @@ import (
 	"github.com/zanmato/plonkout/server/internal/platform/userctx"
 )
 
-// defaultExercises is seeded for every new user. Generated from the web app's
-// original list, see web/src/data/defaultExercises.ts.
+// defaultExercises is seeded for every new user. It started as the local only
+// app's built in list and is edited here now.
 //
 //go:embed default_exercises.json
 var defaultExercises []byte

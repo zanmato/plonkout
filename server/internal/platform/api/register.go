@@ -53,6 +53,9 @@ type Op struct {
 
 	// DefaultStatus overrides the status a successful call answers with.
 	DefaultStatus int
+	// MaxBodyBytes raises the request body limit, e.g. for an import. Zero
+	// keeps Huma's default.
+	MaxBodyBytes int64
 	// Errors lists the statuses the handler can produce, for the document.
 	Errors []int
 }
@@ -139,6 +142,7 @@ func Register[I, O any](r *Registry, op Op, handler func(context.Context, *I) (*
 		Tags:          op.Tags,
 		DefaultStatus: op.DefaultStatus,
 		Errors:        op.Errors,
+		MaxBodyBytes:  op.MaxBodyBytes,
 		Extensions:    map[string]any{},
 	}
 	if op.Public {

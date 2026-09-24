@@ -1,5 +1,5 @@
 import { ref, onMounted } from "vue";
-import { getSetting } from "@/utils/database";
+import { getSetting } from "@/api/data";
 
 /**
  * Load the user's weight and distance unit settings.

@@ -40,10 +40,8 @@ import { useRoute } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import { useRegisterSW } from "virtual:pwa-register/vue";
-import { getSetting } from "@/utils/database";
+import { getLocalPref, type Theme } from "@/utils/localPrefs";
 import VoltToast from "@/volt/Toast.vue";
-
-type Theme = "light" | "dark" | "system";
 
 const { t, locale } = useI18n();
 const currentTheme = ref<Theme>("system");
@@ -178,27 +176,19 @@ function applyTheme(theme: Theme) {
 /**
  * Load and apply app settings on startup
  */
-async function loadAppSettings() {
-  try {
-    // Load locale setting
-    const savedLocale = await getSetting<string>("locale", "en");
-    locale.value = savedLocale;
+function loadAppSettings() {
+  // Theme and language are stored per device, so they are known before sign in
+  locale.value = getLocalPref("locale");
 
-    // Load and apply theme setting
-    const savedTheme = await getSetting<Theme>("theme", "system");
-    applyTheme(savedTheme);
+  const savedTheme = getLocalPref("theme");
+  applyTheme(savedTheme);
 
-    // Listen for system theme changes when using 'system' theme
-    if (savedTheme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      mediaQuery.addEventListener("change", () => {
-        applyTheme("system");
-      });
-    }
-
-    currentTheme.value = savedTheme;
-  } catch (error) {
-    console.error("Error loading app settings:", error);
+  // Listen for system theme changes when using 'system' theme
+  if (savedTheme === "system") {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    mediaQuery.addEventListener("change", () => {
+      applyTheme("system");
+    });
   }
 }
 

@@ -1,17 +1,28 @@
-import { vi, type Mock } from "vitest";
+import { afterAll, afterEach, beforeAll, vi, type Mock } from "vitest";
 import { config } from "@vue/test-utils";
 import { createHead } from "@unhead/vue/client";
 import { createI18n } from "vue-i18n";
+import { client } from "@/api/gen/client.gen";
+import { clearSettingsCache } from "@/api/data";
+import { API, server } from "./helpers/msw";
+import { backend } from "./mocks/backend";
 
 // Import actual locale files
 import en from "@/locales/en.json";
 import sv from "@/locales/sv.json";
 
-// Mock database module
-vi.mock("@/utils/database", async () => {
-  const mocks = await import("./mocks/database");
-  return mocks;
+// Every test talks to the in-memory fake backend over MSW. Tests seed it with
+// backend.seed and add handlers of their own with server.use.
+beforeAll(() => {
+  client.setConfig({ baseUrl: API });
+  server.listen({ onUnhandledRequest: "error" });
 });
+afterEach(() => {
+  server.resetHandlers();
+  backend.reset();
+  clearSettingsCache();
+});
+afterAll(() => server.close());
 
 const mockIntersectionObserver = vi.fn();
 mockIntersectionObserver.mockReturnValue({

@@ -233,7 +233,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { useI18n } from "vue-i18n";
-import { getExercises, saveExercise, getMostRecentWorkoutByName } from "@/utils/database";
+import { getExercises, saveExercise, getMostRecentWorkoutByName } from "@/api/data";
 import { useToast } from "@/composables/useToast";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
@@ -241,6 +241,7 @@ import VoltSelect from "@/volt/Select.vue";
 import type {
   DisplayType,
   Exercise,
+  ExerciseDraft,
   ExerciseType,
   Id,
   MuscleGroup,
@@ -267,7 +268,7 @@ const props = withDefaults(
   }>(),
   {
     workoutName: "",
-    workoutId: 0,
+    workoutId: null,
   },
 );
 
@@ -400,7 +401,6 @@ async function loadRecentExercises() {
   }
 
   try {
-    // Use the optimized cursor-based query to get the most recent workout
     const mostRecentWorkout = await getMostRecentWorkoutByName(
       props.workoutName,
       props.workoutId
@@ -446,7 +446,7 @@ async function createExercise() {
   if (!newExercise.value.name.trim()) return;
 
   try {
-    const exerciseData: Exercise = {
+    const exerciseData: ExerciseDraft = {
       name: newExercise.value.name.trim(),
       muscleGroup:
         newExercise.value.muscleGroup || muscleGroupOptions.value[0]!.value,
@@ -458,8 +458,7 @@ async function createExercise() {
       displayType: newExercise.value.displayType,
     };
 
-    const id = await saveExercise(exerciseData);
-    const savedExercise = { ...exerciseData, id };
+    const savedExercise = await saveExercise(exerciseData);
 
     exercises.value.push(savedExercise);
     selectExercise(savedExercise);

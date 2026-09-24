@@ -20,6 +20,7 @@
     "duplicateError": "Error duplicating workout",
     "deleteError": "Error deleting workout",
     "saveError": "Error saving workout",
+    "staleRevision": "This workout was changed on another device. Reloaded the latest version.",
     "saveSuccess": "Workout saved successfully",
     "templateSaved": "Workout template saved",
     "loadError": "Error loading workout",
@@ -230,7 +231,11 @@
       "clearConfirm": "Are you sure you want to clear all data? This will delete all workouts, exercises, and settings. This cannot be undone.",
       "clearFinalWarning": "This is your final warning. All data will be permanently deleted. Are you absolutely sure?",
       "clearSuccess": "All data has been cleared. The app will now reload.",
-      "clearError": "Error clearing data. Please try again."
+      "clearError": "Error clearing data. Please try again.",
+      "import": "Import from the old app",
+      "importDescription": "Add the workouts from a file exported by the old app",
+      "importSuccess": "{imported} workouts imported, {skipped} already there, {exercisesCreated} new exercises",
+      "importError": "Error importing the file. Check that it is an export from the old app."
     },
     "blockPeriodization": {
       "title": "Block Periodization",

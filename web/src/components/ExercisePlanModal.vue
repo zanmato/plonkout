@@ -422,7 +422,7 @@ import {
   getBestEstimated1RM,
   type BlockSettings,
 } from "@/utils/blockPeriodization";
-import { getWorkouts } from "@/utils/database";
+import { getWorkouts } from "@/api/data";
 import { useUnits } from "@/composables/useUnits";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoButton from "@/components/NeoButton.vue";
@@ -433,7 +433,8 @@ type StartBlockSettings = NonNullable<Parameters<typeof startNewBlock>[2]>;
 
 const props = withDefaults(
   defineProps<{
-    exercise: Exercise;
+    /** An exercise list entry or a logged exercise, only these fields are read */
+    exercise: Pick<Exercise, "name">;
     isOpen?: boolean;
     arm?: Arm;
     onApplyWeight?: ((weight: number) => void) | null;

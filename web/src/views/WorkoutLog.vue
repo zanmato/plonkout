@@ -138,11 +138,8 @@ import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { useHead } from "@unhead/vue";
 import { DynamicScroller, DynamicScrollerItem } from "vue3-virtual-scroller";
-import {
-  getWorkouts,
-  saveWorkout,
-  initializeDefaultExercises,
-} from "@/utils/database";
+import { getWorkouts, saveWorkout } from "@/api/data";
+import { copyExercise } from "@/utils/copyExercise";
 import { useToast } from "@/composables/useToast";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
@@ -294,7 +291,7 @@ function addWorkout() {
  * Navigate to edit existing workout
  */
 function editWorkout(id: Id) {
-  router.push({ name: "workout-edit", params: { id: id.toString() } });
+  router.push({ name: "workout-edit", params: { id } });
 }
 
 /**
@@ -322,15 +319,14 @@ async function duplicateWorkout(workout: Workout) {
     started: new Date(),
     ended: null,
     notes: workout.notes,
-    exercises: (workout.exercises || []).map((exercise) => ({
-      ...exercise,
-      sets: [createNewSet()],
-    })),
+    exercises: (workout.exercises || []).map((exercise) =>
+      copyExercise(exercise, [createNewSet()]),
+    ),
   };
 
   try {
-    const id = await saveWorkout(duplicatedWorkout);
-    router.push({ name: "workout-edit", params: { id: id.toString() } });
+    const saved = await saveWorkout(duplicatedWorkout);
+    router.push({ name: "workout-edit", params: { id: saved.id! } });
   } catch (error) {
     console.error("Error duplicating workout:", error);
     showError(t("workout.duplicateError"));
@@ -472,10 +468,7 @@ function getWorkoutDuration(workout: Workout): string | null {
   }
 }
 
-onMounted(async () => {
-  await initializeDefaultExercises();
-  await loadWorkouts();
-});
+onMounted(loadWorkouts);
 </script>
 
 <style scoped>

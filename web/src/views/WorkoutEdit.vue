@@ -467,7 +467,9 @@ import {
   deleteWorkout,
   deleteWorkoutTemplate,
   saveWorkoutTemplate,
-} from "@/utils/database";
+  toWorkoutExercise,
+} from "@/api/data";
+import { ApiError } from "@/api";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
 import ExerciseStats from "@/components/ExerciseStats.vue";
 import ExercisePlanModal from "@/components/ExercisePlanModal.vue";
@@ -482,11 +484,11 @@ import { useUnits } from "@/composables/useUnits";
 import { useExerciseHistory } from "@/composables/useExerciseHistory";
 import { INTENSITIES, formatEntrySets } from "@/utils/exerciseHistory";
 import { incrementBlockWorkout } from "@/utils/blockPeriodization";
+import { copyExercise } from "@/utils/copyExercise";
 import type {
   Arm,
   DateLike,
   Exercise,
-  Id,
   Intensity,
   Workout,
   WorkoutExercise,
@@ -512,7 +514,7 @@ const props = defineProps<{
   id?: string;
 }>();
 
-// A new workout has no id until the database assigns one on first save
+// A new workout has no id until the server assigns one on first save
 const workout = ref<Workout>({
   name: "",
   started: new Date(),
@@ -533,6 +535,10 @@ const isInitialLoad = ref(true);
 const setEditorRefs = new Map<string, SetEditorRef>();
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
 let pendingSave = false;
+// The editable fields as last loaded or saved. Server assigned fields such as
+// the revision change after a save without being edits, so autosave compares
+// against this instead of reacting to every change.
+let lastSnapshot = "";
 
 const { weightUnit, distanceUnit } = useUnits();
 const {
@@ -598,16 +604,23 @@ function formatDatetimeLocal(date: DateLike | null | undefined): string {
 async function loadWorkout(): Promise<void> {
   if (props.id) {
     try {
-      const data = isTemplate.value
-        ? await getWorkoutTemplate(parseInt(props.id))
-        : await getWorkout(parseInt(props.id));
-      if (data) {
-        workout.value = {
-          ...data,
-          started: data.started ? new Date(data.started) : new Date(),
-          ended: data.ended ? new Date(data.ended) : null,
-        };
+      if (isTemplate.value) {
+        const data = await getWorkoutTemplate(props.id);
+        if (data) {
+          // Templates have no dates, the editor still wants them set
+          workout.value = { ...data, started: new Date(), ended: null };
+        }
+      } else {
+        const data = await getWorkout(props.id);
+        if (data) {
+          workout.value = {
+            ...data,
+            started: data.started ? new Date(data.started) : new Date(),
+            ended: data.ended ? new Date(data.ended) : null,
+          };
+        }
       }
+      lastSnapshot = snapshot(workout.value);
     } catch (error) {
       console.error(
         isTemplate.value ? t("templates.loadError") : t("workout.loadError"),
@@ -618,7 +631,20 @@ async function loadWorkout(): Promise<void> {
 }
 
 /**
- * Save workout or template to database
+ * The fields the user edits, serialized for comparison
+ */
+function snapshot(data: Workout): string {
+  return JSON.stringify({
+    name: data.name,
+    started: data.started,
+    ended: data.ended,
+    notes: data.notes,
+    exercises: data.exercises,
+  });
+}
+
+/**
+ * Save workout or template to the server
  */
 async function saveWorkout(): Promise<void> {
   // A save is already running, remember to run again once it finishes so
@@ -628,38 +654,39 @@ async function saveWorkout(): Promise<void> {
     return;
   }
 
-  const wasNew = isNew.value;
+  // The id is set as soon as the first save returns, which is earlier than
+  // the route catching up
+  const wasNew = !workout.value.id;
 
   try {
     saving.value = true;
-    const rawData: Workout = {
-      ...workout.value,
-      updated: new Date(),
-    };
-
-    // Remove the id field so let the database generate it
-    if (wasNew) {
-      delete rawData.id;
-    }
+    const sentSnapshot = snapshot(workout.value);
 
     // Plain deep copy without reactive proxies, dates become ISO strings
-    const data: Workout = JSON.parse(JSON.stringify(rawData));
+    const data: Workout = JSON.parse(JSON.stringify(workout.value));
 
-    let id: Id;
     if (isTemplate.value) {
-      id = await saveWorkoutTemplate(data);
+      const saved = await saveWorkoutTemplate(data);
+      lastSnapshot = sentSnapshot;
+      Object.assign(workout.value, {
+        id: saved.id,
+        created: saved.created,
+        updated: saved.updated,
+      });
       if (wasNew) {
-        workout.value.id = id;
-        router.replace({
-          name: "template-edit",
-          params: { id: id.toString() },
-        });
+        router.replace({ name: "template-edit", params: { id: saved.id! } });
       }
     } else {
-      id = await saveWorkoutToDB(data);
+      const saved = await saveWorkoutToDB(data);
+      lastSnapshot = sentSnapshot;
+      Object.assign(workout.value, {
+        id: saved.id,
+        revision: saved.revision,
+        created: saved.created,
+        updated: saved.updated,
+      });
       if (wasNew) {
-        workout.value.id = id;
-        router.replace({ name: "workout-edit", params: { id: id.toString() } });
+        router.replace({ name: "workout-edit", params: { id: saved.id! } });
 
         // Increment block workout count for each exercise in this new workout
         for (const exercise of workout.value.exercises) {
@@ -670,10 +697,19 @@ async function saveWorkout(): Promise<void> {
       }
     }
   } catch (error) {
-    console.error("Error saving:", error);
-    showError(
-      isTemplate.value ? t("templates.saveError") : t("workout.saveError"),
-    );
+    if (error instanceof ApiError && error.code === "stale_revision") {
+      // Another device saved first. Its version wins and the edits made here
+      // since the last load are dropped, merging them is not attempted.
+      showError(t("workout.staleRevision"));
+      pendingSave = false;
+      if (saveTimeout) clearTimeout(saveTimeout);
+      await loadWorkout();
+    } else {
+      console.error("Error saving:", error);
+      showError(
+        isTemplate.value ? t("templates.saveError") : t("workout.saveError"),
+      );
+    }
   } finally {
     saving.value = false;
     if (pendingSave) {
@@ -689,6 +725,9 @@ async function saveWorkout(): Promise<void> {
 function debouncedSave(): void {
   // Skip auto-save during initial load
   if (isInitialLoad.value) return;
+
+  // Nothing the user edits has changed, e.g. a save just set the revision
+  if (snapshot(workout.value) === lastSnapshot) return;
 
   // Skip auto-save if workout has no name and no exercises (empty workout)
   if (!workout.value.name.trim() && workout.value.exercises.length === 0) {
@@ -709,12 +748,8 @@ function debouncedSave(): void {
 /**
  * Add a new exercise to the workout
  */
-function addExercise(exercise: Exercise & { intensity?: Intensity | null }): void {
-  workout.value.exercises.push({
-    ...exercise,
-    intensity: exercise.intensity || null,
-    sets: [createNewSet()],
-  });
+function addExercise(exercise: Exercise): void {
+  workout.value.exercises.push(toWorkoutExercise(exercise, [createNewSet()]));
   showExerciseSelector.value = false;
 }
 
@@ -789,7 +824,7 @@ function cycleIntensity(exerciseIndex: number): void {
     ? INTENSITIES.indexOf(exercise.intensity)
     : -1;
   exercise.intensity =
-    current === INTENSITIES.length - 1 ? null : INTENSITIES[current + 1];
+    current === INTENSITIES.length - 1 ? null : (INTENSITIES[current + 1] ?? null);
 }
 
 /**
@@ -976,15 +1011,14 @@ async function duplicateWorkout(): Promise<void> {
     started: new Date(),
     ended: null,
     notes: workout.value.notes,
-    exercises: workout.value.exercises.map((exercise) => ({
-      ...exercise,
-      sets: [createNewSet()],
-    })),
+    exercises: workout.value.exercises.map((exercise) =>
+      copyExercise(exercise, [createNewSet()]),
+    ),
   };
 
   try {
-    const id = await saveWorkoutToDB(duplicatedWorkout);
-    router.push({ name: "workout-edit", params: { id: id.toString() } });
+    const saved = await saveWorkoutToDB(duplicatedWorkout);
+    router.push({ name: "workout-edit", params: { id: saved.id! } });
   } catch (error) {
     console.error("Error duplicating workout:", error);
     showError(t("workout.duplicateError"));
@@ -998,26 +1032,24 @@ async function saveAsTemplate(): Promise<void> {
   showContextMenu.value = false;
 
   try {
-    const templateData = {
+    const templateData: WorkoutTemplate = {
       name: workout.value.name || t("workout.unnamed"),
       notes: workout.value.notes,
-      exercises: workout.value.exercises.map((exercise) => ({
-        ...exercise,
-        sets: exercise.sets.map((set) => ({
-          type: set.type,
-          weight: null, // Clear weight values for template
-          reps: null, // Clear reps values for template
-          rpe: set.rpe,
-          arm: set.arm,
-          notes: "", // Clear notes for template
-        })),
-      })),
+      exercises: workout.value.exercises.map((exercise) =>
+        copyExercise(
+          exercise,
+          // Only keep the set fields that matter for planning
+          exercise.sets.map((set) => ({
+            ...createNewSet(),
+            type: set.type,
+            rpe: set.rpe,
+            arm: set.arm,
+          })),
+        ),
+      ),
     };
 
-    // Templates saved from a workout have no start date and only keep the
-    // set fields that matter for planning, which WorkoutTemplate does not
-    // model yet
-    await saveWorkoutTemplate(templateData as WorkoutTemplate);
+    await saveWorkoutTemplate(templateData);
     showSuccess(t("workout.templateSaved"));
   } catch (error) {
     console.error("Error saving template:", error);
@@ -1032,7 +1064,7 @@ async function deleteWorkoutConfirmed(): Promise<void> {
   showContextMenu.value = false;
 
   // The context menu is only shown for existing records, so the id is set
-  const id = parseInt(props.id!);
+  const id = props.id!;
 
   try {
     if (isTemplate.value) {

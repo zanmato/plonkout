@@ -13,10 +13,15 @@ import (
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zanmato/plonkout/server/internal/account"
+	"github.com/zanmato/plonkout/server/internal/exercise"
+	"github.com/zanmato/plonkout/server/internal/importer"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
 	"github.com/zanmato/plonkout/server/internal/platform/web"
+	"github.com/zanmato/plonkout/server/internal/setting"
 	"github.com/zanmato/plonkout/server/internal/system"
+	"github.com/zanmato/plonkout/server/internal/template"
+	"github.com/zanmato/plonkout/server/internal/workout"
 )
 
 // Version is set at build time.
@@ -89,6 +94,12 @@ func New(deps Deps) (*Server, error) {
 
 	system.Register(reg, deps.Pool, Version)
 	account.Register(reg, accounts)
+	exercise.Register(reg, exercise.NewService(deps.Pool))
+	workout.Register(reg, workout.NewService(deps.Pool))
+	template.Register(reg, template.NewService(deps.Pool))
+	setting.Register(reg, setting.NewService(deps.Pool))
+	importer.Register(reg, importer.NewService(deps.Pool))
+	api.FixNullableEnums(humaAPI.OpenAPI())
 
 	if cfg.Frontend.Path != "" {
 		mux.Handle("/", web.SPA(cfg.Frontend.Path))

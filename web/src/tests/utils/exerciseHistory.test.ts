@@ -13,7 +13,7 @@ import { partial } from "../helpers/fixtures";
 
 const workouts = partial<Workout[]>([
   {
-    id: 1,
+    id: "w1",
     name: "Push Heavy",
     started: "2024-01-01T10:00:00",
     exercises: [
@@ -29,7 +29,7 @@ const workouts = partial<Workout[]>([
     ],
   },
   {
-    id: 2,
+    id: "w2",
     name: "Push Light",
     started: "2024-01-04T10:00:00",
     exercises: [
@@ -44,7 +44,7 @@ const workouts = partial<Workout[]>([
     ],
   },
   {
-    id: 3,
+    id: "w3",
     name: "Push Heavy",
     started: "2024-01-08T10:00:00",
     exercises: [
@@ -70,20 +70,20 @@ const bench = history.get("Bench Press")!;
 describe("buildExerciseHistory", () => {
   it("indexes entries per exercise, newest first", () => {
     expect(bench).toHaveLength(3);
-    expect(bench.map((e) => e.workoutId)).toEqual([3, 2, 1]);
+    expect(bench.map((e) => e.workoutId)).toEqual(["w3", "w2", "w1"]);
     expect(bench[0]!.intensity).toBe("heavy");
     expect(history.get("Wrist Curl")![0]!.intensity).toBeNull();
   });
 
   it("handles workouts without exercises", () => {
-    expect(buildExerciseHistory(partial<(Workout | null)[]>([{ id: 9 }, null])).size).toBe(0);
+    expect(buildExerciseHistory(partial<(Workout | null)[]>([{ id: "w9" }, null])).size).toBe(0);
   });
 });
 
 describe("getMaxWeight", () => {
   it("ignores warmup sets and honours exclusions", () => {
     expect(getMaxWeight(bench)).toBe(102.5);
-    expect(getMaxWeight(bench, { excludeWorkoutId: 3 })).toBe(100);
+    expect(getMaxWeight(bench, { excludeWorkoutId: "w3" })).toBe(100);
   });
 
   it("filters by intensity", () => {
@@ -117,7 +117,7 @@ describe("getBestEstimated1RM", () => {
   });
 
   it("falls back to Epley when no weight is heavier", () => {
-    const entries = partial<HistoryEntry[]>([{ workoutId: 1, sets: [{ weight: 60, reps: 10 }] }]);
+    const entries = partial<HistoryEntry[]>([{ workoutId: "w1", sets: [{ weight: 60, reps: 10 }] }]);
     expect(getBestEstimated1RM(entries)).toBe(60);
   });
 });
@@ -125,13 +125,13 @@ describe("getBestEstimated1RM", () => {
 describe("getLastEntry and formatEntrySets", () => {
   it("finds the last light session", () => {
     const entry = getLastEntry(bench, { intensity: "light" });
-    expect(entry!.workoutId).toBe(2);
+    expect(entry!.workoutId).toBe("w2");
     expect(formatEntrySets(entry)).toBe("70×10, 70×9");
   });
 
   it("skips the workout being edited", () => {
-    const entry = getLastEntry(bench, { intensity: "heavy", excludeWorkoutId: 3 });
-    expect(entry!.workoutId).toBe(1);
+    const entry = getLastEntry(bench, { intensity: "heavy", excludeWorkoutId: "w3" });
+    expect(entry!.workoutId).toBe("w1");
     expect(formatEntrySets(entry)).toBe("100×5, 100×4");
   });
 

@@ -6,19 +6,19 @@ describe('WorkoutLog Debugging - Potential Issues', () => {
     // Test what happens when dates are very close together within a month
     const workouts = [
       {
-        id: 1,
+        id: '1',
         name: 'Workout 1',
         started: '2024-01-31T23:59:59Z', // End of January
         exercises: []
       },
       {
-        id: 2,
+        id: '2',
         name: 'Workout 2',
         started: '2024-01-01T00:00:01Z', // Beginning of January
         exercises: []
       },
       {
-        id: 3,
+        id: '3',
         name: 'Workout 3', 
         started: '2024-01-15T12:00:00Z', // Middle of January
         exercises: []
@@ -29,9 +29,9 @@ describe('WorkoutLog Debugging - Potential Issues', () => {
     const sorted = workouts.sort((a, b) => new Date(b.started).getTime() - new Date(a.started).getTime())
 
     // The sorting should be: Jan 31, Jan 15, Jan 1
-    expect(sorted[0]!.id).toBe(1) // Jan 31 (newest)
-    expect(sorted[1]!.id).toBe(3) // Jan 15 
-    expect(sorted[2]!.id).toBe(2) // Jan 1 (oldest)
+    expect(sorted[0]!.id).toBe('1') // Jan 31 (newest)
+    expect(sorted[1]!.id).toBe('3') // Jan 15 
+    expect(sorted[2]!.id).toBe('2') // Jan 1 (oldest)
 
     console.log('Sorted workout order:')
     sorted.forEach((w, i) => {
@@ -43,19 +43,19 @@ describe('WorkoutLog Debugging - Potential Issues', () => {
     // Create a scenario that might expose the sorting problem
     const workouts = [
       {
-        id: 1,
+        id: '1',
         name: 'Should be last in January',
         started: '2024-01-05T08:00:00Z',
         exercises: []
       },
       {
-        id: 2,
+        id: '2',
         name: 'Should be first in January', 
         started: '2024-01-25T16:00:00Z',
         exercises: []
       },
       {
-        id: 3,
+        id: '3',
         name: 'Should be middle in January',
         started: '2024-01-15T12:00:00Z',
         exercises: []
@@ -108,21 +108,21 @@ describe('WorkoutLog Debugging - Potential Issues', () => {
     })
 
     // The order within January should be: ID 2 (25th), ID 3 (15th), ID 1 (5th)
-    expect(janGroup.workouts[0]!.id).toBe(2) // Jan 25 should be first
-    expect(janGroup.workouts[1]!.id).toBe(3) // Jan 15 should be second  
-    expect(janGroup.workouts[2]!.id).toBe(1) // Jan 5 should be last
+    expect(janGroup.workouts[0]!.id).toBe('2') // Jan 25 should be first
+    expect(janGroup.workouts[1]!.id).toBe('3') // Jan 15 should be second  
+    expect(janGroup.workouts[2]!.id).toBe('1') // Jan 5 should be last
   })
 
   it('reveals the actual problem: sortDate in groups', () => {
     // This test reveals a potential issue with the sortDate assignment
     const workouts = [
       {
-        id: 1,
+        id: '1',
         started: '2024-01-05T08:00:00Z', // Early January
         exercises: []
       },
       {
-        id: 2, 
+        id: '2', 
         started: '2024-01-25T16:00:00Z', // Late January
         exercises: []
       }
@@ -164,10 +164,10 @@ describe('WorkoutLog Debugging - Potential Issues', () => {
 
   it('proposes a fix for the grouping sortDate issue', () => {
     const workouts = [
-      { id: 1, started: '2024-01-05T08:00:00Z', exercises: [] },
-      { id: 2, started: '2024-01-25T16:00:00Z', exercises: [] },
-      { id: 3, started: '2024-02-10T12:00:00Z', exercises: [] },
-      { id: 4, started: '2024-02-01T09:00:00Z', exercises: [] }
+      { id: '1', started: '2024-01-05T08:00:00Z', exercises: [] },
+      { id: '2', started: '2024-01-25T16:00:00Z', exercises: [] },
+      { id: '3', started: '2024-02-10T12:00:00Z', exercises: [] },
+      { id: '4', started: '2024-02-01T09:00:00Z', exercises: [] }
     ]
 
     // Current implementation (potentially buggy)

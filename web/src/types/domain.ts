@@ -1,10 +1,10 @@
 /**
- * Shapes of the records the app stores and edits.
- *
- * Ids are an alias so the switch from IndexedDB autoincrement numbers to
- * server uuids is a one line change.
+ * Shapes of the records the app edits. Stored records come from the API, and
+ * the editor also holds unsaved ones, which have no id or revision yet.
  */
-export type Id = number;
+import type * as api from "@/api/gen/types.gen";
+
+export type Id = string;
 
 export type MuscleGroup =
   | "Forearm"
@@ -16,54 +16,44 @@ export type MuscleGroup =
   | "Triceps"
   | "Abs";
 
-export type ExerciseType = "strength" | "cardio";
-export type DisplayType = "reps" | "time";
-export type Intensity = "heavy" | "light";
-export type Arm = "" | "left" | "right" | "both";
-export type SetType = "regular" | "warmup";
+export type ExerciseType = api.Exercise["type"];
+export type DisplayType = api.Exercise["displayType"];
+export type Intensity = NonNullable<api.WorkoutExercise["intensity"]>;
+export type Arm = api.WorkoutSet["arm"];
+export type SetType = api.WorkoutSet["type"];
 
-/** Dates are Date objects when fresh and ISO strings after a JSON round trip. */
+/** Dates are Date objects when fresh and ISO strings from the API. */
 export type DateLike = Date | string;
 
-export interface Exercise {
-  id?: Id;
-  name: string;
-  muscleGroup: MuscleGroup | string;
-  singleArm: boolean;
-  type: ExerciseType;
-  displayType: DisplayType;
-}
+/** An entry of the exercise list. */
+export type Exercise = api.Exercise;
 
-export interface WorkoutSet {
-  type: SetType;
-  weight: number | null;
-  distance: number | null;
-  reps: number | null;
-  time: string;
-  rpe: number | null;
-  arm: Arm;
-  notes: string;
-}
+/** An exercise to create or update. */
+export type ExerciseDraft = api.ExerciseInput & { id?: Id };
 
-export interface WorkoutExercise extends Exercise {
-  intensity?: Intensity | null;
-  sets: WorkoutSet[];
-}
+export type WorkoutSet = api.WorkoutSet;
+
+export type WorkoutExercise = api.WorkoutExercise;
 
 export interface Workout {
   id?: Id;
+  /** The revision last read from the server, sent back on save. */
+  revision?: number;
   name: string;
   started: DateLike;
   ended?: DateLike | null;
   notes: string;
   exercises: WorkoutExercise[];
+  plannedSessionId?: Id;
   created?: DateLike;
   updated?: DateLike;
 }
 
-export type WorkoutTemplate = Workout;
-
-export interface Setting<T = unknown> {
-  key: string;
-  value: T;
+export interface WorkoutTemplate {
+  id?: Id;
+  name: string;
+  notes: string;
+  exercises: WorkoutExercise[];
+  created?: DateLike;
+  updated?: DateLike;
 }

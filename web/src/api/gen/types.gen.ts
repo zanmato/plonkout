@@ -37,6 +37,32 @@ export type CeremonyStart = {
     options: unknown;
 };
 
+export type Exercise = {
+    archived: boolean;
+    created: string;
+    displayType: 'reps' | 'time';
+    id: string;
+    muscleGroup: string;
+    name: string;
+    singleArm: boolean;
+    type: 'strength' | 'cardio';
+};
+
+export type ExerciseInput = {
+    archived?: boolean;
+    displayType: 'reps' | 'time';
+    muscleGroup: string;
+    name: string;
+    singleArm: boolean;
+    type: 'strength' | 'cardio';
+};
+
+export type Export = {
+    exportDate?: string;
+    version?: string;
+    workouts: Array<unknown>;
+};
+
 export type FinishWithName = {
     ceremony: string;
     /**
@@ -119,8 +145,21 @@ export type ProblemDetail = {
     message: string;
 };
 
+export type PutBody = {
+    value: unknown;
+};
+
 export type RenameBody = {
     name: string;
+};
+
+export type Result = {
+    exercisesCreated: number;
+    imported: number;
+    /**
+     * Workouts imported before, recognized by their old id.
+     */
+    skipped: number;
 };
 
 export type SignedIn = {
@@ -128,10 +167,81 @@ export type SignedIn = {
     user: User;
 };
 
+export type Template = {
+    created: string;
+    exercises: Array<WorkoutExercise>;
+    id: string;
+    name: string;
+    notes: string;
+    updated: string;
+};
+
+export type TemplateInput = {
+    exercises: Array<WorkoutExercise>;
+    name: string;
+    notes: string;
+};
+
 export type User = {
     created: string;
     id: string;
     username: string;
+};
+
+export type Workout = {
+    created: string;
+    ended: string | null;
+    exercises: Array<WorkoutExercise>;
+    id: string;
+    name: string;
+    notes: string;
+    plannedSessionId?: string;
+    revision: number;
+    started: string;
+    updated: string;
+};
+
+export type WorkoutExercise = {
+    displayType: 'reps' | 'time';
+    exerciseId?: string;
+    intensity: 'heavy' | 'light' | null;
+    muscleGroup: string;
+    name: string;
+    notes?: string;
+    plannedExerciseId?: string;
+    sets: Array<WorkoutSet>;
+    singleArm: boolean;
+    type: 'strength' | 'cardio';
+};
+
+export type WorkoutInput = {
+    ended: string | null;
+    exercises: Array<WorkoutExercise>;
+    name: string;
+    notes: string;
+    started: string;
+};
+
+export type WorkoutSet = {
+    arm: '' | 'left' | 'right' | 'both';
+    distance: number | null;
+    notes: string;
+    reps: number | null;
+    rpe: number | null;
+    targetId?: string;
+    targetSeq?: number;
+    time: string;
+    type: 'regular' | 'warmup';
+    weight: number | null;
+};
+
+export type WorkoutUpdate = {
+    ended: string | null;
+    exercises: Array<WorkoutExercise>;
+    name: string;
+    notes: string;
+    revision: number;
+    started: string;
 };
 
 export type DeleteAccountData = {
@@ -639,6 +749,115 @@ export type FinishSignupResponses = {
 
 export type FinishSignupResponse = FinishSignupResponses[keyof FinishSignupResponses];
 
+export type ListExercisesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/exercises';
+};
+
+export type ListExercisesErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListExercisesError = ListExercisesErrors[keyof ListExercisesErrors];
+
+export type ListExercisesResponses = {
+    /**
+     * OK
+     */
+    200: Array<Exercise>;
+};
+
+export type ListExercisesResponse = ListExercisesResponses[keyof ListExercisesResponses];
+
+export type CreateExerciseData = {
+    body: ExerciseInput;
+    path?: never;
+    query?: never;
+    url: '/api/exercises';
+};
+
+export type CreateExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateExerciseError = CreateExerciseErrors[keyof CreateExerciseErrors];
+
+export type CreateExerciseResponses = {
+    /**
+     * Created
+     */
+    201: Exercise;
+};
+
+export type CreateExerciseResponse = CreateExerciseResponses[keyof CreateExerciseResponses];
+
+export type UpdateExerciseData = {
+    body: ExerciseInput;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/exercises/{id}';
+};
+
+export type UpdateExerciseErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateExerciseError = UpdateExerciseErrors[keyof UpdateExerciseErrors];
+
+export type UpdateExerciseResponses = {
+    /**
+     * OK
+     */
+    200: Exercise;
+};
+
+export type UpdateExerciseResponse = UpdateExerciseResponses[keyof UpdateExerciseResponses];
+
 export type GetHealthData = {
     body?: never;
     path?: never;
@@ -667,3 +886,514 @@ export type GetHealthResponses = {
 };
 
 export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+
+export type ImportLegacyExportData = {
+    body: Export;
+    path?: never;
+    query?: never;
+    url: '/api/import/legacy';
+};
+
+export type ImportLegacyExportErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ImportLegacyExportError = ImportLegacyExportErrors[keyof ImportLegacyExportErrors];
+
+export type ImportLegacyExportResponses = {
+    /**
+     * OK
+     */
+    200: Result;
+};
+
+export type ImportLegacyExportResponse = ImportLegacyExportResponses[keyof ImportLegacyExportResponses];
+
+export type ListSettingsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/settings';
+};
+
+export type ListSettingsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListSettingsError = ListSettingsErrors[keyof ListSettingsErrors];
+
+export type ListSettingsResponses = {
+    /**
+     * OK
+     */
+    200: {
+        [key: string]: unknown;
+    };
+};
+
+export type ListSettingsResponse = ListSettingsResponses[keyof ListSettingsResponses];
+
+export type PutSettingData = {
+    body: PutBody;
+    path: {
+        key: string;
+    };
+    query?: never;
+    url: '/api/settings/{key}';
+};
+
+export type PutSettingErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type PutSettingError = PutSettingErrors[keyof PutSettingErrors];
+
+export type PutSettingResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type PutSettingResponse = PutSettingResponses[keyof PutSettingResponses];
+
+export type ListTemplatesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/templates';
+};
+
+export type ListTemplatesErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListTemplatesError = ListTemplatesErrors[keyof ListTemplatesErrors];
+
+export type ListTemplatesResponses = {
+    /**
+     * OK
+     */
+    200: Array<Template>;
+};
+
+export type ListTemplatesResponse = ListTemplatesResponses[keyof ListTemplatesResponses];
+
+export type CreateTemplateData = {
+    body: TemplateInput;
+    path?: never;
+    query?: never;
+    url: '/api/templates';
+};
+
+export type CreateTemplateErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateTemplateError = CreateTemplateErrors[keyof CreateTemplateErrors];
+
+export type CreateTemplateResponses = {
+    /**
+     * Created
+     */
+    201: Template;
+};
+
+export type CreateTemplateResponse = CreateTemplateResponses[keyof CreateTemplateResponses];
+
+export type DeleteTemplateData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/templates/{id}';
+};
+
+export type DeleteTemplateErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteTemplateError = DeleteTemplateErrors[keyof DeleteTemplateErrors];
+
+export type DeleteTemplateResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteTemplateResponse = DeleteTemplateResponses[keyof DeleteTemplateResponses];
+
+export type GetTemplateData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/templates/{id}';
+};
+
+export type GetTemplateErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetTemplateError = GetTemplateErrors[keyof GetTemplateErrors];
+
+export type GetTemplateResponses = {
+    /**
+     * OK
+     */
+    200: Template;
+};
+
+export type GetTemplateResponse = GetTemplateResponses[keyof GetTemplateResponses];
+
+export type UpdateTemplateData = {
+    body: TemplateInput;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/templates/{id}';
+};
+
+export type UpdateTemplateErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateTemplateError = UpdateTemplateErrors[keyof UpdateTemplateErrors];
+
+export type UpdateTemplateResponses = {
+    /**
+     * OK
+     */
+    200: Template;
+};
+
+export type UpdateTemplateResponse = UpdateTemplateResponses[keyof UpdateTemplateResponses];
+
+export type ListWorkoutsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        from?: string;
+        to?: string;
+    };
+    url: '/api/workouts';
+};
+
+export type ListWorkoutsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListWorkoutsError = ListWorkoutsErrors[keyof ListWorkoutsErrors];
+
+export type ListWorkoutsResponses = {
+    /**
+     * OK
+     */
+    200: Array<Workout>;
+};
+
+export type ListWorkoutsResponse = ListWorkoutsResponses[keyof ListWorkoutsResponses];
+
+export type CreateWorkoutData = {
+    body: WorkoutInput;
+    path?: never;
+    query?: never;
+    url: '/api/workouts';
+};
+
+export type CreateWorkoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateWorkoutError = CreateWorkoutErrors[keyof CreateWorkoutErrors];
+
+export type CreateWorkoutResponses = {
+    /**
+     * Created
+     */
+    201: Workout;
+};
+
+export type CreateWorkoutResponse = CreateWorkoutResponses[keyof CreateWorkoutResponses];
+
+export type GetLatestWorkoutData = {
+    body?: never;
+    path?: never;
+    query?: {
+        name?: string;
+        /**
+         * Skip this workout, usually the one being edited.
+         */
+        excludeId?: string;
+    };
+    url: '/api/workouts/latest';
+};
+
+export type GetLatestWorkoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetLatestWorkoutError = GetLatestWorkoutErrors[keyof GetLatestWorkoutErrors];
+
+export type GetLatestWorkoutResponses = {
+    /**
+     * OK
+     */
+    200: Workout;
+};
+
+export type GetLatestWorkoutResponse = GetLatestWorkoutResponses[keyof GetLatestWorkoutResponses];
+
+export type DeleteWorkoutData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/workouts/{id}';
+};
+
+export type DeleteWorkoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteWorkoutError = DeleteWorkoutErrors[keyof DeleteWorkoutErrors];
+
+export type DeleteWorkoutResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteWorkoutResponse = DeleteWorkoutResponses[keyof DeleteWorkoutResponses];
+
+export type GetWorkoutData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/workouts/{id}';
+};
+
+export type GetWorkoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetWorkoutError = GetWorkoutErrors[keyof GetWorkoutErrors];
+
+export type GetWorkoutResponses = {
+    /**
+     * OK
+     */
+    200: Workout;
+};
+
+export type GetWorkoutResponse = GetWorkoutResponses[keyof GetWorkoutResponses];
+
+export type UpdateWorkoutData = {
+    body: WorkoutUpdate;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/workouts/{id}';
+};
+
+export type UpdateWorkoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateWorkoutError = UpdateWorkoutErrors[keyof UpdateWorkoutErrors];
+
+export type UpdateWorkoutResponses = {
+    /**
+     * OK
+     */
+    200: Workout;
+};
+
+export type UpdateWorkoutResponse = UpdateWorkoutResponses[keyof UpdateWorkoutResponses];
