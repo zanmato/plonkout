@@ -40,3 +40,13 @@ SELECT name FROM exercises
 WHERE similarity(name, sqlc.arg(name)::text) > 0.2
 ORDER BY similarity(name, sqlc.arg(name)::text) DESC
 LIMIT 5;
+
+-- name: ExerciseSets :many
+-- Every logged set of an exercise, oldest first, for its statistics.
+SELECT w.id AS workout_id, w.started, ws.type, ws.weight, ws.reps, ws.rpe, ws.arm
+FROM workout_sets ws
+JOIN workout_exercises we ON we.id = ws.workout_exercise_id
+JOIN workouts w ON w.id = we.workout_id
+WHERE lower(we.name) = lower(sqlc.arg(name))
+  AND (sqlc.narg(from_time)::timestamptz IS NULL OR w.started >= sqlc.narg(from_time))
+ORDER BY w.started, we.position, ws.position;

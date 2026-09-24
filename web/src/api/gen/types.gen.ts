@@ -95,6 +95,29 @@ export type ConsentPrompt = {
     scopes: Array<string>;
 };
 
+export type Context = {
+    activePlans: Array<PlanSummary>;
+    distanceUnit: string;
+    /**
+     * The arm that gets the listed weight on single arm exercises.
+     */
+    dominantArm: 'left' | 'right';
+    /**
+     * The server's clock, to reason about dates from.
+     */
+    now: string;
+    /**
+     * The latest workouts, newest first.
+     */
+    recentWorkouts: Array<RecentWorkout>;
+    totalWorkouts: number;
+    username: string;
+    /**
+     * Every weight in this account is in this unit.
+     */
+    weightUnit: 'kg' | 'lbs';
+};
+
 export type DecideConsentResponse = {
     redirectTo: string;
 };
@@ -202,6 +225,20 @@ export type PlanInput = {
     startDate?: string;
 };
 
+export type PlanSummary = {
+    completed: number;
+    goal: string;
+    id: string;
+    name: string;
+    /**
+     * The session the user will pick next, with its targets.
+     */
+    next: Session;
+    pending: number;
+    sessions: number;
+    skipped: number;
+};
+
 export type PlanUpdate = {
     goal: string;
     name: string;
@@ -301,6 +338,15 @@ export type QueueEntry = {
     session: Session;
 };
 
+export type RecentWorkout = {
+    ended: string | null;
+    exercises: Array<string>;
+    id: string;
+    name: string;
+    plannedSessionId?: string;
+    started: string;
+};
+
 export type RenameBody = {
     name: string;
 };
@@ -366,6 +412,16 @@ export type SessionUpdate = {
     week?: number;
 };
 
+export type SetRecord = {
+    arm: string;
+    date: string;
+    estimated1RM: number;
+    reps: number;
+    rpe: number | null;
+    weight: number;
+    workoutId: string;
+};
+
 export type SignedIn = {
     recoveryCodes?: Array<string>;
     user: User;
@@ -373,6 +429,22 @@ export type SignedIn = {
 
 export type StartOutputBody = {
     workoutId: string;
+};
+
+export type Stats = {
+    /**
+     * The arm the numbers are for, when asked for one.
+     */
+    arm?: string;
+    bestByReps: Array<SetRecord>;
+    bestEstimated1RM: SetRecord;
+    exercise: string;
+    heaviest: SetRecord;
+    weekly: Array<WeekStats>;
+    /**
+     * Workouts that logged the exercise.
+     */
+    workouts: number;
 };
 
 export type StatusBody = {
@@ -455,6 +527,22 @@ export type User = {
     created: string;
     id: string;
     username: string;
+};
+
+export type WeekStats = {
+    /**
+     * The set with the best estimated 1RM that week.
+     */
+    topSet: SetRecord;
+    /**
+     * Weight times reps over every working set.
+     */
+    volume: number;
+    /**
+     * The Monday of the week.
+     */
+    weekStart: string;
+    workingSets: number;
 };
 
 export type Workout = {
@@ -1086,6 +1174,35 @@ export type FinishSignupResponses = {
 
 export type FinishSignupResponse = FinishSignupResponses[keyof FinishSignupResponses];
 
+export type GetContextData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/context';
+};
+
+export type GetContextErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetContextError = GetContextErrors[keyof GetContextErrors];
+
+export type GetContextResponses = {
+    /**
+     * OK
+     */
+    200: Context;
+};
+
+export type GetContextResponse = GetContextResponses[keyof GetContextResponses];
+
 export type ListExercisesData = {
     body?: never;
     path?: never;
@@ -1151,6 +1268,52 @@ export type CreateExerciseResponses = {
 };
 
 export type CreateExerciseResponse = CreateExerciseResponses[keyof CreateExerciseResponses];
+
+export type GetExerciseStatsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * The exercise's name.
+         */
+        name?: string;
+        /**
+         * Only sets of this arm, for single arm exercises.
+         */
+        arm?: 'left' | 'right';
+        /**
+         * Only sets logged at or after this time.
+         */
+        from?: string;
+    };
+    url: '/api/exercises/stats';
+};
+
+export type GetExerciseStatsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetExerciseStatsError = GetExerciseStatsErrors[keyof GetExerciseStatsErrors];
+
+export type GetExerciseStatsResponses = {
+    /**
+     * OK
+     */
+    200: Stats;
+};
+
+export type GetExerciseStatsResponse = GetExerciseStatsResponses[keyof GetExerciseStatsResponses];
 
 export type UpdateExerciseData = {
     body: ExerciseInput;
@@ -2082,8 +2245,22 @@ export type ListWorkoutsData = {
     body?: never;
     path?: never;
     query?: {
+        /**
+         * Only workouts started at or after this time.
+         */
         from?: string;
+        /**
+         * Only workouts started before this time.
+         */
         to?: string;
+        /**
+         * Only workouts that logged this exercise, by name.
+         */
+        exercise?: string;
+        /**
+         * At most this many workouts.
+         */
+        limit?: number;
     };
     url: '/api/workouts';
 };

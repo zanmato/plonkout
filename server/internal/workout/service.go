@@ -32,9 +32,19 @@ func NewService(pool *pgxpool.Pool) *Service {
 	return &Service{pool: pool, q: workoutdb.New(pool)}
 }
 
-// List returns workouts newest first, optionally within [from, to).
-func (s *Service) List(ctx context.Context, from, to *time.Time) ([]Workout, error) {
-	rows, err := s.q.ListWorkouts(ctx, workoutdb.ListWorkoutsParams{FromTime: from, ToTime: to})
+// Filter narrows a list of workouts. Every field is optional.
+type Filter struct {
+	From, To *time.Time
+	// Exercise keeps workouts that logged an exercise of this name.
+	Exercise *string
+	Limit    *int32
+}
+
+// List returns workouts newest first.
+func (s *Service) List(ctx context.Context, f Filter) ([]Workout, error) {
+	rows, err := s.q.ListWorkouts(ctx, workoutdb.ListWorkoutsParams{
+		FromTime: f.From, ToTime: f.To, Exercise: f.Exercise, MaxRows: f.Limit,
+	})
 	if err != nil {
 		return nil, err
 	}

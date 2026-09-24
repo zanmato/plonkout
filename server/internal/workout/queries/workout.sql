@@ -6,7 +6,12 @@
 SELECT * FROM workouts
 WHERE (sqlc.narg(from_time)::timestamptz IS NULL OR started >= sqlc.narg(from_time))
   AND (sqlc.narg(to_time)::timestamptz IS NULL OR started < sqlc.narg(to_time))
-ORDER BY started DESC;
+  AND (sqlc.narg(exercise)::text IS NULL OR EXISTS (
+    SELECT 1 FROM workout_exercises we
+    WHERE we.workout_id = workouts.id AND lower(we.name) = lower(sqlc.narg(exercise))
+  ))
+ORDER BY started DESC
+LIMIT sqlc.narg(max_rows)::int;
 
 -- name: GetWorkout :one
 SELECT * FROM workouts WHERE id = $1;

@@ -11,11 +11,13 @@ import (
 // Register declares the exercise operations.
 func Register(reg *api.Registry, s *Service) {
 	tags := []string{"exercises"}
+	registerStats(reg, s)
 
 	api.Register(reg, api.Op{
 		ID: "list-exercises", Method: http.MethodGet, Path: "/exercises",
-		Summary: "The exercise list",
-		Tags:    tags,
+		Summary:     "The exercise list",
+		Description: "Every exercise, with its muscle group, whether it is trained one arm at a time, and whether it is archived.",
+		Tags:        tags, MCPTool: "list_exercises",
 	}, func(ctx context.Context, _ *struct{}) (*struct{ Body []Exercise }, error) {
 		exercises, err := s.List(ctx)
 		if err != nil {

@@ -7,6 +7,7 @@ package exercisedb
 
 import (
 	"context"
+	"time"
 
 	uuid "github.com/gofrs/uuid/v5"
 )
@@ -47,6 +48,60 @@ func (q *Queries) CreateExercise(ctx context.Context, arg CreateExerciseParams) 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const exerciseSets = `-- name: ExerciseSets :many
+SELECT w.id AS workout_id, w.started, ws.type, ws.weight, ws.reps, ws.rpe, ws.arm
+FROM workout_sets ws
+JOIN workout_exercises we ON we.id = ws.workout_exercise_id
+JOIN workouts w ON w.id = we.workout_id
+WHERE lower(we.name) = lower($1)
+  AND ($2::timestamptz IS NULL OR w.started >= $2)
+ORDER BY w.started, we.position, ws.position
+`
+
+type ExerciseSetsParams struct {
+	Name     string
+	FromTime *time.Time
+}
+
+type ExerciseSetsRow struct {
+	WorkoutID uuid.UUID
+	Started   time.Time
+	Type      string
+	Weight    *float64
+	Reps      *int32
+	Rpe       *float64
+	Arm       string
+}
+
+// Every logged set of an exercise, oldest first, for its statistics.
+func (q *Queries) ExerciseSets(ctx context.Context, arg ExerciseSetsParams) ([]ExerciseSetsRow, error) {
+	rows, err := q.db.Query(ctx, exerciseSets, arg.Name, arg.FromTime)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ExerciseSetsRow{}
+	for rows.Next() {
+		var i ExerciseSetsRow
+		if err := rows.Scan(
+			&i.WorkoutID,
+			&i.Started,
+			&i.Type,
+			&i.Weight,
+			&i.Reps,
+			&i.Rpe,
+			&i.Arm,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const findExerciseByName = `-- name: FindExerciseByName :one

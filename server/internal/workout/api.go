@@ -15,14 +15,24 @@ func Register(reg *api.Registry, s *Service) {
 
 	api.Register(reg, api.Op{
 		ID: "list-workouts", Method: http.MethodGet, Path: "/workouts",
-		Summary:     "Workouts, newest first",
-		Description: "Every workout with its exercises and sets, optionally between from (inclusive) and to (exclusive).",
-		Tags:        tags,
+		Summary: "Workouts, newest first",
+		Description: "Logged workouts with their exercises and sets, newest first. Narrow with from (inclusive) " +
+			"and to (exclusive) dates, an exercise name, and a limit.",
+		Tags: tags, MCPTool: "get_workout_history",
 	}, func(ctx context.Context, in *struct {
-		From time.Time `query:"from" required:"false"`
-		To   time.Time `query:"to" required:"false"`
+		From     time.Time `query:"from" required:"false" doc:"Only workouts started at or after this time."`
+		To       time.Time `query:"to" required:"false" doc:"Only workouts started before this time."`
+		Exercise string    `query:"exercise" required:"false" doc:"Only workouts that logged this exercise, by name."`
+		Limit    int32     `query:"limit" required:"false" minimum:"1" maximum:"1000" doc:"At most this many workouts."`
 	}) (*struct{ Body []Workout }, error) {
-		workouts, err := s.List(ctx, optionalTime(in.From), optionalTime(in.To))
+		filter := Filter{From: optionalTime(in.From), To: optionalTime(in.To)}
+		if in.Exercise != "" {
+			filter.Exercise = &in.Exercise
+		}
+		if in.Limit > 0 {
+			filter.Limit = &in.Limit
+		}
+		workouts, err := s.List(ctx, filter)
 		if err != nil {
 			return nil, err
 		}

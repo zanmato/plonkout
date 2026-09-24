@@ -17,7 +17,9 @@ import (
 	"github.com/zanmato/plonkout/server/internal/account"
 	"github.com/zanmato/plonkout/server/internal/exercise"
 	"github.com/zanmato/plonkout/server/internal/importer"
+	"github.com/zanmato/plonkout/server/internal/mcpserver"
 	"github.com/zanmato/plonkout/server/internal/oauth"
+	"github.com/zanmato/plonkout/server/internal/overview"
 	"github.com/zanmato/plonkout/server/internal/plan"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
@@ -105,10 +107,20 @@ func New(deps Deps) (*Server, error) {
 	template.Register(reg, template.NewService(deps.Pool))
 	setting.Register(reg, setting.NewService(deps.Pool))
 	importer.Register(reg, importer.NewService(deps.Pool))
-	plan.Register(reg, plan.NewService(deps.Pool))
+	plans := plan.NewService(deps.Pool)
+	plan.Register(reg, plans)
+	overview.Register(reg, deps.Pool, plans)
 	oauth.RegisterAPI(reg, tokens)
 	tokens.Mount(mux, deps.Logger)
 	api.FixNullableEnums(humaAPI.OpenAPI())
+
+	assistant, err := mcpserver.New(mcpserver.Deps{
+		Handler: mux, Registry: reg, Tokens: tokens, Version: Version, Logger: deps.Logger,
+	})
+	if err != nil {
+		return nil, err
+	}
+	mux.Handle("/mcp", assistant.Handler())
 
 	if cfg.Frontend.Path != "" {
 		mux.Handle("/", web.SPA(cfg.Frontend.Path))

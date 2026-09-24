@@ -251,19 +251,31 @@ const listWorkouts = `-- name: ListWorkouts :many
 SELECT id, user_id, name, started, ended, notes, planned_session_id, revision, legacy_id, created_at, updated_at FROM workouts
 WHERE ($1::timestamptz IS NULL OR started >= $1)
   AND ($2::timestamptz IS NULL OR started < $2)
+  AND ($3::text IS NULL OR EXISTS (
+    SELECT 1 FROM workout_exercises we
+    WHERE we.workout_id = workouts.id AND lower(we.name) = lower($3)
+  ))
 ORDER BY started DESC
+LIMIT $4::int
 `
 
 type ListWorkoutsParams struct {
 	FromTime *time.Time
 	ToTime   *time.Time
+	Exercise *string
+	MaxRows  *int32
 }
 
 // Row level security scopes every query to the signed in user. A workout is
 // read and written as a whole document: the workout row, its exercises and
 // their sets.
 func (q *Queries) ListWorkouts(ctx context.Context, arg ListWorkoutsParams) ([]Workout, error) {
-	rows, err := q.db.Query(ctx, listWorkouts, arg.FromTime, arg.ToTime)
+	rows, err := q.db.Query(ctx, listWorkouts,
+		arg.FromTime,
+		arg.ToTime,
+		arg.Exercise,
+		arg.MaxRows,
+	)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddSessionsData, AddSessionsErrors, AddSessionsResponses, BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreatePlanData, CreatePlanErrors, CreatePlanResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DecideConsentData, DecideConsentErrors, DecideConsentResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeletePlanData, DeletePlanErrors, DeletePlanResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, DisconnectAppData, DisconnectAppErrors, DisconnectAppResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetConsentPromptData, GetConsentPromptErrors, GetConsentPromptResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetPlanData, GetPlanErrors, GetPlannedSessionData, GetPlannedSessionErrors, GetPlannedSessionResponses, GetPlanResponses, GetQueueData, GetQueueErrors, GetQueueResponses, GetSessionComparisonData, GetSessionComparisonErrors, GetSessionComparisonResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListConnectedAppsData, ListConnectedAppsErrors, ListConnectedAppsResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListPlansData, ListPlansErrors, ListPlansResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogoutData, LogoutErrors, LogoutResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ReorderSessionsData, ReorderSessionsErrors, ReorderSessionsResponses, SetSessionStatusData, SetSessionStatusErrors, SetSessionStatusResponses, StartSessionData, StartSessionErrors, StartSessionResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdatePlanData, UpdatePlanErrors, UpdatePlanResponses, UpdateSessionData, UpdateSessionErrors, UpdateSessionResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
+import type { AddSessionsData, AddSessionsErrors, AddSessionsResponses, BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreatePlanData, CreatePlanErrors, CreatePlanResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DecideConsentData, DecideConsentErrors, DecideConsentResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeletePlanData, DeletePlanErrors, DeletePlanResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, DisconnectAppData, DisconnectAppErrors, DisconnectAppResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetConsentPromptData, GetConsentPromptErrors, GetConsentPromptResponses, GetContextData, GetContextErrors, GetContextResponses, GetExerciseStatsData, GetExerciseStatsErrors, GetExerciseStatsResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetPlanData, GetPlanErrors, GetPlannedSessionData, GetPlannedSessionErrors, GetPlannedSessionResponses, GetPlanResponses, GetQueueData, GetQueueErrors, GetQueueResponses, GetSessionComparisonData, GetSessionComparisonErrors, GetSessionComparisonResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListConnectedAppsData, ListConnectedAppsErrors, ListConnectedAppsResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListPlansData, ListPlansErrors, ListPlansResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogoutData, LogoutErrors, LogoutResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ReorderSessionsData, ReorderSessionsErrors, ReorderSessionsResponses, SetSessionStatusData, SetSessionStatusErrors, SetSessionStatusResponses, StartSessionData, StartSessionErrors, StartSessionResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdatePlanData, UpdatePlanErrors, UpdatePlanResponses, UpdateSessionData, UpdateSessionErrors, UpdateSessionResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -250,7 +250,24 @@ export const finishSignup = <ThrowOnError extends boolean = false>(options: Opti
 });
 
 /**
+ * Where the user is at
+ *
+ * Units, dominant arm, active plans with progress and the next session, and the latest workouts. Read this first: every weight elsewhere is in weightUnit.
+ */
+export const getContext = <ThrowOnError extends boolean = false>(options?: Options<GetContextData, ThrowOnError>): RequestResult<GetContextResponses, GetContextErrors, ThrowOnError> => (options?.client ?? client).get<GetContextResponses, GetContextErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/context',
+    ...options
+});
+
+/**
  * The exercise list
+ *
+ * Every exercise, with its muscle group, whether it is trained one arm at a time, and whether it is archived.
  */
 export const listExercises = <ThrowOnError extends boolean = false>(options?: Options<ListExercisesData, ThrowOnError>): RequestResult<ListExercisesResponses, ListExercisesErrors, ThrowOnError> => (options?.client ?? client).get<ListExercisesResponses, ListExercisesErrors, ThrowOnError>({
     security: [{
@@ -277,6 +294,21 @@ export const createExercise = <ThrowOnError extends boolean = false>(options: Op
         'Content-Type': 'application/json',
         ...options.headers
     }
+});
+
+/**
+ * How an exercise has gone
+ *
+ * Best estimated 1RM (Epley, capped at 12 reps), the heaviest set, the heaviest weight for each rep count, and the top set and volume of every week, from working sets only. Optionally for one arm and from a date.
+ */
+export const getExerciseStats = <ThrowOnError extends boolean = false>(options?: Options<GetExerciseStatsData, ThrowOnError>): RequestResult<GetExerciseStatsResponses, GetExerciseStatsErrors, ThrowOnError> => (options?.client ?? client).get<GetExerciseStatsResponses, GetExerciseStatsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/exercises/stats',
+    ...options
 });
 
 /**
@@ -667,7 +699,7 @@ export const updateTemplate = <ThrowOnError extends boolean = false>(options: Op
 /**
  * Workouts, newest first
  *
- * Every workout with its exercises and sets, optionally between from (inclusive) and to (exclusive).
+ * Logged workouts with their exercises and sets, newest first. Narrow with from (inclusive) and to (exclusive) dates, an exercise name, and a limit.
  */
 export const listWorkouts = <ThrowOnError extends boolean = false>(options?: Options<ListWorkoutsData, ThrowOnError>): RequestResult<ListWorkoutsResponses, ListWorkoutsErrors, ThrowOnError> => (options?.client ?? client).get<ListWorkoutsResponses, ListWorkoutsErrors, ThrowOnError>({
     security: [{

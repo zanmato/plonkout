@@ -144,3 +144,34 @@ func (h *Harness) Expect(r Response, status int) Response {
 	}
 	return r
 }
+
+// NewAccessToken gives the user an OAuth access token for the MCP resource,
+// as if an MCP client had been through the authorization flow.
+func (h *Harness) NewAccessToken(u User) string {
+	h.t.Helper()
+	ctx := h.t.Context()
+	raw := make([]byte, 32)
+	_, _ = rand.Read(raw)
+	token := base64.RawURLEncoding.EncodeToString(raw)
+	hash := sha256.Sum256([]byte(token))
+
+	var grantID uuid.UUID
+	err := h.DB.App.QueryRow(ctx, `
+		WITH client AS (
+			INSERT INTO auth.oauth_clients (client_id, kind, client_name, redirect_uris)
+			VALUES ('test_' || gen_random_uuid(), 'dcr', 'Test client', '{https://client.example/callback}')
+			RETURNING client_id
+		)
+		INSERT INTO auth.oauth_grants (client_id, user_id, scope, resource, refresh_expires_at)
+		SELECT client_id, $1, 'training offline_access', $2, now() + interval '1 day' FROM client
+		RETURNING id`, u.ID, Origin+"/mcp").Scan(&grantID)
+	if err != nil {
+		h.t.Fatalf("create a grant: %v", err)
+	}
+	if _, err := h.DB.App.Exec(ctx, `
+		INSERT INTO auth.oauth_access_tokens (token_hash, grant_id, expires_at) VALUES ($1, $2, now() + interval '1 hour')`,
+		hash[:], grantID); err != nil {
+		h.t.Fatalf("create an access token: %v", err)
+	}
+	return token
+}
