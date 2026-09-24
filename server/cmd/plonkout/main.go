@@ -111,7 +111,10 @@ func run(configPath string, migrateFirst, migrateOnly bool) error {
 // contacts a database, so generating the committed document works in a fresh
 // checkout.
 func printOpenAPI() error {
-	cfg := &config.Config{Server: config.Server{BaseURL: "http://localhost"}}
+	cfg := &config.Config{
+		Server:   config.Server{BaseURL: "http://localhost"},
+		WebAuthn: config.WebAuthn{RPID: "localhost", RPName: "Plonkout", Origins: []string{"http://localhost"}},
+	}
 	logger := slog.New(slog.DiscardHandler)
 
 	pool, err := db.OpenWithoutConnecting("postgres://localhost/plonkout", logger)

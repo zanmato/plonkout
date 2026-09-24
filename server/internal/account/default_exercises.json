@@ -1,0 +1,471 @@
+[
+  {
+    "name": "Wrist Curl",
+    "muscle_group": "Forearm",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Pronation Curl",
+    "muscle_group": "Forearm",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Supination Curl",
+    "muscle_group": "Forearm",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Side Pressure",
+    "muscle_group": "Shoulders",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Hook Training",
+    "muscle_group": "Forearm",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Top Roll Training",
+    "muscle_group": "Forearm",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Cable Hammer Curl",
+    "muscle_group": "Biceps",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Bench Press",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Incline Bench Press",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Decline Bench Press",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Close Grip Bench Press",
+    "muscle_group": "Triceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Dumbbell Press",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Incline Dumbbell Press",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Chest Fly",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Push-ups",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Dips",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Deadlift",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Sumo Deadlift",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Romanian Deadlift",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Bent Over Row",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "T-Bar Row",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Cable Row",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Lat Pulldown",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Pull-ups",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Chin-ups",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Single Arm Row",
+    "muscle_group": "Back",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Shoulder Press",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Overhead Press",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Dumbbell Shoulder Press",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Lateral Raise",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Front Raise",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Rear Delt Fly",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Upright Row",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Shrugs",
+    "muscle_group": "Shoulders",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Squat",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Front Squat",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Bulgarian Split Squat",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Leg Press",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Leg Curl",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Leg Extension",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Calf Raise",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Lunges",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Bicep Curl",
+    "muscle_group": "Biceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Hammer Curl",
+    "muscle_group": "Biceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Preacher Curl",
+    "muscle_group": "Biceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Cable Curl",
+    "muscle_group": "Biceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Concentration Curl",
+    "muscle_group": "Biceps",
+    "single_arm": true,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Tricep Extension",
+    "muscle_group": "Triceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Overhead Tricep Extension",
+    "muscle_group": "Triceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Tricep Pushdown",
+    "muscle_group": "Triceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Diamond Push-ups",
+    "muscle_group": "Triceps",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Plank",
+    "muscle_group": "Abs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "time"
+  },
+  {
+    "name": "Crunches",
+    "muscle_group": "Abs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Russian Twists",
+    "muscle_group": "Abs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Leg Raises",
+    "muscle_group": "Abs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Mountain Climbers",
+    "muscle_group": "Abs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Dead Bug",
+    "muscle_group": "Abs",
+    "single_arm": false,
+    "type": "strength",
+    "display_type": "reps"
+  },
+  {
+    "name": "Running",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Walking",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Jogging",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Cycling",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Rowing Machine",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Elliptical",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Swimming",
+    "muscle_group": "Back",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  },
+  {
+    "name": "Jumping Jacks",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "reps"
+  },
+  {
+    "name": "Burpees",
+    "muscle_group": "Chest",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "reps"
+  },
+  {
+    "name": "High Knees",
+    "muscle_group": "Legs",
+    "single_arm": false,
+    "type": "cardio",
+    "display_type": "time"
+  }
+]

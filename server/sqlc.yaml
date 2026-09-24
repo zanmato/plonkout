@@ -62,3 +62,15 @@ sql:
             go_type: "string"
           - db_type: "jsonb"
             go_type: "encoding/json.RawMessage"
+
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/account/queries
+    gen:
+      go:
+        package: accountdb
+        out: internal/account/accountdb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides

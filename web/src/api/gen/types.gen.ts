@@ -4,6 +4,51 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type BeginRecoveryBody = {
+    recoveryCode: string;
+    username: string;
+};
+
+export type BeginSignupBody = {
+    pow: PowSolution;
+    username: string;
+    /**
+     * Leave empty.
+     */
+    website?: string;
+};
+
+export type CeremonyFinish = {
+    ceremony: string;
+    /**
+     * The result of PublicKeyCredential.toJSON().
+     */
+    credential: unknown;
+};
+
+export type CeremonyStart = {
+    /**
+     * Pass back to the matching finish operation.
+     */
+    ceremony: string;
+    /**
+     * WebAuthn options in their JSON form, for PublicKeyCredential.parse*OptionsFromJSON.
+     */
+    options: unknown;
+};
+
+export type FinishWithName = {
+    ceremony: string;
+    /**
+     * The result of PublicKeyCredential.toJSON().
+     */
+    credential: unknown;
+    /**
+     * A name that helps tell passkeys apart, e.g. the device.
+     */
+    passkeyName?: string;
+};
+
 export type Health = {
     /**
      * The database clock, which proves it answered.
@@ -13,10 +58,56 @@ export type Health = {
     version: string;
 };
 
+export type Me = {
+    created: string;
+    id: string;
+    passkeys: number;
+    recoveryCodesLeft: number;
+    username: string;
+};
+
+export type Passkey = {
+    created: string;
+    /**
+     * The credential id, base64url.
+     */
+    id: string;
+    lastUsed?: string;
+    name: string;
+    /**
+     * The passkey can be backed up, e.g. to iCloud Keychain or Google Password Manager.
+     */
+    synced: boolean;
+};
+
+export type PowChallenge = {
+    algorithm: string;
+    /**
+     * Hex SHA-256 of salt followed by the secret number.
+     */
+    challenge: string;
+    /**
+     * The secret number is between 0 and this, inclusive.
+     */
+    maxNumber: number;
+    salt: string;
+    /**
+     * Proves the server issued the challenge.
+     */
+    signature: string;
+};
+
+export type PowSolution = {
+    challenge: string;
+    number: number;
+    salt: string;
+    signature: string;
+};
+
 export type Problem = {
     code: string;
     detail?: string;
-    errors?: Array<ProblemDetail> | null;
+    errors?: Array<ProblemDetail>;
     status: number;
     title: string;
     type: string;
@@ -27,6 +118,526 @@ export type ProblemDetail = {
     location?: string;
     message: string;
 };
+
+export type RenameBody = {
+    name: string;
+};
+
+export type SignedIn = {
+    recoveryCodes?: Array<string>;
+    user: User;
+};
+
+export type User = {
+    created: string;
+    id: string;
+    username: string;
+};
+
+export type DeleteAccountData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account';
+};
+
+export type DeleteAccountErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteAccountError = DeleteAccountErrors[keyof DeleteAccountErrors];
+
+export type DeleteAccountResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteAccountResponse = DeleteAccountResponses[keyof DeleteAccountResponses];
+
+export type GetMeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account';
+};
+
+export type GetMeErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetMeError = GetMeErrors[keyof GetMeErrors];
+
+export type GetMeResponses = {
+    /**
+     * OK
+     */
+    200: Me;
+};
+
+export type GetMeResponse = GetMeResponses[keyof GetMeResponses];
+
+export type ListPasskeysData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account/passkeys';
+};
+
+export type ListPasskeysErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListPasskeysError = ListPasskeysErrors[keyof ListPasskeysErrors];
+
+export type ListPasskeysResponses = {
+    /**
+     * OK
+     */
+    200: Array<Passkey>;
+};
+
+export type ListPasskeysResponse = ListPasskeysResponses[keyof ListPasskeysResponses];
+
+export type BeginAddPasskeyData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account/passkeys/begin';
+};
+
+export type BeginAddPasskeyErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type BeginAddPasskeyError = BeginAddPasskeyErrors[keyof BeginAddPasskeyErrors];
+
+export type BeginAddPasskeyResponses = {
+    /**
+     * OK
+     */
+    200: CeremonyStart;
+};
+
+export type BeginAddPasskeyResponse = BeginAddPasskeyResponses[keyof BeginAddPasskeyResponses];
+
+export type FinishAddPasskeyData = {
+    body: FinishWithName;
+    path?: never;
+    query?: never;
+    url: '/api/account/passkeys/finish';
+};
+
+export type FinishAddPasskeyErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type FinishAddPasskeyError = FinishAddPasskeyErrors[keyof FinishAddPasskeyErrors];
+
+export type FinishAddPasskeyResponses = {
+    /**
+     * Created
+     */
+    201: Passkey;
+};
+
+export type FinishAddPasskeyResponse = FinishAddPasskeyResponses[keyof FinishAddPasskeyResponses];
+
+export type DeletePasskeyData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/account/passkeys/{id}';
+};
+
+export type DeletePasskeyErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeletePasskeyError = DeletePasskeyErrors[keyof DeletePasskeyErrors];
+
+export type DeletePasskeyResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeletePasskeyResponse = DeletePasskeyResponses[keyof DeletePasskeyResponses];
+
+export type RenamePasskeyData = {
+    body: RenameBody;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/account/passkeys/{id}';
+};
+
+export type RenamePasskeyErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RenamePasskeyError = RenamePasskeyErrors[keyof RenamePasskeyErrors];
+
+export type RenamePasskeyResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type RenamePasskeyResponse = RenamePasskeyResponses[keyof RenamePasskeyResponses];
+
+export type RegenerateRecoveryCodesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account/recovery-codes';
+};
+
+export type RegenerateRecoveryCodesErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type RegenerateRecoveryCodesError = RegenerateRecoveryCodesErrors[keyof RegenerateRecoveryCodesErrors];
+
+export type RegenerateRecoveryCodesResponses = {
+    /**
+     * OK
+     */
+    200: Array<string>;
+};
+
+export type RegenerateRecoveryCodesResponse = RegenerateRecoveryCodesResponses[keyof RegenerateRecoveryCodesResponses];
+
+export type BeginLoginData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/login/begin';
+};
+
+export type BeginLoginErrors = {
+    /**
+     * Error
+     */
+    default: Problem;
+};
+
+export type BeginLoginError = BeginLoginErrors[keyof BeginLoginErrors];
+
+export type BeginLoginResponses = {
+    /**
+     * OK
+     */
+    200: CeremonyStart;
+};
+
+export type BeginLoginResponse = BeginLoginResponses[keyof BeginLoginResponses];
+
+export type FinishLoginData = {
+    body: CeremonyFinish;
+    headers?: {
+        'User-Agent'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/auth/login/finish';
+};
+
+export type FinishLoginErrors = {
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type FinishLoginError = FinishLoginErrors[keyof FinishLoginErrors];
+
+export type FinishLoginResponses = {
+    /**
+     * OK
+     */
+    200: SignedIn;
+};
+
+export type FinishLoginResponse = FinishLoginResponses[keyof FinishLoginResponses];
+
+export type LogoutData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/logout';
+};
+
+export type LogoutErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type LogoutError = LogoutErrors[keyof LogoutErrors];
+
+export type LogoutResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type LogoutResponse = LogoutResponses[keyof LogoutResponses];
+
+export type BeginRecoveryData = {
+    body: BeginRecoveryBody;
+    path?: never;
+    query?: never;
+    url: '/api/auth/recover/begin';
+};
+
+export type BeginRecoveryErrors = {
+    /**
+     * Error
+     */
+    default: Problem;
+};
+
+export type BeginRecoveryError = BeginRecoveryErrors[keyof BeginRecoveryErrors];
+
+export type BeginRecoveryResponses = {
+    /**
+     * OK
+     */
+    200: CeremonyStart;
+};
+
+export type BeginRecoveryResponse = BeginRecoveryResponses[keyof BeginRecoveryResponses];
+
+export type FinishRecoveryData = {
+    body: FinishWithName;
+    headers?: {
+        'User-Agent'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/auth/recover/finish';
+};
+
+export type FinishRecoveryErrors = {
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type FinishRecoveryError = FinishRecoveryErrors[keyof FinishRecoveryErrors];
+
+export type FinishRecoveryResponses = {
+    /**
+     * OK
+     */
+    200: SignedIn;
+};
+
+export type FinishRecoveryResponse = FinishRecoveryResponses[keyof FinishRecoveryResponses];
+
+export type BeginSignupData = {
+    body: BeginSignupBody;
+    path?: never;
+    query?: never;
+    url: '/api/auth/signup/begin';
+};
+
+export type BeginSignupErrors = {
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type BeginSignupError = BeginSignupErrors[keyof BeginSignupErrors];
+
+export type BeginSignupResponses = {
+    /**
+     * OK
+     */
+    200: CeremonyStart;
+};
+
+export type BeginSignupResponse = BeginSignupResponses[keyof BeginSignupResponses];
+
+export type GetSignupChallengeData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/auth/signup/challenge';
+};
+
+export type GetSignupChallengeErrors = {
+    /**
+     * Error
+     */
+    default: Problem;
+};
+
+export type GetSignupChallengeError = GetSignupChallengeErrors[keyof GetSignupChallengeErrors];
+
+export type GetSignupChallengeResponses = {
+    /**
+     * OK
+     */
+    200: PowChallenge;
+};
+
+export type GetSignupChallengeResponse = GetSignupChallengeResponses[keyof GetSignupChallengeResponses];
+
+export type FinishSignupData = {
+    body: FinishWithName;
+    headers?: {
+        'User-Agent'?: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/api/auth/signup/finish';
+};
+
+export type FinishSignupErrors = {
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type FinishSignupError = FinishSignupErrors[keyof FinishSignupErrors];
+
+export type FinishSignupResponses = {
+    /**
+     * OK
+     */
+    200: SignedIn;
+};
+
+export type FinishSignupResponse = FinishSignupResponses[keyof FinishSignupResponses];
 
 export type GetHealthData = {
     body?: never;

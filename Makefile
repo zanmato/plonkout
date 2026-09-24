@@ -42,6 +42,7 @@ test: test-go test-web
 
 lint:
 	cd server && go vet ./...
+	@cd server && test -z "$$(gofmt -l .)" || { gofmt -l .; echo 'run gofmt -w'; exit 1; }
 	cd web && pnpm lint
 
 build-web:

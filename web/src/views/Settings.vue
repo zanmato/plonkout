@@ -4,7 +4,9 @@
     <NeoHeader :title="t('settings.title')" />
 
     <!-- Content -->
-    <div class="flex-1 overflow-y-auto p-4">
+    <div class="flex-1 overflow-y-auto p-4 space-y-4">
+      <AccountSettings />
+
       <NeoPanel>
         <!-- Language Setting -->
         <div class="mb-6">
@@ -235,6 +237,7 @@ import {
 import { useToast } from "@/composables/useToast";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
+import AccountSettings from "@/components/AccountSettings.vue";
 import NeoButton from "@/components/NeoButton.vue";
 import DestructiveButton from "@/components/DestructiveButton.vue";
 import VoltSelect from "@/volt/Select.vue";

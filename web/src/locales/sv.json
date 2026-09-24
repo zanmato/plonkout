@@ -243,6 +243,28 @@
       "description": "Välj vad \"föregående bästa\" och \"senast\" jämförs mot. Rekord och % av max använder alltid hela historiken.",
       "intensity": "Samma intensitet",
       "all": "Alla pass"
+    },
+    "account": {
+      "title": "Konto",
+      "signedInAs": "Inloggad som {username}",
+      "passkeys": "Passkeys",
+      "synced": "Synkad",
+      "lastUsed": "Senast använd {date}",
+      "neverUsed": "Inte använd än",
+      "addPasskey": "Lägg till passkey",
+      "rename": "Byt namn",
+      "renamePrompt": "Namn",
+      "remove": "Ta bort",
+      "removeConfirm": "Ta bort passkeyn \"{name}\"? Du kan inte längre logga in med den.",
+      "recoveryCodes": "Återställningskoder",
+      "recoveryCodesLeft": "{count} oanvända återställningskoder",
+      "regenerate": "Nya återställningskoder",
+      "regenerateConfirm": "Dina nuvarande återställningskoder slutar fungera. Fortsätta?",
+      "signOut": "Logga ut",
+      "deleteAccount": "Radera konto",
+      "deleteAccountExplain": "Tar bort ditt konto och alla pass, program, mallar och inställningar i det. Det går inte att ångra.",
+      "deleteAccountConfirm": "Skriv ditt användarnamn för att bekräfta",
+      "done": "Klar"
     }
   },
   "templates": {
@@ -290,6 +312,46 @@
       "fri": "Fre",
       "sat": "Lör",
       "sun": "Sön"
+    }
+  },
+  "auth": {
+    "tagline": "Logga pass, följ ditt program.",
+    "signIn": "Logga in med passkey",
+    "createAccount": "Skapa konto",
+    "lostPasskey": "Tappat bort din passkey?",
+    "waitingForPasskey": "Väntar på din passkey...",
+    "unsupported": "Den här webbläsaren kan inte använda passkeys. Prova en ny version av Safari, Chrome eller Firefox.",
+    "username": "Användarnamn",
+    "usernameHint": "3 till 32 bokstäver, siffror, punkter, bindestreck eller understreck.",
+    "passkeyExplain": "Du loggar in med en passkey som låses upp med ansikte, fingeravtryck eller skärmlås. Det finns inget lösenord att komma ihåg.",
+    "createPasskey": "Skapa passkey",
+    "recoveryCodes": {
+      "title": "Spara dina återställningskoder",
+      "explain": "Om du tappar bort alla enheter med din passkey kan du lägga till en ny med en av de här koderna. Varje kod fungerar en gång. Förvara dem säkert, till exempel i din lösenordshanterare.",
+      "copy": "Kopiera",
+      "copied": "Kopierat",
+      "download": "Ladda ner",
+      "saved": "Jag har sparat mina återställningskoder",
+      "continue": "Fortsätt"
+    },
+    "recover": {
+      "title": "Återställ ditt konto",
+      "explain": "Ange ditt användarnamn och en av dina återställningskoder. Sedan skapar du en ny passkey på den här enheten.",
+      "code": "Återställningskod",
+      "submit": "Skapa ny passkey"
+    },
+    "errors": {
+      "cancelled": "Passkey-rutan stängdes. Försök igen när du är redo.",
+      "passkeyExists": "Den här enheten har redan en passkey för kontot.",
+      "generic": "Något gick fel. Kontrollera din anslutning och försök igen.",
+      "username_taken": "Användarnamnet är upptaget.",
+      "invalid_username": "Ett användarnamn är 3 till 32 bokstäver, siffror, punkter, bindestreck eller understreck.",
+      "signup_refused": "Registreringen kunde inte verifieras. Ladda om sidan och försök igen.",
+      "ceremony_expired": "Det tog för lång tid. Försök igen.",
+      "passkey_rejected": "Passkeyn kunde inte verifieras.",
+      "recovery_rejected": "Användarnamnet eller återställningskoden stämmer inte.",
+      "last_passkey": "Lägg till en passkey till innan du tar bort den här.",
+      "unauthorized": "Din session har gått ut. Logga in igen."
     }
   }
 }

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { GetHealthData, GetHealthErrors, GetHealthResponses } from './types.gen';
+import type { BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetMeData, GetMeErrors, GetMeResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, LogoutData, LogoutErrors, LogoutResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -17,6 +17,211 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
      */
     meta?: keyof ClientMeta extends never ? Record<string, unknown> : ClientMeta;
 };
+
+/**
+ * Delete the account and everything in it
+ *
+ * Irreversible. Workouts, plans, templates, settings and passkeys are all removed.
+ */
+export const deleteAccount = <ThrowOnError extends boolean = false>(options?: Options<DeleteAccountData, ThrowOnError>): RequestResult<DeleteAccountResponses, DeleteAccountErrors, ThrowOnError> => (options?.client ?? client).delete<DeleteAccountResponses, DeleteAccountErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account',
+    ...options
+});
+
+/**
+ * The signed in user
+ */
+export const getMe = <ThrowOnError extends boolean = false>(options?: Options<GetMeData, ThrowOnError>): RequestResult<GetMeResponses, GetMeErrors, ThrowOnError> => (options?.client ?? client).get<GetMeResponses, GetMeErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account',
+    ...options
+});
+
+/**
+ * The signed in user's passkeys
+ */
+export const listPasskeys = <ThrowOnError extends boolean = false>(options?: Options<ListPasskeysData, ThrowOnError>): RequestResult<ListPasskeysResponses, ListPasskeysErrors, ThrowOnError> => (options?.client ?? client).get<ListPasskeysResponses, ListPasskeysErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account/passkeys',
+    ...options
+});
+
+/**
+ * Start registering another passkey
+ */
+export const beginAddPasskey = <ThrowOnError extends boolean = false>(options?: Options<BeginAddPasskeyData, ThrowOnError>): RequestResult<BeginAddPasskeyResponses, BeginAddPasskeyErrors, ThrowOnError> => (options?.client ?? client).post<BeginAddPasskeyResponses, BeginAddPasskeyErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account/passkeys/begin',
+    ...options
+});
+
+/**
+ * Save another passkey
+ */
+export const finishAddPasskey = <ThrowOnError extends boolean = false>(options: Options<FinishAddPasskeyData, ThrowOnError>): RequestResult<FinishAddPasskeyResponses, FinishAddPasskeyErrors, ThrowOnError> => (options.client ?? client).post<FinishAddPasskeyResponses, FinishAddPasskeyErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account/passkeys/finish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Remove a passkey
+ *
+ * The last passkey cannot be removed, since the account could not be signed in to again without spending a recovery code.
+ */
+export const deletePasskey = <ThrowOnError extends boolean = false>(options: Options<DeletePasskeyData, ThrowOnError>): RequestResult<DeletePasskeyResponses, DeletePasskeyErrors, ThrowOnError> => (options.client ?? client).delete<DeletePasskeyResponses, DeletePasskeyErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account/passkeys/{id}',
+    ...options
+});
+
+/**
+ * Rename a passkey
+ */
+export const renamePasskey = <ThrowOnError extends boolean = false>(options: Options<RenamePasskeyData, ThrowOnError>): RequestResult<RenamePasskeyResponses, RenamePasskeyErrors, ThrowOnError> => (options.client ?? client).patch<RenamePasskeyResponses, RenamePasskeyErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account/passkeys/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Replace every recovery code with a new set
+ *
+ * The old codes stop working. The new ones are shown only in this answer.
+ */
+export const regenerateRecoveryCodes = <ThrowOnError extends boolean = false>(options?: Options<RegenerateRecoveryCodesData, ThrowOnError>): RequestResult<RegenerateRecoveryCodesResponses, RegenerateRecoveryCodesErrors, ThrowOnError> => (options?.client ?? client).post<RegenerateRecoveryCodesResponses, RegenerateRecoveryCodesErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/account/recovery-codes',
+    ...options
+});
+
+/**
+ * Start signing in with a passkey
+ */
+export const beginLogin = <ThrowOnError extends boolean = false>(options?: Options<BeginLoginData, ThrowOnError>): RequestResult<BeginLoginResponses, BeginLoginErrors, ThrowOnError> => (options?.client ?? client).post<BeginLoginResponses, BeginLoginErrors, ThrowOnError>({ url: '/api/auth/login/begin', ...options });
+
+/**
+ * Verify the passkey and sign in
+ */
+export const finishLogin = <ThrowOnError extends boolean = false>(options: Options<FinishLoginData, ThrowOnError>): RequestResult<FinishLoginResponses, FinishLoginErrors, ThrowOnError> => (options.client ?? client).post<FinishLoginResponses, FinishLoginErrors, ThrowOnError>({
+    url: '/api/auth/login/finish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Sign out of this device
+ */
+export const logout = <ThrowOnError extends boolean = false>(options?: Options<LogoutData, ThrowOnError>): RequestResult<LogoutResponses, LogoutErrors, ThrowOnError> => (options?.client ?? client).post<LogoutResponses, LogoutErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/auth/logout',
+    ...options
+});
+
+/**
+ * Start adding a new passkey with a recovery code
+ */
+export const beginRecovery = <ThrowOnError extends boolean = false>(options: Options<BeginRecoveryData, ThrowOnError>): RequestResult<BeginRecoveryResponses, BeginRecoveryErrors, ThrowOnError> => (options.client ?? client).post<BeginRecoveryResponses, BeginRecoveryErrors, ThrowOnError>({
+    url: '/api/auth/recover/begin',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Save the new passkey, spend the recovery code and sign in
+ */
+export const finishRecovery = <ThrowOnError extends boolean = false>(options: Options<FinishRecoveryData, ThrowOnError>): RequestResult<FinishRecoveryResponses, FinishRecoveryErrors, ThrowOnError> => (options.client ?? client).post<FinishRecoveryResponses, FinishRecoveryErrors, ThrowOnError>({
+    url: '/api/auth/recover/finish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Start creating an account with a passkey
+ */
+export const beginSignup = <ThrowOnError extends boolean = false>(options: Options<BeginSignupData, ThrowOnError>): RequestResult<BeginSignupResponses, BeginSignupErrors, ThrowOnError> => (options.client ?? client).post<BeginSignupResponses, BeginSignupErrors, ThrowOnError>({
+    url: '/api/auth/signup/begin',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Issue a proof of work for a signup
+ *
+ * The browser brute forces the number in a worker and sends the solution with begin-signup.
+ */
+export const getSignupChallenge = <ThrowOnError extends boolean = false>(options?: Options<GetSignupChallengeData, ThrowOnError>): RequestResult<GetSignupChallengeResponses, GetSignupChallengeErrors, ThrowOnError> => (options?.client ?? client).get<GetSignupChallengeResponses, GetSignupChallengeErrors, ThrowOnError>({ url: '/api/auth/signup/challenge', ...options });
+
+/**
+ * Save the passkey, create the account and sign in
+ *
+ * Answers with the recovery codes, which are never shown again.
+ */
+export const finishSignup = <ThrowOnError extends boolean = false>(options: Options<FinishSignupData, ThrowOnError>): RequestResult<FinishSignupResponses, FinishSignupErrors, ThrowOnError> => (options.client ?? client).post<FinishSignupResponses, FinishSignupErrors, ThrowOnError>({
+    url: '/api/auth/signup/finish',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
 
 /**
  * Report whether the server and its database are up

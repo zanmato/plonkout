@@ -8,8 +8,9 @@
     <!-- Toast notifications -->
     <VoltToast />
 
-    <!-- Bottom tab navigation -->
+    <!-- Bottom tab navigation, hidden on the sign in pages -->
     <nav
+      v-if="!route.meta.public"
       class="border-t-2 border-black bg-white dark:bg-zinc-800 dark:text-white safe-area-bottom"
       style="box-shadow: 0 -4px 0px black"
     >

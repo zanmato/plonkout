@@ -92,7 +92,9 @@ jobs:
 
       - name: Vet
         working-directory: server
-        run: go vet ./...
+        run: |
+          go vet ./...
+          test -z "$(gofmt -l .)"
 
       - name: Test
         working-directory: server

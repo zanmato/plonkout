@@ -248,6 +248,28 @@
       "description": "Choose what \"previous best\" and \"last time\" compare with. Records and % of max always use your full history.",
       "intensity": "Same intensity",
       "all": "All workouts"
+    },
+    "account": {
+      "title": "Account",
+      "signedInAs": "Signed in as {username}",
+      "passkeys": "Passkeys",
+      "synced": "Synced",
+      "lastUsed": "Last used {date}",
+      "neverUsed": "Not used yet",
+      "addPasskey": "Add a passkey",
+      "rename": "Rename",
+      "renamePrompt": "Name",
+      "remove": "Remove",
+      "removeConfirm": "Remove the passkey \"{name}\"? You can no longer sign in with it.",
+      "recoveryCodes": "Recovery codes",
+      "recoveryCodesLeft": "{count} unused recovery codes",
+      "regenerate": "New recovery codes",
+      "regenerateConfirm": "Your current recovery codes stop working. Continue?",
+      "signOut": "Sign out",
+      "deleteAccount": "Delete account",
+      "deleteAccountExplain": "Removes your account and every workout, plan, template and setting in it. This cannot be undone.",
+      "deleteAccountConfirm": "Type your username to confirm",
+      "done": "Done"
     }
   },
   "templates": {
@@ -295,6 +317,46 @@
       "fri": "Fri",
       "sat": "Sat",
       "sun": "Sun"
+    }
+  },
+  "auth": {
+    "tagline": "Log workouts, follow your plan.",
+    "signIn": "Sign in with a passkey",
+    "createAccount": "Create an account",
+    "lostPasskey": "Lost your passkey?",
+    "waitingForPasskey": "Waiting for your passkey...",
+    "unsupported": "This browser cannot use passkeys. Try a recent Safari, Chrome or Firefox.",
+    "username": "Username",
+    "usernameHint": "3 to 32 letters, digits, dots, dashes or underscores.",
+    "passkeyExplain": "You sign in with a passkey, unlocked with your face, fingerprint or screen lock. There is no password to remember.",
+    "createPasskey": "Create passkey",
+    "recoveryCodes": {
+      "title": "Save your recovery codes",
+      "explain": "If you ever lose every device with your passkey, one of these codes lets you add a new one. Each code works once. Keep them somewhere safe, like your password manager.",
+      "copy": "Copy",
+      "copied": "Copied",
+      "download": "Download",
+      "saved": "I have saved my recovery codes",
+      "continue": "Continue"
+    },
+    "recover": {
+      "title": "Recover your account",
+      "explain": "Enter your username and one of your recovery codes. You will then create a new passkey on this device.",
+      "code": "Recovery code",
+      "submit": "Create a new passkey"
+    },
+    "errors": {
+      "cancelled": "The passkey prompt was closed. Try again when you are ready.",
+      "passkeyExists": "This device already has a passkey for this account.",
+      "generic": "Something went wrong. Check your connection and try again.",
+      "username_taken": "That username is taken.",
+      "invalid_username": "A username is 3 to 32 letters, digits, dots, dashes or underscores.",
+      "signup_refused": "The signup could not be verified. Reload the page and try again.",
+      "ceremony_expired": "That took too long. Try again.",
+      "passkey_rejected": "That passkey could not be verified.",
+      "recovery_rejected": "The username or recovery code is not right.",
+      "last_passkey": "Add another passkey before removing this one.",
+      "unauthorized": "Your session has ended. Sign in again."
     }
   }
 }

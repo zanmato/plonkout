@@ -12,6 +12,7 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/zanmato/plonkout/server/internal/account"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
 	"github.com/zanmato/plonkout/server/internal/platform/web"
@@ -36,6 +37,9 @@ type Deps struct {
 
 func init() {
 	api.UseProblemErrors()
+	// Handlers never answer with a nil slice, so an array is an array. A
+	// nullable one would make every list in the web client T[] | null.
+	huma.DefaultArrayNullable = false
 }
 
 // New builds the server. It never contacts the database, so the openapi
@@ -70,14 +74,21 @@ func New(deps Deps) (*Server, error) {
 		},
 	}
 
+	accounts, err := account.NewService(deps.Pool, cfg)
+	if err != nil {
+		return nil, err
+	}
+
 	humaAPI := humago.New(mux, humaConfig)
 	reg := api.NewRegistry(api.Deps{
 		API:    humaAPI,
+		Auth:   accounts,
 		Origin: cfg.Server.BaseURL,
 		Logger: deps.Logger,
 	})
 
 	system.Register(reg, deps.Pool, Version)
+	account.Register(reg, accounts)
 
 	if cfg.Frontend.Path != "" {
 		mux.Handle("/", web.SPA(cfg.Frontend.Path))
