@@ -135,3 +135,15 @@ sql:
         emit_empty_slices: true
         overrides: *type_overrides
 
+
+  - engine: postgresql
+    schema: db/migrations
+    queries: internal/oauth/queries
+    gen:
+      go:
+        package: oauthdb
+        out: internal/oauth/oauthdb
+        sql_package: pgx/v5
+        emit_pointers_for_null_types: true
+        emit_empty_slices: true
+        overrides: *type_overrides

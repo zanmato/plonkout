@@ -4,6 +4,7 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"log/slog"
@@ -11,10 +12,12 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
+	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zanmato/plonkout/server/internal/account"
 	"github.com/zanmato/plonkout/server/internal/exercise"
 	"github.com/zanmato/plonkout/server/internal/importer"
+	"github.com/zanmato/plonkout/server/internal/oauth"
 	"github.com/zanmato/plonkout/server/internal/plan"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
@@ -85,10 +88,12 @@ func New(deps Deps) (*Server, error) {
 		return nil, err
 	}
 
+	tokens := oauth.NewService(deps.Pool, cfg)
+
 	humaAPI := humago.New(mux, humaConfig)
 	reg := api.NewRegistry(api.Deps{
 		API:    humaAPI,
-		Auth:   accounts,
+		Auth:   authenticator{sessions: accounts, tokens: tokens},
 		Origin: cfg.Server.BaseURL,
 		Logger: deps.Logger,
 	})
@@ -101,6 +106,8 @@ func New(deps Deps) (*Server, error) {
 	setting.Register(reg, setting.NewService(deps.Pool))
 	importer.Register(reg, importer.NewService(deps.Pool))
 	plan.Register(reg, plan.NewService(deps.Pool))
+	oauth.RegisterAPI(reg, tokens)
+	tokens.Mount(mux, deps.Logger)
 	api.FixNullableEnums(humaAPI.OpenAPI())
 
 	if cfg.Frontend.Path != "" {
@@ -108,6 +115,24 @@ func New(deps Deps) (*Server, error) {
 	}
 
 	return &Server{api: humaAPI, handler: securityHeaders(mux)}, nil
+}
+
+// authenticator accepts either credential a request can carry: the web
+// session cookie of the app, or an OAuth access token of an MCP client.
+type authenticator struct {
+	sessions *account.Service
+	tokens   *oauth.Service
+}
+
+func (a authenticator) Authenticate(ctx context.Context, creds api.Credentials) (uuid.UUID, error) {
+	if creds.BearerToken != "" {
+		info, err := a.tokens.Verify(ctx, creds.BearerToken)
+		if err != nil {
+			return uuid.Nil, err
+		}
+		return info.UserID, nil
+	}
+	return a.sessions.Authenticate(ctx, creds)
 }
 
 // Handler is what the listener serves.

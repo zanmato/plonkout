@@ -76,6 +76,40 @@
       </NeoButton>
     </div>
 
+    <!-- Connected apps -->
+    <div>
+      <h4 class="text-base font-bold text-black dark:text-white mb-2">
+        {{ t("settings.account.connectedApps") }}
+      </h4>
+      <p v-if="apps.length === 0" class="text-sm text-black dark:text-white opacity-70">
+        {{ t("settings.account.connectedAppsEmpty") }}
+      </p>
+      <ul v-else class="flex flex-col gap-2" data-testid="connected-apps">
+        <li
+          v-for="app in apps"
+          :key="app.id"
+          class="border-3 border-nb-border rounded-lg p-3 bg-white dark:bg-zinc-900 flex items-center gap-3"
+        >
+          <span class="material-icons text-purple-500">link</span>
+          <div class="flex-1 min-w-0">
+            <div class="font-bold text-black dark:text-white truncate">{{ app.name }}</div>
+            <div class="text-xs text-black dark:text-white opacity-60">
+              {{
+                app.lastUsed
+                  ? t("settings.account.connectedLastUsed", { date: d(new Date(app.lastUsed), "short") })
+                  : t("settings.account.neverUsed")
+              }}
+            </div>
+          </div>
+          <DestructiveButton
+            :confirm-text="t('settings.account.disconnect')"
+            size="sm"
+            @confirm="disconnect(app.id)"
+          />
+        </li>
+      </ul>
+    </div>
+
     <!-- Recovery codes -->
     <div>
       <h4 class="text-base font-bold text-black dark:text-white mb-1">
@@ -136,7 +170,8 @@ import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import DestructiveButton from "@/components/DestructiveButton.vue";
 import RecoveryCodes from "@/components/RecoveryCodes.vue";
-import type { Passkey } from "@/api";
+import type { ConnectedApp, Passkey } from "@/api";
+import { disconnectApp, listConnectedApps } from "@/api/oauth";
 import * as auth from "@/api/auth";
 import { useAuth } from "@/composables/useAuth";
 import { useToast } from "@/composables/useToast";
@@ -148,6 +183,7 @@ const { me, load, clear } = useAuth();
 const { showError } = useToast();
 
 const passkeys = ref<Passkey[]>([]);
+const apps = ref<ConnectedApp[]>([]);
 const busy = ref(false);
 const renaming = ref<string | null>(null);
 const newName = ref("");
@@ -155,8 +191,18 @@ const freshCodes = ref<string[] | null>(null);
 const confirmUsername = ref("");
 
 async function refresh(): Promise<void> {
-  const [list] = await Promise.all([auth.listPasskeys(), load(true)]);
+  const [list, connected] = await Promise.all([auth.listPasskeys(), listConnectedApps(), load(true)]);
   passkeys.value = list;
+  apps.value = connected;
+}
+
+async function disconnect(id: string): Promise<void> {
+  try {
+    await disconnectApp(id);
+    await refresh();
+  } catch (e) {
+    showError(describeError(e, t));
+  }
 }
 
 onMounted(() => refresh().catch((e) => showError(describeError(e, t))));

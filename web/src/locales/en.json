@@ -274,7 +274,11 @@
       "deleteAccount": "Delete account",
       "deleteAccountExplain": "Removes your account and every workout, plan, template and setting in it. This cannot be undone.",
       "deleteAccountConfirm": "Type your username to confirm",
-      "done": "Done"
+      "done": "Done",
+      "connectedApps": "Connected apps",
+      "connectedAppsEmpty": "No apps connected. Add Plonkout as a connector in Claude to let it plan your training.",
+      "disconnect": "Disconnect",
+      "connectedLastUsed": "Last used {date}"
     },
     "dominantArm": {
       "title": "Dominant arm",
@@ -410,5 +414,17 @@
       "best1RM": "Best est. 1RM",
       "loadError": "Error loading the comparison"
     }
+  },
+  "oauth": {
+    "title": "Connect an app",
+    "wants": "{client} wants to use your Plonkout account.",
+    "read": "See your workouts, exercises, plans and settings.",
+    "write": "Create and change training plans and workouts.",
+    "sendsTo": "The answer goes to {host}.",
+    "loopback": "That is a program on this computer, like Claude Code.",
+    "revokeLater": "You can disconnect it at any time in Settings.",
+    "allow": "Allow",
+    "deny": "Deny",
+    "invalid": "This request is not valid, so nothing was shared."
   }
 }

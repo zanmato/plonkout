@@ -23,6 +23,17 @@ export type AddSessionsBody = {
     sessions: Array<SessionInput>;
 };
 
+export type AuthorizationParams = {
+    client_id: string;
+    code_challenge: string;
+    code_challenge_method: string;
+    redirect_uri: string;
+    resource?: string;
+    response_type: string;
+    scope?: string;
+    state?: string;
+};
+
 export type BeginRecoveryBody = {
     recoveryCode: string;
     username: string;
@@ -59,6 +70,38 @@ export type CeremonyStart = {
 export type Comparison = {
     exercises: Array<ExerciseComparison>;
     unplanned: Array<string>;
+};
+
+export type ConnectedApp = {
+    clientId: string;
+    created: string;
+    id: string;
+    lastUsed: string | null;
+    name: string;
+    scope: string;
+};
+
+export type ConsentPrompt = {
+    clientId: string;
+    clientName: string;
+    /**
+     * The answer goes to a program on this computer, e.g. Claude Code.
+     */
+    loopback: boolean;
+    /**
+     * Where the answer goes. Shown so a person can spot an impostor.
+     */
+    redirectHost: string;
+    scopes: Array<string>;
+};
+
+export type DecideConsentResponse = {
+    redirectTo: string;
+};
+
+export type Decision = {
+    approve: boolean;
+    params: AuthorizationParams;
 };
 
 export type Exercise = {
@@ -527,6 +570,74 @@ export type GetMeResponses = {
 };
 
 export type GetMeResponse = GetMeResponses[keyof GetMeResponses];
+
+export type ListConnectedAppsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/account/connected-apps';
+};
+
+export type ListConnectedAppsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListConnectedAppsError = ListConnectedAppsErrors[keyof ListConnectedAppsErrors];
+
+export type ListConnectedAppsResponses = {
+    /**
+     * OK
+     */
+    200: Array<ConnectedApp>;
+};
+
+export type ListConnectedAppsResponse = ListConnectedAppsResponses[keyof ListConnectedAppsResponses];
+
+export type DisconnectAppData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/account/connected-apps/{id}';
+};
+
+export type DisconnectAppErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DisconnectAppError = DisconnectAppErrors[keyof DisconnectAppErrors];
+
+export type DisconnectAppResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DisconnectAppResponse = DisconnectAppResponses[keyof DisconnectAppResponses];
 
 export type ListPasskeysData = {
     body?: never;
@@ -1145,6 +1256,81 @@ export type ImportLegacyExportResponses = {
 };
 
 export type ImportLegacyExportResponse = ImportLegacyExportResponses[keyof ImportLegacyExportResponses];
+
+export type GetConsentPromptData = {
+    body?: never;
+    path?: never;
+    query?: {
+        client_id?: string;
+        redirect_uri?: string;
+        response_type?: string;
+        code_challenge?: string;
+        code_challenge_method?: string;
+        scope?: string;
+        state?: string;
+        resource?: string;
+    };
+    url: '/api/oauth/consent';
+};
+
+export type GetConsentPromptErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetConsentPromptError = GetConsentPromptErrors[keyof GetConsentPromptErrors];
+
+export type GetConsentPromptResponses = {
+    /**
+     * OK
+     */
+    200: ConsentPrompt;
+};
+
+export type GetConsentPromptResponse = GetConsentPromptResponses[keyof GetConsentPromptResponses];
+
+export type DecideConsentData = {
+    body: Decision;
+    path?: never;
+    query?: never;
+    url: '/api/oauth/consent';
+};
+
+export type DecideConsentErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DecideConsentError = DecideConsentErrors[keyof DecideConsentErrors];
+
+export type DecideConsentResponses = {
+    /**
+     * OK
+     */
+    200: DecideConsentResponse;
+};
+
+export type DecideConsentResponse2 = DecideConsentResponses[keyof DecideConsentResponses];
 
 export type GetPlannedSessionData = {
     body?: never;

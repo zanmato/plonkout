@@ -11,6 +11,48 @@ import (
 	uuid "github.com/gofrs/uuid/v5"
 )
 
+type AuthOauthAccessToken struct {
+	TokenHash []byte
+	GrantID   uuid.UUID
+	ExpiresAt time.Time
+}
+
+type AuthOauthClient struct {
+	ClientID     string
+	Kind         string
+	ClientName   string
+	RedirectUris []string
+	Metadata     json.RawMessage
+	CacheUntil   *time.Time
+	CreatedAt    time.Time
+	LastUsedAt   *time.Time
+}
+
+type AuthOauthCode struct {
+	CodeHash      []byte
+	ClientID      string
+	UserID        uuid.UUID
+	RedirectUri   string
+	CodeChallenge string
+	Scope         string
+	Resource      string
+	ExpiresAt     time.Time
+}
+
+type AuthOauthGrant struct {
+	ID                  uuid.UUID
+	ClientID            string
+	UserID              uuid.UUID
+	Scope               string
+	Resource            string
+	RefreshHash         []byte
+	PreviousRefreshHash []byte
+	RefreshExpiresAt    time.Time
+	CreatedAt           time.Time
+	LastUsedAt          *time.Time
+	RevokedAt           *time.Time
+}
+
 type AuthPasskey struct {
 	CredentialID    []byte
 	UserID          uuid.UUID

@@ -41,6 +41,13 @@ const routes: RouteRecordRaw[] = [
     meta: { public: true },
   },
   {
+    // The consent page of an MCP client signing in. It needs a signed in
+    // user, so the guard sends the person through sign in first and back here.
+    path: "/authorize",
+    component: () => import("@/views/auth/Authorize.vue"),
+    name: "authorize",
+  },
+  {
     path: "/recover",
     component: () => import("@/views/auth/Recover.vue"),
     name: "recover",
@@ -102,7 +109,10 @@ router.beforeEach(async (to) => {
     console.error("Could not load the signed in user:", error);
   }
   if (to.meta.public) {
-    return signedIn && to.name === "welcome" ? { name: "log" } : true;
+    if (!signedIn || to.name !== "welcome") return true;
+    // Already signed in, e.g. in another tab: carry on where the link pointed.
+    const returnTo = typeof to.query.returnTo === "string" ? to.query.returnTo : "";
+    return returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : { name: "log" };
   }
   return signedIn ? true : { name: "welcome", query: { returnTo: to.fullPath } };
 });

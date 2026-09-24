@@ -269,7 +269,11 @@
       "deleteAccount": "Radera konto",
       "deleteAccountExplain": "Tar bort ditt konto och alla pass, program, mallar och inställningar i det. Det går inte att ångra.",
       "deleteAccountConfirm": "Skriv ditt användarnamn för att bekräfta",
-      "done": "Klar"
+      "done": "Klar",
+      "connectedApps": "Anslutna appar",
+      "connectedAppsEmpty": "Inga appar anslutna. Lägg till Plonkout som en koppling i Claude så kan den planera din träning.",
+      "disconnect": "Koppla bort",
+      "connectedLastUsed": "Senast använd {date}"
     },
     "dominantArm": {
       "title": "Dominant arm",
@@ -405,5 +409,17 @@
       "best1RM": "Bästa uppsk. 1RM",
       "loadError": "Kunde inte ladda jämförelsen"
     }
+  },
+  "oauth": {
+    "title": "Anslut en app",
+    "wants": "{client} vill använda ditt Plonkout-konto.",
+    "read": "Se dina pass, övningar, program och inställningar.",
+    "write": "Skapa och ändra träningsprogram och pass.",
+    "sendsTo": "Svaret skickas till {host}.",
+    "loopback": "Det är ett program på den här datorn, till exempel Claude Code.",
+    "revokeLater": "Du kan koppla bort den när som helst under Inställningar.",
+    "allow": "Tillåt",
+    "deny": "Neka",
+    "invalid": "Förfrågan är inte giltig, så inget delades."
   }
 }

@@ -42,6 +42,11 @@ func New(t testing.TB) *Harness {
 			SessionAbsoluteTTL: config.Duration(2 * time.Hour),
 		},
 		WebAuthn: config.WebAuthn{RPID: "localhost", RPName: "Plonkout", Origins: []string{Origin}},
+		OAuth: config.OAuth{
+			AccessTokenTTL:           config.Duration(time.Hour),
+			RefreshTokenTTL:          config.Duration(24 * time.Hour),
+			AllowDynamicRegistration: true,
+		},
 	}
 	srv, err := server.New(server.Deps{Config: cfg, Pool: d.App, Logger: slog.New(slog.DiscardHandler)})
 	if err != nil {
