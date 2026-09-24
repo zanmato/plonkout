@@ -16,6 +16,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/zanmato/plonkout/server/internal/maintenance"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
 	"github.com/zanmato/plonkout/server/internal/platform/db"
 	"github.com/zanmato/plonkout/server/internal/platform/migrate"
@@ -77,6 +78,7 @@ func run(configPath string, migrateFirst, migrateOnly bool) error {
 	if err != nil {
 		return err
 	}
+	go maintenance.Run(ctx, pool, logger)
 
 	httpServer := &http.Server{
 		Addr:              cfg.Server.Addr,
