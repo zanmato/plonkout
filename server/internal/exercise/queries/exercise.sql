@@ -26,14 +26,6 @@ RETURNING *;
 UPDATE workout_exercises SET name = sqlc.arg(new_name)
 WHERE exercise_id = sqlc.arg(exercise_id) OR lower(name) = lower(sqlc.arg(old_name));
 
--- name: RenameBlockPeriodizationKey :exec
--- Block periodization state is a settings document keyed by exercise name.
-UPDATE settings
-SET value = (value - sqlc.arg(old_name)::text)
-    || jsonb_build_object(sqlc.arg(new_name)::text, value -> sqlc.arg(old_name)::text),
-    updated_at = now()
-WHERE key = 'blockPeriodization_exercises' AND value ? sqlc.arg(old_name)::text;
-
 -- name: SuggestExercises :many
 -- Closest names first, for an unknown name typed by a person or a model.
 SELECT name FROM exercises

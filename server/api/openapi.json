@@ -3445,7 +3445,7 @@
     },
     "/api/exercises/{id}": {
       "put": {
-        "description": "Renaming also renames it in logged workouts and in the block periodization state.",
+        "description": "Renaming also renames it in logged workouts.",
         "operationId": "update-exercise",
         "parameters": [
           {

@@ -185,25 +185,6 @@ func (q *Queries) ListExercises(ctx context.Context) ([]Exercise, error) {
 	return items, nil
 }
 
-const renameBlockPeriodizationKey = `-- name: RenameBlockPeriodizationKey :exec
-UPDATE settings
-SET value = (value - $1::text)
-    || jsonb_build_object($2::text, value -> $1::text),
-    updated_at = now()
-WHERE key = 'blockPeriodization_exercises' AND value ? $1::text
-`
-
-type RenameBlockPeriodizationKeyParams struct {
-	OldName string
-	NewName string
-}
-
-// Block periodization state is a settings document keyed by exercise name.
-func (q *Queries) RenameBlockPeriodizationKey(ctx context.Context, arg RenameBlockPeriodizationKeyParams) error {
-	_, err := q.db.Exec(ctx, renameBlockPeriodizationKey, arg.OldName, arg.NewName)
-	return err
-}
-
 const renameExerciseSnapshots = `-- name: RenameExerciseSnapshots :exec
 UPDATE workout_exercises SET name = $1
 WHERE exercise_id = $2 OR lower(name) = lower($3)

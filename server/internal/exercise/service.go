@@ -75,8 +75,8 @@ func (s *Service) Create(ctx context.Context, in ExerciseInput) (Exercise, error
 	return toExercise(row), nil
 }
 
-// Update changes an exercise. A rename carries the logged history and the
-// block periodization state along, since both are keyed by name.
+// Update changes an exercise. A rename carries the logged history along,
+// since it is keyed by name.
 func (s *Service) Update(ctx context.Context, id uuid.UUID, in ExerciseInput) (Exercise, error) {
 	var out Exercise
 	err := db.RunInTx(ctx, s.pool, func(tx pgx.Tx) error {
@@ -98,11 +98,6 @@ func (s *Service) Update(ctx context.Context, id uuid.UUID, in ExerciseInput) (E
 		if before.Name != name {
 			if err := q.RenameExerciseSnapshots(ctx, exercisedb.RenameExerciseSnapshotsParams{
 				ExerciseID: &id, OldName: before.Name, NewName: name,
-			}); err != nil {
-				return err
-			}
-			if err := q.RenameBlockPeriodizationKey(ctx, exercisedb.RenameBlockPeriodizationKeyParams{
-				OldName: before.Name, NewName: name,
 			}); err != nil {
 				return err
 			}

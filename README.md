@@ -4,14 +4,14 @@ A workout logger for the phone, with training plans an AI assistant can write an
 
 ## Features
 
-- 🏋️ **Workout logging**: sets with weight, reps, time, RPE and arm, warmups, notes and auto save
-- 📋 **Training plans**: an ordered queue of sessions with targets. Pick the next one, skip it, and see planned against done
-- 🤖 **Assistant ready**: connect Claude or any MCP client to design plans from your history and adjust them as you go
-- 💪 **Armwrestling first**: single arm exercises, a dominant arm, off arm percentages and per arm history
-- 🔑 **Passkeys**: sign in with your face or fingerprint, no passwords. Recovery codes for when every device is lost
-- 📊 **Statistics**: records, estimated 1RM, charts and block periodization suggestions
-- 🌍 **English and Swedish**
-- 📱 **Installable PWA** with a neobrutalism design
+- **Workout logging**: sets with weight, reps, time, RPE and arm, warmups, notes and auto save
+- **Training plans**: an ordered queue of sessions with targets. Pick the next one, skip it, and see planned against done
+- **Assistant ready**: connect Claude or any MCP client to design plans from your history and adjust them as you go
+- **Armwrestling first**: single arm exercises, a dominant arm, off arm percentages and per arm history
+- **Passkeys**: sign in with your face or fingerprint, no passwords. Recovery codes for when every device is lost
+- **Statistics**: records, estimated 1RM and charts
+- **English and Swedish**
+- **Installable PWA** with a neobrutalism design
 
 ## How it fits together
 
@@ -38,13 +38,13 @@ make web                                 # Vite on :5173, proxying the API to th
 
 Open http://localhost:5173. Passkeys work on `localhost` without https.
 
-| Command | What it does |
-| --- | --- |
-| `make generate` | sqlc, the OpenAPI document and the web client |
-| `make test` | Go tests against real Postgres databases, then the web tests |
-| `make lint` | go vet, gofmt and eslint |
-| `make check` | everything CI runs, and fails when generated code is stale |
-| `make docker` | builds the image |
+| Command         | What it does                                                 |
+| --------------- | ------------------------------------------------------------ |
+| `make generate` | sqlc, the OpenAPI document and the web client                |
+| `make test`     | Go tests against real Postgres databases, then the web tests |
+| `make lint`     | go vet, gofmt and eslint                                     |
+| `make check`    | everything CI runs, and fails when generated code is stale   |
+| `make docker`   | builds the image                                             |
 
 Go tests create a fresh database per test from a migrated template (pgtestdb), so they need `make up` first.
 

@@ -42,7 +42,7 @@ func Register(reg *api.Registry, s *Service) {
 	api.Register(reg, api.Op{
 		ID: "update-exercise", Method: http.MethodPut, Path: "/exercises/{id}",
 		Summary:     "Change an exercise",
-		Description: "Renaming also renames it in logged workouts and in the block periodization state.",
+		Description: "Renaming also renames it in logged workouts.",
 		Tags:        tags,
 		Errors:      []int{http.StatusNotFound, http.StatusConflict},
 	}, func(ctx context.Context, in *struct {

@@ -1,0 +1,1 @@
+-- The deleted settings are not restored.

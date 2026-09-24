@@ -106,103 +106,6 @@
           />
         </div>
 
-        <!-- Block Periodization Settings -->
-        <div class="mb-6">
-          <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
-            {{ t("settings.blockPeriodization.title") }}
-          </h3>
-          <p class="text-sm text-black dark:text-white opacity-70 mb-4">
-            {{ t("settings.blockPeriodization.description") }}
-          </p>
-          <div class="space-y-4">
-            <!-- Weeks per Block -->
-            <div>
-              <label
-                class="block text-sm font-medium text-black dark:text-white mb-1"
-              >
-                {{ t("settings.blockPeriodization.weeksPerBlock") }}
-              </label>
-              <input
-                v-model.number="blockWeeksPerBlock"
-                type="number"
-                min="1"
-                max="12"
-                class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                @change="saveBlockSettings"
-              />
-            </div>
-
-            <!-- Workouts per Week -->
-            <div>
-              <label
-                class="block text-sm font-medium text-black dark:text-white mb-1"
-              >
-                {{ t("settings.blockPeriodization.workoutsPerWeek") }}
-              </label>
-              <input
-                v-model.number="blockWorkoutsPerWeek"
-                type="number"
-                min="1"
-                max="7"
-                class="w-full px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                @change="saveBlockSettings"
-              />
-            </div>
-
-            <!-- Start Percentage -->
-            <div>
-              <label
-                class="block text-sm font-medium text-black dark:text-white mb-1"
-              >
-                {{ t("settings.blockPeriodization.startPercentage") }}
-              </label>
-              <div class="flex items-center">
-                <input
-                  v-model.number="blockStartPercentage"
-                  type="number"
-                  min="50"
-                  max="90"
-                  class="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  @change="saveBlockSettings"
-                />
-                <span class="ml-2 text-black dark:text-white">%</span>
-              </div>
-            </div>
-
-            <!-- Weekly Progression -->
-            <div>
-              <label
-                class="block text-sm font-medium text-black dark:text-white mb-1"
-              >
-                {{ t("settings.blockPeriodization.progressionPerWeek") }}
-              </label>
-              <div class="flex items-center">
-                <input
-                  v-model.number="blockProgressionPerWeek"
-                  type="number"
-                  min="1"
-                  max="10"
-                  class="flex-1 px-3 py-2 bg-white dark:bg-zinc-800 border-2 border-nb-border rounded-md text-black dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  @change="saveBlockSettings"
-                />
-                <span class="ml-2 text-black dark:text-white">%</span>
-              </div>
-            </div>
-
-            <!-- Reset All Blocks -->
-            <DestructiveButton
-              :confirm-text="t('settings.blockPeriodization.resetAll')"
-              full-width
-              @confirm="handleResetAllBlocks"
-            >
-              <template #icon>
-                <span class="material-icons">restart_alt</span>
-              </template>
-              {{ t("settings.blockPeriodization.resetAll") }}
-            </DestructiveButton>
-          </div>
-        </div>
-
         <!-- Data Management -->
         <div class="mb-6">
           <h3 class="text-xl font-semibold text-black dark:text-white mb-2">
@@ -273,18 +176,12 @@ import {
   importLegacyExport,
 } from "@/api/data";
 import { getLocalPref, setLocalPref, type Theme } from "@/utils/localPrefs";
-import {
-  getGlobalSettings,
-  saveGlobalSettings,
-  resetAllBlocks,
-} from "@/utils/blockPeriodization";
 import { useToast } from "@/composables/useToast";
 import type { DominantArm } from "@/utils/plan";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import AccountSettings from "@/components/AccountSettings.vue";
 import NeoButton from "@/components/NeoButton.vue";
-import DestructiveButton from "@/components/DestructiveButton.vue";
 import VoltSelect from "@/volt/Select.vue";
 import SelectButton from "@/volt/SelectButton.vue";
 import {
@@ -309,12 +206,6 @@ const dominantArm = ref<DominantArm>("right");
 const importing = ref(false);
 const importInput = useTemplateRef<HTMLInputElement>("importInput");
 const storageUsed = ref("");
-
-// Block periodization settings
-const blockWeeksPerBlock = ref(5);
-const blockWorkoutsPerWeek = ref(1);
-const blockStartPercentage = ref(75);
-const blockProgressionPerWeek = ref(5);
 
 // Options for Select and SelectButton components
 const languageOptions = ref([
@@ -391,26 +282,6 @@ async function saveDominantArm() {
  */
 async function saveDistanceUnit() {
   await saveSetting("distanceUnit", distanceUnit.value);
-}
-
-/**
- * Save block periodization settings
- */
-async function saveBlockSettings() {
-  await saveGlobalSettings({
-    weeksPerBlock: blockWeeksPerBlock.value,
-    workoutsPerWeek: blockWorkoutsPerWeek.value,
-    startPercentage: blockStartPercentage.value,
-    progressionPerWeek: blockProgressionPerWeek.value,
-  });
-}
-
-/**
- * Reset all block data
- */
-async function handleResetAllBlocks() {
-  await resetAllBlocks();
-  showSuccess(t("settings.blockPeriodization.resetSuccess"));
 }
 
 /**
@@ -503,13 +374,6 @@ async function loadSettings() {
     weightUnit.value = savedWeightUnit;
     distanceUnit.value = savedDistanceUnit;
     dominantArm.value = await getSetting<DominantArm>("dominantArm", "right");
-
-    // Load block periodization settings
-    const blockSettings = await getGlobalSettings();
-    blockWeeksPerBlock.value = blockSettings.weeksPerBlock;
-    blockWorkoutsPerWeek.value = blockSettings.workoutsPerWeek;
-    blockStartPercentage.value = blockSettings.startPercentage;
-    blockProgressionPerWeek.value = blockSettings.progressionPerWeek;
   } catch (error) {
     console.error(t("settings.loadError"), error);
   }

@@ -314,7 +314,7 @@ export const getExerciseStats = <ThrowOnError extends boolean = false>(options?:
 /**
  * Change an exercise
  *
- * Renaming also renames it in logged workouts and in the block periodization state.
+ * Renaming also renames it in logged workouts.
  */
 export const updateExercise = <ThrowOnError extends boolean = false>(options: Options<UpdateExerciseData, ThrowOnError>): RequestResult<UpdateExerciseResponses, UpdateExerciseErrors, ThrowOnError> => (options.client ?? client).put<UpdateExerciseResponses, UpdateExerciseErrors, ThrowOnError>({
     security: [{

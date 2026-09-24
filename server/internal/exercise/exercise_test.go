@@ -1,7 +1,6 @@
 package exercise_test
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 	"testing"
@@ -27,9 +26,6 @@ func TestRenameCarriesHistoryAlong(t *testing.T) {
 			"singleArm": false, "intensity": nil, "sets": []any{},
 		}},
 	}, u.Session), http.StatusCreated)
-	h.Expect(h.Do(http.MethodPut, "/settings/blockPeriodization_exercises", map[string]any{
-		"value": map[string]any{"Hantel curl": map[string]any{"blockWorkoutCount": 3}},
-	}, u.Session), http.StatusNoContent)
 
 	h.Expect(h.Do(http.MethodPut, "/exercises/"+created.ID.String(), exercise.ExerciseInput{
 		Name: "Dumbbell Curl", MuscleGroup: "Biceps", Type: "strength", DisplayType: "reps",
@@ -41,16 +37,6 @@ func TestRenameCarriesHistoryAlong(t *testing.T) {
 	h.Expect(h.Do(http.MethodGet, "/workouts", nil, u.Session), http.StatusOK).Decode(t, &workouts)
 	if workouts[0].Exercises[0].Name != "Dumbbell Curl" {
 		t.Fatalf("the logged exercise kept its old name %q", workouts[0].Exercises[0].Name)
-	}
-
-	var settings map[string]json.RawMessage
-	h.Expect(h.Do(http.MethodGet, "/settings", nil, u.Session), http.StatusOK).Decode(t, &settings)
-	var blocks map[string]map[string]int
-	if err := json.Unmarshal(settings["blockPeriodization_exercises"], &blocks); err != nil {
-		t.Fatal(err)
-	}
-	if blocks["Dumbbell Curl"]["blockWorkoutCount"] != 3 || blocks["Hantel curl"] != nil {
-		t.Fatalf("block state was not renamed: %v", blocks)
 	}
 }
 

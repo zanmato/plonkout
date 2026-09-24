@@ -217,18 +217,6 @@
                 </div>
                 <div class="flex items-center space-x-2 shrink-0">
                   <NeoButton
-                    v-if="exercise.type !== 'cardio'"
-                    variant="secondary"
-                    size="sm"
-                    class="w-8 h-8 !px-0 !py-0 rounded-full"
-                    :title="t('exercise.plan.buttonTitle')"
-                    @click="openExercisePlan(exerciseIndex)"
-                  >
-                    <template #icon>
-                      <span class="material-icons">timeline</span>
-                    </template>
-                  </NeoButton>
-                  <NeoButton
                     variant="secondary"
                     size="sm"
                     class="w-8 h-8 !px-0 !py-0 rounded-full"
@@ -479,19 +467,6 @@
         selectedExerciseForStats = null;
       "
     />
-
-    <!-- Exercise Plan Modal -->
-    <ExercisePlanModal
-      v-if="selectedExerciseForPlan"
-      :exercise="selectedExerciseForPlan"
-      :arm="selectedExerciseArmForPlan"
-      :is-open="showExercisePlan"
-      :on-apply-weight="applyPlanWeight"
-      @close="
-        showExercisePlan = false;
-        selectedExerciseForPlan = null;
-      "
-    />
   </div>
 </template>
 
@@ -522,7 +497,6 @@ import { getPlannedSession } from "@/api/plans";
 import { ApiError } from "@/api";
 import ExerciseSelector from "@/components/ExerciseSelector.vue";
 import ExerciseStats from "@/components/ExerciseStats.vue";
-import ExercisePlanModal from "@/components/ExercisePlanModal.vue";
 import NeoButton from "@/components/NeoButton.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
 import NeoHeader from "@/components/NeoHeader.vue";
@@ -534,11 +508,9 @@ import { useToast } from "@/composables/useToast";
 import { useUnits } from "@/composables/useUnits";
 import { useExerciseHistory } from "@/composables/useExerciseHistory";
 import { INTENSITIES, formatEntrySets } from "@/utils/exerciseHistory";
-import { incrementBlockWorkout } from "@/utils/blockPeriodization";
 import { copyExercise } from "@/utils/copyExercise";
 import { targetWeightFor, type DominantArm } from "@/utils/plan";
 import type {
-  Arm,
   DateLike,
   Exercise,
   Intensity,
@@ -583,9 +555,6 @@ const showContextMenu = ref(false);
 const showExerciseSelector = ref(false);
 const showExerciseStats = ref(false);
 const selectedExerciseForStats = ref<WorkoutExercise | null>(null);
-const showExercisePlan = ref(false);
-const selectedExerciseForPlan = ref<WorkoutExercise | null>(null);
-const selectedExerciseArmForPlan = ref<Arm>("");
 const isInitialLoad = ref(true);
 const setEditorRefs = new Map<string, SetEditorRef>();
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -809,15 +778,7 @@ async function saveWorkout(): Promise<void> {
       });
       if (wasNew) {
         router.replace({ name: "workout-edit", params: { id: saved.id! } });
-
-        // Increment block workout count for each exercise in this new workout
-        for (const exercise of workout.value.exercises) {
-          if (exercise.name) {
-            await incrementBlockWorkout(exercise.name);
-          }
-        }
-      }
-    }
+      }    }
   } catch (error) {
     if (error instanceof ApiError && error.code === "stale_revision") {
       // Another device saved first. Its version wins and the edits made here
@@ -1080,46 +1041,6 @@ function getTotalVolume(exercise: WorkoutExercise): number {
 function openExerciseStats(exerciseIndex: number): void {
   selectedExerciseForStats.value = workout.value.exercises[exerciseIndex]!;
   showExerciseStats.value = true;
-}
-
-/**
- * Show exercise plan modal
- */
-function openExercisePlan(exerciseIndex: number): void {
-  const exercise = workout.value.exercises[exerciseIndex]!;
-  selectedExerciseForPlan.value = exercise;
-  // Determine arm for single-arm exercises
-  const hasArmSets = exercise.sets?.some((s) => s.arm);
-  selectedExerciseArmForPlan.value = hasArmSets
-    ? exercise.sets?.find((s) => s.arm)?.arm || ""
-    : "";
-  showExercisePlan.value = true;
-}
-
-/**
- * Apply recommended weight to first empty set
- */
-function applyPlanWeight(weight: number): void {
-  if (!selectedExerciseForPlan.value) return;
-
-  const exerciseIndex = workout.value.exercises.findIndex(
-    (ex) => ex === selectedExerciseForPlan.value,
-  );
-  if (exerciseIndex === -1) return;
-
-  const exercise = workout.value.exercises[exerciseIndex]!;
-
-  // Find first set without weight
-  const emptySetIndex = exercise.sets?.findIndex(
-    (s) => !s.weight || s.weight === 0,
-  );
-
-  if (emptySetIndex !== undefined && emptySetIndex >= 0) {
-    updateSetField(exerciseIndex, emptySetIndex, "weight", weight);
-  } else if (exercise.sets && exercise.sets.length > 0) {
-    // If no empty set, update the last set
-    updateSetField(exerciseIndex, exercise.sets.length - 1, "weight", weight);
-  }
 }
 
 /**
