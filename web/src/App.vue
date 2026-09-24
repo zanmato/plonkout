@@ -1,5 +1,16 @@
 <template>
   <div class="app-container">
+    <!--
+      An opaque fixed strip under the status bar, in the header's color. iOS 26
+      draws its own fading blur over the top of a home screen web app unless a
+      fixed element sits at the edge, in which case it extends that element's
+      solid color instead. The header scrolls with its view, so it cannot be it.
+    -->
+    <div
+      class="status-bar-backdrop fixed top-0 inset-x-0 z-40 pointer-events-none bg-white dark:bg-header"
+      aria-hidden="true"
+    ></div>
+
     <!-- Main content area -->
     <main class="flex-1 overflow-hidden bg-gray-100 dark:bg-zinc-800">
       <router-view />

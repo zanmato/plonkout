@@ -176,6 +176,11 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  /* Zero tall outside a home screen web app, where there is no inset. */
+  .status-bar-backdrop {
+    height: env(safe-area-inset-top, 0px);
+  }
+
   /* Hide scrollbars but keep functionality */
   .hide-scrollbar {
     -ms-overflow-style: none;
