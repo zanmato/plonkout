@@ -176,6 +176,11 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
+  .safe-area-top-header {
+    padding-top: max(0.5rem,
+        calc(env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px) * 1000, 10px)));
+  }
+
   /* Zero tall outside a home screen web app, where there is no inset. */
   .status-bar-backdrop {
     height: env(safe-area-inset-top, 0px);
