@@ -23,6 +23,9 @@ importers:
       chartjs-adapter-date-fns:
         specifier: ^3.0.0
         version: 3.0.0(chart.js@4.5.1)(date-fns@4.4.0)
+      chartjs-plugin-zoom:
+        specifier: ^2.2.0
+        version: 2.2.0(chart.js@4.5.1)
       date-fns:
         specifier: ^4.4.0
         version: 4.4.0
@@ -1462,6 +1465,9 @@ packages:
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
+  '@types/hammerjs@2.0.46':
+    resolution: {integrity: sha512-ynRvcq6wvqexJ9brDMS4BnBLzmr0e14d6ZJTEShTBWKymQiHwlAyGu0ZPEFI2Fh1U53F7tN9ufClWM5KvqkKOw==}
+
   '@types/jsesc@2.5.1':
     resolution: {integrity: sha512-9VN+6yxLOPLOav+7PwjZbxiID2bVaeq0ED4qSQmdQTdjnXJSaCVKTR58t15oqH1H5t8Ng2ZX1SabJVoN9Q34bw==}
 
@@ -1913,6 +1919,11 @@ packages:
     peerDependencies:
       chart.js: '>=2.8.0'
       date-fns: '>=2.0.0'
+
+  chartjs-plugin-zoom@2.2.0:
+    resolution: {integrity: sha512-in6kcdiTlP6npIVLMd4zXZ08PDUXC52gZ4FAy5oyjk1zX3gKarXMAof7B9eFiisf9WOC3bh2saHg+J5WtLXZeA==}
+    peerDependencies:
+      chart.js: '>=3.2.0'
 
   chokidar@5.0.0:
     resolution: {integrity: sha512-TQMmc3w+5AxjpL8iIiwebF73dRDF4fBIieAqGn9RGCWaEVwQ6Fb2cGe31Yns0RRIzii5goJ1Y7xbMwo1TxMplw==}
@@ -2378,6 +2389,10 @@ packages:
     peerDependenciesMeta:
       crossws:
         optional: true
+
+  hammerjs@2.0.8:
+    resolution: {integrity: sha512-tSQXBXS/MWQOn/RKckawJ61vvsDpCom87JgxiYdGwHdOa0ht0vzUWDlfioofFCRU0L+6NGDt6XzbgoJvZkMeRQ==}
+    engines: {node: '>=0.8.0'}
 
   has-bigints@1.1.0:
     resolution: {integrity: sha512-R3pbpkcIqv2Pm3dUwgjclDRVmWpTJW2DcMzcIhEXEx1oh/CEMObMm3KLmRJOdvhM7o4uQBnwr8pzRK2sJWIqfg==}
@@ -5227,6 +5242,8 @@ snapshots:
 
   '@types/estree@1.0.9': {}
 
+  '@types/hammerjs@2.0.46': {}
+
   '@types/jsesc@2.5.1': {}
 
   '@types/json-schema@7.0.15': {}
@@ -5793,6 +5810,12 @@ snapshots:
       chart.js: 4.5.1
       date-fns: 4.4.0
 
+  chartjs-plugin-zoom@2.2.0(chart.js@4.5.1):
+    dependencies:
+      '@types/hammerjs': 2.0.46
+      chart.js: 4.5.1
+      hammerjs: 2.0.8
+
   chokidar@5.0.0:
     dependencies:
       readdirp: 5.0.0
@@ -6306,6 +6329,8 @@ snapshots:
     dependencies:
       rou3: 0.8.1
       srvx: 0.11.16
+
+  hammerjs@2.0.8: {}
 
   has-bigints@1.1.0: {}
 

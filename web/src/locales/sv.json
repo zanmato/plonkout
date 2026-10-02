@@ -110,7 +110,17 @@
       "distance": "Distans",
       "heavy": "Tung",
       "light": "Lätt",
-      "untagged": "Omärkt"
+      "untagged": "Omärkt",
+      "topSetHint": "Tyngsta arbetsset per pass",
+      "longestHint": "Längsta distans per pass",
+      "panHint": "Dra för att panorera, nyp för att zooma",
+      "range": {
+        "1m": "1M",
+        "3m": "3M",
+        "6m": "6M",
+        "1y": "1Å",
+        "all": "Alla"
+      }
     },
     "intensity": {
       "label": "Intensitet",

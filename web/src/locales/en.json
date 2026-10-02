@@ -115,7 +115,17 @@
       "distance": "Distance",
       "heavy": "Heavy",
       "light": "Light",
-      "untagged": "Untagged"
+      "untagged": "Untagged",
+      "topSetHint": "Heaviest working set per workout",
+      "longestHint": "Longest distance per workout",
+      "panHint": "Drag to pan, pinch to zoom",
+      "range": {
+        "1m": "1M",
+        "3m": "3M",
+        "6m": "6M",
+        "1y": "1Y",
+        "all": "All"
+      }
     },
     "intensity": {
       "label": "Intensity",
