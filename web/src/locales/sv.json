@@ -445,13 +445,15 @@
       "title": "Lägg till i {meal}",
       "label": "Sök livsmedel",
       "yourFoods": "Dina livsmedel",
-      "noFoods": "Sök på namn.",
       "nothing": "Inget hittades. Prova färre eller mer allmänna ord.",
       "create": "Skapa ett livsmedel från etiketten",
       "per100": "{kcal} kcal per 100 g",
       "mine": "Ditt livsmedel",
       "uses": "Loggat en gång nyligen | Loggat {count} gånger nyligen",
-      "kcalPer100": "kcal/100 g"
+      "kcalPer100": "kcal/100 g",
+      "placeholder": "Sök, t.ex. kokt pasta eller ägg",
+      "usual": "Brukar ätas till {meal}",
+      "quickAdd": "Lägg till {food} igen"
     },
     "amount": {
       "label": "Mängd i gram",
@@ -499,6 +501,13 @@
       "save": "Spara mål",
       "saved": "Målet sparat",
       "assistantHint": "Din assistent kan räkna fram ett mål utifrån vikt, längd och träning. Be den sätta ett."
+    },
+    "repeat": {
+      "title": "Samma som {day}",
+      "yesterday": "igår",
+      "summary": "1 livsmedel · {kcal} kcal | {count} livsmedel · {kcal} kcal",
+      "button": "Lägg till",
+      "done": "Tillagt"
     }
   }
 }

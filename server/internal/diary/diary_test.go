@@ -145,3 +145,46 @@ func TestLoggingIsAllOrNothing(t *testing.T) {
 	h.Expect(h.Do(http.MethodGet, "/diary?from=2026-10-03&to=2026-10-01", nil, u.Session), http.StatusUnprocessableEntity)
 	h.Expect(h.Do(http.MethodGet, "/nutrition-goal", nil, u.Session), http.StatusNotFound)
 }
+
+func TestRecentMealsAreTheUsual(t *testing.T) {
+	h := apitest.New(t)
+	seedLMV(t, h)
+	u := h.NewUser()
+
+	log := func(day string, entries ...diary.EntryInput) {
+		t.Helper()
+		h.Expect(h.Do(http.MethodPost, "/diary/"+day+"/entries", map[string]any{"entries": entries}, u.Session), http.StatusCreated)
+	}
+	pasta := func(grams float64) diary.EntryInput {
+		return diary.EntryInput{Meal: "lunch", LMVNumber: ptr(int32(4065)), Grams: grams}
+	}
+	bun := diary.EntryInput{Meal: "lunch", Name: "Kanelbulle", Per100g: &food.Nutrients{Kcal: 350, Protein: 6, Carbs: 50, Fat: 14}, Grams: 90}
+	log("2026-09-29", pasta(150))
+	log("2026-09-30", pasta(180), bun)
+	log("2026-10-01", pasta(200), diary.EntryInput{Meal: "lunch", LMVNumber: ptr(int32(6201)), Grams: 30, Amount: "2 tbsp"})
+	// The day asked about and later days do not count, nor do other meals.
+	log("2026-10-02", pasta(999))
+	log("2026-09-30", diary.EntryInput{Meal: "dinner", LMVNumber: ptr(int32(6201)), Grams: 15})
+
+	var recent diary.Recent
+	h.Expect(h.Do(http.MethodGet, "/diary/2026-10-02/recent", nil, u.Session), http.StatusOK).Decode(t, &recent)
+	lunch := recent.Meals[1]
+	if lunch.Meal != "lunch" || lunch.Last.Day != "2026-10-01" || len(lunch.Last.Entries) != 2 || lunch.Last.Kcal != 419.5 {
+		t.Fatalf("unexpected last lunch %+v", lunch.Last)
+	}
+	if len(lunch.Foods) != 3 || lunch.Foods[0].Name != "Pasta kokt u. salt" || lunch.Foods[0].Uses != 3 || lunch.Foods[0].Grams != 200 {
+		t.Fatalf("unexpected usual lunch foods %+v", lunch.Foods)
+	}
+	// A one off comes back with its own nutrients, to log it again by name.
+	for _, f := range lunch.Foods {
+		if f.Name == "Kanelbulle" && (f.LMVNumber != nil || f.FoodID != nil || f.Per100g.Kcal != 350) {
+			t.Fatalf("unexpected one off %+v", f)
+		}
+	}
+	if recent.Meals[0].Last != nil || len(recent.Meals[0].Foods) != 0 {
+		t.Fatalf("nothing was eaten for breakfast, got %+v", recent.Meals[0])
+	}
+	if dinner := recent.Meals[2]; dinner.Last.Day != "2026-09-30" || len(dinner.Foods) != 1 {
+		t.Fatalf("unexpected dinner %+v", dinner)
+	}
+}

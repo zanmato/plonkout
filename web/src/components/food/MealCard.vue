@@ -36,6 +36,26 @@
       <div class="h-full bg-purple-500" :style="{ width: `${progress}%` }"></div>
     </div>
 
+    <!-- An empty meal offers the last one again, most weeks look alike -->
+    <div
+      v-if="!meal.entries.length && last"
+      class="flex items-center gap-3 py-3 pl-4 pr-3 bg-nb-bg border-t-2 border-dashed border-nb-border dark:bg-zinc-800"
+      data-testid="repeat"
+    >
+      <div class="flex-1 min-w-0 text-black dark:text-white">
+        <div class="text-xs font-bold uppercase tracking-wide text-purple-700 dark:text-purple-300">
+          {{ t("food.repeat.title", { day: lastDayName }) }}
+        </div>
+        <div class="text-sm font-bold truncate">{{ last.entries.map((e) => e.name).join(", ") }}</div>
+        <div class="text-xs opacity-70">
+          {{ t("food.repeat.summary", { count: last.entries.length, kcal: Math.round(last.kcal) }, last.entries.length) }}
+        </div>
+      </div>
+      <NeoButton variant="secondary" size="sm" :disabled="busy" data-testid="repeat-meal" @click="emit('repeat')">
+        {{ t("food.repeat.button") }}
+      </NeoButton>
+    </div>
+
     <ul v-if="meal.entries.length">
       <li v-for="entry in meal.entries" :key="entry.id" class="border-b border-gray-300 last:border-b-0 dark:border-zinc-600">
         <button
@@ -64,11 +84,29 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import NeoButton from "@/components/NeoButton.vue";
-import type { DayMeal, FoodEntry } from "@/types/domain";
+import type { DayKey, DayMeal, FoodEntry, PastMeal } from "@/types/domain";
+import { addDays, dateOf } from "@/utils/day";
 
-const props = defineProps<{ meal: DayMeal }>();
-const emit = defineEmits<{ (e: "add"): void; (e: "edit", entry: FoodEntry): void }>();
-const { t } = useI18n();
+const props = defineProps<{
+  meal: DayMeal;
+  /** The day shown, to name the day the last meal was on relative to it. */
+  day: DayKey;
+  /** The latest earlier logging of this meal. */
+  last?: PastMeal;
+  busy?: boolean;
+}>();
+const emit = defineEmits<{
+  (e: "add"): void;
+  (e: "edit", entry: FoodEntry): void;
+  (e: "repeat"): void;
+}>();
+const { t, d } = useI18n();
+
+const lastDayName = computed(() => {
+  if (!props.last) return "";
+  if (props.last.day === addDays(props.day, -1)) return t("food.repeat.yesterday");
+  return d(dateOf(props.last.day), { weekday: "long", day: "numeric", month: "short" });
+});
 
 // How far into its aim the meal is, full at the top of the range.
 const progress = computed(() => {

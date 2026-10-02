@@ -1,5 +1,27 @@
 <template>
-  <BottomSheet :title="t('food.search.title', { meal: mealName })" @close="emit('close')">
+  <BottomSheet :title="t('food.search.title', { meal: mealName })" fill @close="emit('close')">
+    <!-- The search stays put above the list, the list scrolls under it -->
+    <template v-if="!creating && !selected" #header>
+      <div class="px-4 pt-4 space-y-2">
+        <input
+          ref="searchInput"
+          v-model="query"
+          type="search"
+          class="w-full min-h-12 px-4 bg-nb-bg border-3 border-nb-border rounded-lg text-black placeholder:text-gray-500 focus:outline-none focus:border-nb-main dark:bg-black dark:text-white dark:placeholder:text-zinc-400"
+          :placeholder="t('food.search.placeholder')"
+          :aria-label="t('food.search.label')"
+          autocomplete="off"
+          autocorrect="off"
+          spellcheck="false"
+          data-testid="food-search"
+        />
+        <!-- One line that is always there, so the list below never jumps -->
+        <p class="h-5 text-sm font-bold text-black dark:text-white truncate" data-testid="search-status">
+          {{ status }}
+        </p>
+      </div>
+    </template>
+
     <!-- Creating a food from its label -->
     <FoodForm v-if="creating" :initial-name="query" @saved="pickCreated" />
 
@@ -49,7 +71,7 @@
         </button>
       </div>
 
-      <div v-if="grams && !portion" class="flex items-stretch gap-2">
+      <div v-if="grams && !portion && (selected.foodId || selected.lmvNumber)" class="flex items-stretch gap-2">
         <div class="floating-label-container flex-1">
           <input
             id="portion-name"
@@ -81,36 +103,48 @@
       </div>
     </div>
 
-    <!-- Search -->
+    <!-- Usual foods, search results or the user's own foods -->
     <div v-else class="space-y-3">
-      <div class="floating-label-container">
-        <input
-          id="food-search"
-          ref="searchInput"
-          v-model="query"
-          type="search"
-          class="floating-input"
-          :placeholder="t('food.search.label')"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-          data-testid="food-search"
-        />
-        <label for="food-search" class="floating-label">{{ t("food.search.label") }}</label>
-      </div>
-
-      <div v-if="!query.trim()" class="text-sm font-bold text-black dark:text-white">
-        {{ myFoods.length ? t("food.search.yourFoods") : t("food.search.noFoods") }}
-      </div>
-      <p
-        v-else-if="searched && matches.length === 0"
-        class="text-sm text-black dark:text-white opacity-70"
-        data-testid="no-matches"
+      <ul
+        v-if="!query.trim() && usual.length"
+        class="border-3 border-nb-border rounded-xl overflow-hidden bg-white dark:bg-zinc-800"
+        data-testid="usual-foods"
       >
-        {{ t("food.search.nothing") }}
-      </p>
+        <li
+          v-for="food in usual"
+          :key="usualKey(food)"
+          class="flex items-center border-b border-gray-300 dark:border-zinc-600 last:border-b-0"
+        >
+          <button type="button" class="flex-1 min-w-0 px-3 py-3 text-left" data-testid="usual-food" @click="pickUsual(food)">
+            <div class="font-bold text-black dark:text-white truncate">{{ food.name }}</div>
+            <div class="text-xs text-black dark:text-white opacity-70">
+              {{ food.amount ? `${food.amount} (${food.grams} g)` : `${food.grams} g` }} · {{ Math.round(food.kcal) }}
+              {{ t("food.kcal") }}
+            </div>
+          </button>
+          <button
+            type="button"
+            :class="[
+              'w-11 h-11 mr-2 shrink-0 flex items-center justify-center border-2 border-nb-border rounded-lg',
+              added.has(usualKey(food)) ? 'bg-green-500 text-white' : 'bg-purple-300 text-black',
+            ]"
+            :aria-label="t('food.search.quickAdd', { food: food.name })"
+            :disabled="saving"
+            data-testid="quick-add"
+            @click="quickAdd(food)"
+          >
+            <span class="material-icons">{{ added.has(usualKey(food)) ? "check" : "add" }}</span>
+          </button>
+        </li>
+      </ul>
 
-      <ul class="border-3 border-nb-border rounded-xl overflow-hidden bg-white dark:bg-zinc-800 empty:hidden">
+      <p v-if="!query.trim() && usual.length && shown.length" class="text-sm font-bold text-black dark:text-white pt-1">
+        {{ t("food.search.yourFoods") }}
+      </p>
+      <ul
+        v-if="shown.length"
+        class="border-3 border-nb-border rounded-xl overflow-hidden bg-white dark:bg-zinc-800"
+      >
         <li v-for="match in shown" :key="matchKey(match)" class="border-b border-gray-300 dark:border-zinc-600 last:border-b-0">
           <button
             type="button"
@@ -159,14 +193,25 @@ import { useI18n } from "vue-i18n";
 import BottomSheet from "@/components/BottomSheet.vue";
 import NeoButton from "@/components/NeoButton.vue";
 import FoodForm from "@/components/food/FoodForm.vue";
-import { getFoods, logFood, savePortion, searchFoods } from "@/api/food";
-import type { Day, DayKey, Food, FoodMatch, FoodSearch, Meal, Portion } from "@/types/domain";
+import { againEntry, getFoods, logFood, savePortion, searchFoods } from "@/api/food";
+import type { Day, DayKey, Food, FoodMatch, FoodSearch, Meal, Portion, RecentFood } from "@/types/domain";
 import { parseDecimal, scale } from "@/utils/number";
 
-const props = defineProps<{ day: DayKey; meal: Meal }>();
+const props = withDefaults(
+  defineProps<{
+    day: DayKey;
+    meal: Meal;
+    /** What the user ate at this meal lately, to add again with one tap. */
+    usual?: RecentFood[];
+  }>(),
+  { usual: () => [] },
+);
 const emit = defineEmits<{
   (e: "close"): void;
+  /** Logged and done, the sheet closes. */
   (e: "logged", day: Day): void;
+  /** Logged with a quick add, the sheet stays open for more. */
+  (e: "updated", day: Day): void;
   (e: "error"): void;
 }>();
 const { t } = useI18n();
@@ -188,6 +233,17 @@ const searchInput = useTemplateRef<HTMLInputElement>("searchInput");
 
 const round = (n: number) => Math.round(n * 10) / 10;
 const versionText = computed(() => (source.value?.version ? ` ${source.value.version}` : ""));
+const added = ref(new Set<string>());
+
+const status = computed(() => {
+  if (!query.value.trim()) {
+    if (props.usual.length) return t("food.search.usual", { meal: mealName.value.toLowerCase() });
+    return myFoods.value.length ? t("food.search.yourFoods") : "";
+  }
+  if (searched.value && matches.value.length === 0) return t("food.search.nothing");
+  return "";
+});
+
 const shown = computed(() => (query.value.trim() ? matches.value : myFoods.value));
 const grams = computed(() => {
   const value = parseDecimal(gramsText.value);
@@ -207,6 +263,42 @@ const preview = computed(() => {
 
 function matchKey(match: FoodMatch) {
   return match.foodId ?? `lmv-${match.lmvNumber}`;
+}
+
+function usualKey(food: RecentFood) {
+  return food.foodId ?? (food.lmvNumber ? `lmv-${food.lmvNumber}` : `name-${food.name}`);
+}
+
+// One tap logs the amount of the last time and leaves the sheet open, since
+// a usual meal is often several foods.
+async function quickAdd(food: RecentFood) {
+  saving.value = true;
+  try {
+    const day = await logFood(props.day, [againEntry(food, props.meal)]);
+    added.value = new Set([...added.value, usualKey(food)]);
+    emit("updated", day);
+  } catch (error) {
+    console.error("Error logging food:", error);
+    emit("error");
+  } finally {
+    saving.value = false;
+  }
+}
+
+// Tapping the name instead opens the amount, prefilled with the last one.
+function pickUsual(food: RecentFood) {
+  pick({
+    source: food.foodId || !food.lmvNumber ? "mine" : "lmv",
+    foodId: food.foodId,
+    lmvNumber: food.lmvNumber,
+    name: food.name,
+    brand: "",
+    group: "",
+    per100g: food.per100g,
+    portions: [],
+    uses: food.uses,
+  });
+  gramsText.value = String(food.grams);
 }
 
 function asMatch(food: Food): FoodMatch {
@@ -303,7 +395,12 @@ async function add() {
     const day = await logFood(props.day, [
       {
         meal: props.meal,
-        ...(match.foodId ? { foodId: match.foodId } : { lmvNumber: match.lmvNumber! }),
+        // A usual one off has no food, it goes by its name and nutrients.
+        ...(match.foodId
+          ? { foodId: match.foodId }
+          : match.lmvNumber
+            ? { lmvNumber: match.lmvNumber }
+            : { name: match.name, per100g: match.per100g }),
         grams: grams.value,
         amount: portion.value ? `${portions.value} ${portion.value.name}` : undefined,
       },

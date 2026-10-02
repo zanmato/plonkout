@@ -116,8 +116,12 @@
           v-for="meal in diary.meals"
           :key="meal.meal"
           :meal="meal"
+          :day="day"
+          :last="recentOf(meal.meal)?.last"
+          :busy="busy"
           @add="adding = meal.meal"
           @edit="editing = $event"
+          @repeat="repeat(meal.meal)"
         />
 
         <!-- Exercise -->
@@ -190,8 +194,10 @@
       v-if="adding"
       :day="day"
       :meal="adding"
+      :usual="recentOf(adding)?.foods"
       @close="adding = null"
       @logged="logged"
+      @updated="diary = $event"
       @error="showError(t('food.saveError'))"
     />
 
@@ -293,10 +299,19 @@ import DestructiveButton from "@/components/DestructiveButton.vue";
 import MealCard from "@/components/food/MealCard.vue";
 import AddFoodSheet from "@/components/food/AddFoodSheet.vue";
 import EntrySheet from "@/components/food/EntrySheet.vue";
-import { deleteActivity, deleteWeight, getDay, logActivity, saveWeight } from "@/api/food";
+import {
+  againEntry,
+  deleteActivity,
+  deleteWeight,
+  getDay,
+  getRecentMeals,
+  logActivity,
+  logFood,
+  saveWeight,
+} from "@/api/food";
 import { useToast } from "@/composables/useToast";
 import { useUnits } from "@/composables/useUnits";
-import type { Day, DayKey, FoodEntry, Meal } from "@/types/domain";
+import type { Day, DayKey, FoodEntry, Meal, RecentMeals } from "@/types/domain";
 import { addDays, dateOf, isDayKey, today } from "@/utils/day";
 import { parseDecimal } from "@/utils/number";
 
@@ -311,6 +326,7 @@ const { weightUnit } = useUnits();
 // The day lives in the address, so a reload or the back button keeps it.
 const day = ref<DayKey>(isDayKey(route.query.day) ? route.query.day : today());
 const diary = ref<Day | null>(null);
+const recent = ref<RecentMeals | null>(null);
 const adding = ref<Meal | null>(null);
 const editing = ref<FoodEntry | null>(null);
 const busy = ref(false);
@@ -358,6 +374,35 @@ async function load() {
   }
 }
 
+// What was eaten before the day only changes with the day, not with logging.
+async function loadRecent() {
+  try {
+    recent.value = await getRecentMeals(day.value);
+  } catch (error) {
+    // Quick add is a shortcut, the day works without it.
+    console.error("Error loading recent meals:", error);
+  }
+}
+
+function recentOf(meal: Meal) {
+  return recent.value?.meals.find((m) => m.meal === meal);
+}
+
+// Logs the meal's last logging again, every food at its amount.
+async function repeat(meal: Meal) {
+  const last = recentOf(meal)?.last;
+  if (!last) return;
+  busy.value = true;
+  try {
+    diary.value = await logFood(day.value, last.entries.map((food) => againEntry(food, meal)));
+  } catch (error) {
+    console.error("Error repeating a meal:", error);
+    showError(t("food.saveError"));
+  } finally {
+    busy.value = false;
+  }
+}
+
 function goTo(next: DayKey) {
   if (next === day.value) return;
   day.value = next;
@@ -366,9 +411,14 @@ function goTo(next: DayKey) {
 
 watch(day, () => {
   diary.value = null;
+  recent.value = null;
   load();
+  loadRecent();
 });
-onMounted(load);
+onMounted(() => {
+  load();
+  loadRecent();
+});
 
 function logged(updated: Day) {
   adding.value = null;

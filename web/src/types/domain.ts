@@ -115,3 +115,14 @@ export type NutritionGoal = api.Goal;
 export type NutritionGoalDraft = api.GoalInput;
 
 export type DiarySummary = api.Summary;
+
+/** What the user usually eats, per meal. */
+export type RecentMeals = api.Recent;
+
+export type RecentMeal = api.RecentMeal;
+
+/** A food eaten at a meal lately, with the amount of the last time. */
+export type RecentFood = api.RecentFood;
+
+/** A meal as logged on an earlier day. */
+export type PastMeal = api.PastMeal;

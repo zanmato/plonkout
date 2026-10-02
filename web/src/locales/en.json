@@ -450,13 +450,15 @@
       "title": "Add to {meal}",
       "label": "Search foods",
       "yourFoods": "Your foods",
-      "noFoods": "Search by name, in Swedish for general foods.",
       "nothing": "Nothing found. Try fewer or more general words.",
       "create": "Create a food from the label",
       "per100": "{kcal} kcal per 100 g",
       "mine": "Your food",
       "uses": "Logged once lately | Logged {count} times lately",
-      "kcalPer100": "kcal/100 g"
+      "kcalPer100": "kcal/100 g",
+      "placeholder": "Search, e.g. kokt pasta or ägg",
+      "usual": "Usual for {meal}",
+      "quickAdd": "Add {food} again"
     },
     "amount": {
       "label": "Amount in grams",
@@ -504,6 +506,13 @@
       "save": "Save goal",
       "saved": "Goal saved",
       "assistantHint": "Your assistant can work out a goal from your weight, height and training. Ask it to set one."
+    },
+    "repeat": {
+      "title": "Same as {day}",
+      "yesterday": "yesterday",
+      "summary": "1 food · {kcal} kcal | {count} foods · {kcal} kcal",
+      "button": "Add all",
+      "done": "Added"
     }
   }
 }

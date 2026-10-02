@@ -17,7 +17,10 @@ import type {
   Meal,
   Nutrients,
   Portion,
+  PastMeal,
   Problem,
+  Recent,
+  RecentFood,
   Totals,
 } from "@/api/gen/types.gen";
 
@@ -177,6 +180,54 @@ function dayOf(day: string): Day {
   };
 }
 
+const shiftDay = (day: string, days: number) => {
+  const date = new Date(`${day}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+};
+
+const asRecent = (entry: Entry, uses: number): RecentFood => ({
+  foodId: entry.foodId,
+  lmvNumber: entry.lmvNumber,
+  name: entry.name,
+  grams: entry.grams,
+  amount: entry.amount,
+  per100g: clone(entry.per100g),
+  kcal: entry.kcal,
+  uses,
+  lastDay: entry.day,
+});
+
+// Like the server: the 60 days before day, the latest meal whole, and foods
+// by how often they were eaten with the amount of the last time.
+function recentOf(day: string): Recent {
+  const from = shiftDay(day, -60);
+  const before = state.entries
+    .filter((e) => e.day >= from && e.day < day)
+    .sort((a, b) => a.day.localeCompare(b.day));
+  return {
+    day,
+    meals: MEALS.map((meal) => {
+      const entries = before.filter((e) => e.meal === meal);
+      const lastDay = entries.at(-1)?.day;
+      const last: PastMeal | undefined = lastDay
+        ? {
+            day: lastDay,
+            kcal: round(entries.filter((e) => e.day === lastDay).reduce((sum, e) => sum + e.kcal, 0)),
+            entries: entries.filter((e) => e.day === lastDay).map((e) => asRecent(e, 1)),
+          }
+        : undefined;
+      const byFood = new Map<string, RecentFood>();
+      for (const entry of entries) {
+        const key = entry.foodId ?? (entry.lmvNumber ? `lmv-${entry.lmvNumber}` : `name-${entry.name.toLowerCase()}`);
+        byFood.set(key, asRecent(entry, (byFood.get(key)?.uses ?? 0) + 1));
+      }
+      const foods = [...byFood.values()].sort((a, b) => b.uses - a.uses || b.lastDay.localeCompare(a.lastDay));
+      return { meal, ...(last ? { last } : {}), foods };
+    }),
+  };
+}
+
 const lmvMatch = (food: LmvFood): Match => ({
   source: "lmv",
   foodId: null,
@@ -264,6 +315,8 @@ export const foodHandlers: HttpHandler[] = [
   }),
 
   http.get(url("/diary/:day"), ({ params }) => HttpResponse.json(dayOf(params.day as string))),
+
+  http.get(url("/diary/:day/recent"), ({ params }) => HttpResponse.json(recentOf(params.day as string))),
 
   http.post(url("/diary/:day/entries"), async ({ params, request }) => {
     const body = (await request.json()) as Body;

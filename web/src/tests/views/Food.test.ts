@@ -133,7 +133,7 @@ describe("Food.vue", () => {
     await byTestId("add-snack").trigger("click");
     await byTestId("food-search").setValue("ölkorv");
     await searchSettles();
-    expect(byTestId("no-matches").exists()).toBe(true);
+    expect(byTestId("search-status").text()).toContain("Nothing found");
 
     await byTestId("create-food").trigger("click");
     expect((wrapper.find("#food-name").element as HTMLInputElement).value).toBe("ölkorv");
@@ -210,5 +210,81 @@ describe("Food.vue", () => {
     await flushPromises();
     expect(mockReplace).toHaveBeenLastCalledWith({ query: {} });
     expect(byTestId("eaten").text()).toBe("0");
+  });
+
+  it("adds the last meal again with one tap", async () => {
+    const yesterday = addDays(today(), -1);
+    backend.seed({
+      food: {
+        lmvFoods,
+        entries: [
+          { day: addDays(today(), -3), meal: "breakfast", name: "Pasta kokt u. salt", lmvNumber: 4065, grams: 50, per100g: pasta },
+          { day: yesterday, meal: "lunch", name: "Pasta kokt u. salt", lmvNumber: 4065, grams: 200, per100g: pasta },
+          { day: yesterday, meal: "lunch", name: "Pesto hemlagad", lmvNumber: 6201, grams: 30, amount: "2 tbsp", per100g: pesto },
+        ],
+      },
+    });
+    await createWrapper();
+
+    const lunch = byTestId("meal-lunch");
+    expect(lunch.find('[data-testid="repeat"]').text()).toContain("Same as yesterday");
+    expect(lunch.find('[data-testid="repeat"]').text()).toContain("2 foods · 420 kcal");
+    // An older breakfast is named by its day.
+    expect(byTestId("meal-breakfast").find('[data-testid="repeat"]').exists()).toBe(true);
+
+    await lunch.find('[data-testid="repeat-meal"]').trigger("click");
+    await flushPromises();
+
+    const today_ = backend.food.entries.filter((e) => e.day === today());
+    expect(today_).toHaveLength(2);
+    expect(today_[1]).toMatchObject({ meal: "lunch", lmvNumber: 6201, grams: 30, amount: "2 tbsp" });
+    expect(byTestId("meal-lunch").find('[data-testid="repeat"]').exists()).toBe(false);
+    expect(byTestId("eaten").text()).toBe("420");
+  });
+
+  it("quick adds usual foods and keeps the sheet open for more", async () => {
+    const bun: Nutrients = { kcal: 350, protein: 6, carbs: 50, fat: 14 };
+    backend.seed({
+      food: {
+        lmvFoods,
+        entries: [
+          { day: addDays(today(), -2), meal: "snack", name: "Pesto hemlagad", lmvNumber: 6201, grams: 15, per100g: pesto },
+          { day: addDays(today(), -1), meal: "snack", name: "Kanelbulle", grams: 90, per100g: bun },
+          { day: addDays(today(), -1), meal: "snack", name: "Pesto hemlagad", lmvNumber: 6201, grams: 20, per100g: pesto },
+        ],
+      },
+    });
+    await createWrapper();
+
+    await byTestId("add-snack").trigger("click");
+    expect(byTestId("search-status").text()).toBe("Usual for snacks");
+    const usual = allByTestId("usual-food");
+    // Eaten most often first, with the amount of the last time.
+    expect(usual[0]!.text()).toContain("Pesto hemlagad");
+    expect(usual[0]!.text()).toContain("20 g");
+
+    await allByTestId("quick-add")[0]!.trigger("click");
+    await flushPromises();
+    await allByTestId("quick-add")[1]!.trigger("click");
+    await flushPromises();
+
+    expect(byTestId("food-search").exists()).toBe(true);
+    expect(allByTestId("quick-add")[0]!.text()).toBe("check");
+    expect(backend.food.entries.filter((e) => e.day === today())).toMatchObject([
+      { meal: "snack", lmvNumber: 6201, grams: 20 },
+      // A one off without a food, logged again by its name and nutrients.
+      { meal: "snack", lmvNumber: null, foodId: null, name: "Kanelbulle", grams: 90, kcal: 315 },
+    ]);
+    expect(byTestId("eaten").text()).toBe("424");
+  });
+
+  it("closes a sheet with Escape", async () => {
+    await createWrapper();
+    await byTestId("add-lunch").trigger("click");
+    expect(byTestId("food-search").exists()).toBe(true);
+
+    window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
+    await flushPromises();
+    expect(byTestId("food-search").exists()).toBe(false);
   });
 });

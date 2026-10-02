@@ -93,7 +93,7 @@ func TestToolsAndPrompts(t *testing.T) {
 	}
 	want := []string{
 		"add_sessions", "create_food", "create_plan", "delete_activity", "delete_food_entry", "get_context",
-		"get_diary", "get_exercise_stats", "get_plan", "get_workout_history", "list_exercises", "list_plans",
+		"get_diary", "get_exercise_stats", "get_plan", "get_recent_meals", "get_workout_history", "list_exercises", "list_plans",
 		"log_activity", "log_food", "log_weight", "reorder_sessions", "save_portion", "search_foods",
 		"set_nutrition_goal", "set_session_status", "summarize_diary", "update_food", "update_food_entry",
 		"update_plan", "update_session",

@@ -19,6 +19,8 @@ import type {
   NutritionGoal,
   NutritionGoalDraft,
   Portion,
+  RecentFood,
+  RecentMeals,
 } from "@/types/domain";
 import { ApiError, unwrap } from "./index";
 
@@ -62,6 +64,22 @@ export function getDay(day: DayKey): Promise<Day> {
 /** Every day of a range in brief. */
 export function getDiarySummary(from: DayKey, to: DayKey): Promise<DiarySummary> {
   return unwrap(sdk.summarizeDiary({ query: { from, to } }));
+}
+
+/** What the user usually eats per meal, from the days before day. */
+export function getRecentMeals(day: DayKey): Promise<RecentMeals> {
+  return unwrap(sdk.getRecentMeals({ path: { day } }));
+}
+
+/**
+ * Logs a food eaten before again, with the amount of the last time. A one off
+ * without a food goes by its name and nutrients.
+ */
+export function againEntry(food: RecentFood, meal: EntryDraft["meal"]): EntryDraft {
+  const amount = food.amount || undefined;
+  if (food.foodId) return { meal, foodId: food.foodId, grams: food.grams, amount };
+  if (food.lmvNumber) return { meal, lmvNumber: food.lmvNumber, grams: food.grams, amount };
+  return { meal, name: food.name, per100g: food.per100g, grams: food.grams, amount };
 }
 
 /** Logs what was eaten, all or nothing, and answers the day as it now is. */

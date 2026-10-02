@@ -58,6 +58,27 @@ func Register(reg *api.Registry, s *Service) {
 		return &struct{ Body Summary }{Body: summary}, nil
 	})
 
+	api.Register(reg, api.Op{
+		ID: "get-recent-meals", Method: http.MethodGet, Path: "/diary/{day}/recent",
+		Summary: "What the user usually eats, per meal", Tags: tags, MCPTool: "get_recent_meals",
+		Description: "From the 60 days before day: each meal's latest earlier logging, whole, and the foods " +
+			"eaten at it most often with the amount of the last time. For \"the usual breakfast\" or \"same " +
+			"lunch as yesterday\": log those entries with log_food.",
+		Errors: []int{http.StatusUnprocessableEntity},
+	}, func(ctx context.Context, in *struct {
+		Day string `path:"day" format:"date" doc:"The user's own calendar day, e.g. 2026-10-02."`
+	}) (*struct{ Body Recent }, error) {
+		day, err := ParseDay(in.Day)
+		if err != nil {
+			return nil, err
+		}
+		recent, err := s.Recent(ctx, day)
+		if err != nil {
+			return nil, err
+		}
+		return &struct{ Body Recent }{Body: recent}, nil
+	})
+
 	type logBody struct {
 		Entries []EntryInput `json:"entries" minItems:"1" maxItems:"50"`
 	}

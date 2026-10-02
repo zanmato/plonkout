@@ -511,6 +511,12 @@ export type Passkey = {
     synced: boolean;
 };
 
+export type PastMeal = {
+    day: string;
+    entries: Array<RecentFood>;
+    kcal: number;
+};
+
 export type Plan = {
     created: string;
     goal: string;
@@ -672,6 +678,47 @@ export type QueueEntry = {
 export type Range = {
     max: number;
     min: number;
+};
+
+export type Recent = {
+    day: string;
+    meals: Array<RecentMeal>;
+};
+
+export type RecentFood = {
+    amount: string;
+    foodId: string | null;
+    /**
+     * The amount of the last time.
+     */
+    grams: number;
+    /**
+     * For the amount of the last time.
+     */
+    kcal: number;
+    lastDay: string;
+    lmvNumber: number | null;
+    name: string;
+    /**
+     * As last logged.
+     */
+    per100g: Nutrients;
+    /**
+     * How many times it was logged at this meal lately.
+     */
+    uses: number;
+};
+
+export type RecentMeal = {
+    /**
+     * Foods eaten at this meal lately, the most often eaten first.
+     */
+    foods: Array<RecentFood>;
+    /**
+     * The latest earlier day with this meal logged, whole.
+     */
+    last?: PastMeal;
+    meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 };
 
 export type RecentWorkout = {
@@ -1760,6 +1807,44 @@ export type LogFoodResponses = {
 };
 
 export type LogFoodResponse = LogFoodResponses[keyof LogFoodResponses];
+
+export type GetRecentMealsData = {
+    body?: never;
+    path: {
+        /**
+         * The user's own calendar day, e.g. 2026-10-02.
+         */
+        day: string;
+    };
+    query?: never;
+    url: '/api/diary/{day}/recent';
+};
+
+export type GetRecentMealsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetRecentMealsError = GetRecentMealsErrors[keyof GetRecentMealsErrors];
+
+export type GetRecentMealsResponses = {
+    /**
+     * OK
+     */
+    200: Recent;
+};
+
+export type GetRecentMealsResponse = GetRecentMealsResponses[keyof GetRecentMealsResponses];
 
 export type DeleteWeightData = {
     body?: never;
