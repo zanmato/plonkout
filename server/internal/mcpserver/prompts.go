@@ -9,7 +9,7 @@ import (
 )
 
 // instructions tell a model how this domain works before it calls anything.
-const instructions = `Plonkout is a workout log with training plans, often used for armwrestling.
+const instructions = `Plonkout is a workout log with training plans, often used for armwrestling, and a food diary.
 
 Start with get_context: it has the weight unit (every weight anywhere is in it), the dominant arm, active plans with their next session, and recent workouts.
 
@@ -22,7 +22,16 @@ A plan is an ordered queue of sessions. The user opens the app, picks the next s
 - Only pending sessions can be changed. Started, completed and skipped ones are history.
 - Exercise names must match the list, ignoring case. An unknown name is refused with suggestions; set createMissingExercises only when the user really does a new exercise.
 
-To review, call get_plan with actuals: every session with a workout carries planned against done per target, whether it was met, the top RPE and the best estimated 1RM (Epley). get_exercise_stats gives the longer history of one exercise.`
+To review, call get_plan with actuals: every session with a workout carries planned against done per target, whether it was met, the top RPE and the best estimated 1RM (Epley). get_exercise_stats gives the longer history of one exercise.
+
+The food diary counts what the user eats against a daily goal (nutritionGoal in get_context). Unlike workouts, you log food yourself when asked.
+
+- A day is the user's own calendar day (YYYY-MM-DD). Work it out from what they say and the time of day; ask when it is unclear, for example just after midnight.
+- To log "100 g pasta and two tablespoons of pesto for lunch": search_foods for each food, pick the match in the state it was eaten (cooked pasta, not dry), convert household measures to grams (a saved portion if the food has one, else a sensible estimate: a tablespoon of pesto is about 15 g), then log_food once with every entry. Put how the user said it in amount, e.g. "2 tbsp", and what they called a food in alias when it differs from the food's name, e.g. "ölkorv", so the next search finds it first.
+- Livsmedelsverket's foods are generic and named in Swedish. For a branded product they lack, ask for the label's values per 100 g and create_food once, then reuse it. A dish eaten out can be logged as a one off with a name and estimated per100g.
+- Tell the user what you logged, with grams and kcal, and say which values were estimates.
+- Energy burned is not measured. Log it with log_activity only when the user gives it or asks for an estimate.
+- Livsmedelsverket's data is CC BY 4.0: credit "Livsmedelsverkets livsmedelsdatabas" when you present its values.`
 
 func addPrompts(server *mcp.Server) {
 	server.AddPrompt(&mcp.Prompt{
@@ -52,6 +61,26 @@ func addPrompts(server *mcp.Server) {
 		return &mcp.GetPromptResult{
 			Description: "Design a training plan",
 			Messages:    []*mcp.PromptMessage{{Role: "user", Content: &mcp.TextContent{Text: b.String()}}},
+		}, nil
+	})
+
+	server.AddPrompt(&mcp.Prompt{
+		Name:        "nutrition_goal",
+		Title:       "Set a nutrition goal",
+		Description: "Work out a daily calorie and macro budget for losing, keeping or gaining weight.",
+		Arguments: []*mcp.PromptArgument{
+			{Name: "goal", Description: "What the user wants, e.g. lose 4 kg by Christmas without losing strength.", Required: true},
+		},
+	}, func(_ context.Context, req *mcp.GetPromptRequest) (*mcp.GetPromptResult, error) {
+		text := fmt.Sprintf(`Help me set a nutrition goal in Plonkout. Goal: %s.
+
+1. Call get_context for units, training and any goal already set, and summarize_diary for the last four weeks to see what I eat and weigh.
+2. Ask for what you still need: height, age, sex, and how active I am outside training.
+3. Estimate maintenance, then a budget for the pace: about 0.5%% of body weight a week at most when losing, slower when gaining. Keep protein high (1.6 to 2.2 g per kg) when strength matters, fat at least 0.6 g per kg, and the rest carbs.
+4. Show the numbers and the reasoning, and ask before saving. Then call set_nutrition_goal, with the reasoning in notes.`, req.Params.Arguments["goal"])
+		return &mcp.GetPromptResult{
+			Description: "Set a nutrition goal",
+			Messages:    []*mcp.PromptMessage{{Role: "user", Content: &mcp.TextContent{Text: text}}},
 		}, nil
 	})
 

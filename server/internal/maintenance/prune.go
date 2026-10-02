@@ -5,14 +5,11 @@ package maintenance
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zanmato/plonkout/server/internal/maintenance/maintenancedb"
+	"github.com/zanmato/plonkout/server/internal/platform/schedule"
 )
-
-// Interval is how often the pruner runs.
-const Interval = time.Hour
 
 // Prune runs one pass and reports how many rows each step removed.
 func Prune(ctx context.Context, pool *pgxpool.Pool) (map[string]int64, error) {
@@ -40,22 +37,15 @@ func Prune(ctx context.Context, pool *pgxpool.Pool) (map[string]int64, error) {
 	return removed, nil
 }
 
-// Run prunes now and then every Interval until the context ends. One server
-// instance is all there is, so no lock is needed to keep two from racing.
-func Run(ctx context.Context, pool *pgxpool.Pool, logger *slog.Logger) {
-	ticker := time.NewTicker(Interval)
-	defer ticker.Stop()
-	for {
+// Job prunes every hour, and once when the server starts.
+func Job(pool *pgxpool.Pool, logger *slog.Logger) schedule.Job {
+	run := func(ctx context.Context) error {
 		removed, err := Prune(ctx, pool)
-		if err != nil && ctx.Err() == nil {
-			logger.Error("pruning failed", "error", err)
-		} else if err == nil {
-			logger.Debug("pruned expired rows", "removed", removed)
+		if err != nil {
+			return err
 		}
-		select {
-		case <-ctx.Done():
-			return
-		case <-ticker.C:
-		}
+		logger.Debug("pruned expired rows", "removed", removed)
+		return nil
 	}
+	return schedule.Job{Name: "prune", Spec: "@hourly", Run: run, AtStart: run}
 }

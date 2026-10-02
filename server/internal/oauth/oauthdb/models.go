@@ -9,7 +9,19 @@ import (
 	"time"
 
 	uuid "github.com/gofrs/uuid/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+type Activity struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Day       time.Time
+	Label     string
+	Kcal      int32
+	WorkoutID *uuid.UUID
+	LoggedBy  string
+	CreatedAt time.Time
+}
 
 type AuthOauthAccessToken struct {
 	TokenHash []byte
@@ -106,6 +118,13 @@ type AuthWebauthnCeremony struct {
 	ExpiresAt      time.Time
 }
 
+type BodyWeight struct {
+	UserID    uuid.UUID
+	Day       time.Time
+	Weight    float64
+	UpdatedAt time.Time
+}
+
 type Exercise struct {
 	ID          uuid.UUID
 	UserID      uuid.UUID
@@ -117,6 +136,109 @@ type Exercise struct {
 	Archived    bool
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+}
+
+type Food struct {
+	ID           uuid.UUID
+	UserID       uuid.UUID
+	Name         string
+	Brand        string
+	Gtin         *string
+	Kcal         float64
+	Protein      float64
+	Carbs        float64
+	Fat          float64
+	Fiber        *float64
+	Sugars       *float64
+	SaturatedFat *float64
+	Salt         *float64
+	Notes        string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	SearchTerms  string
+	Search       pgtype.TSVector
+}
+
+type FoodAlias struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	Alias     string
+	FoodID    *uuid.UUID
+	LmvNumber *int32
+	CreatedAt time.Time
+}
+
+type FoodEntry struct {
+	ID           uuid.UUID
+	UserID       uuid.UUID
+	Day          time.Time
+	Meal         string
+	FoodID       *uuid.UUID
+	LmvNumber    *int32
+	Name         string
+	Grams        float64
+	Amount       string
+	Kcal         float64
+	Protein      float64
+	Carbs        float64
+	Fat          float64
+	Fiber        *float64
+	Sugars       *float64
+	SaturatedFat *float64
+	Salt         *float64
+	LoggedBy     string
+	CreatedAt    time.Time
+}
+
+type FoodPortion struct {
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	FoodID    *uuid.UUID
+	LmvNumber *int32
+	Name      string
+	Grams     float64
+}
+
+type LmvFood struct {
+	Number       int32
+	Name         string
+	FoodGroup    string
+	Kcal         float64
+	Protein      float64
+	Carbs        float64
+	Fat          float64
+	Fiber        *float64
+	Sugars       *float64
+	SaturatedFat *float64
+	Salt         *float64
+	Nutrients    json.RawMessage
+	Retired      bool
+	UpdatedAt    time.Time
+	SearchTerms  string
+	Search       pgtype.TSVector
+}
+
+type LmvRelease struct {
+	ID         uuid.UUID
+	Version    string
+	Sha256     []byte
+	Foods      int32
+	ImportedAt time.Time
+	Vocabulary []string
+}
+
+type NutritionGoal struct {
+	UserID        uuid.UUID
+	Direction     string
+	Kcal          int32
+	Protein       int32
+	Carbs         int32
+	Fat           int32
+	AddActivities bool
+	TargetWeight  *float64
+	WeeklyChange  *float64
+	Notes         string
+	UpdatedAt     time.Time
 }
 
 type Plan struct {

@@ -2,7 +2,7 @@
 
 import type { Client, ClientMeta, Options as Options2, RequestResult, TDataShape } from './client';
 import { client } from './client.gen';
-import type { AddSessionsData, AddSessionsErrors, AddSessionsResponses, BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreatePlanData, CreatePlanErrors, CreatePlanResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DecideConsentData, DecideConsentErrors, DecideConsentResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeletePlanData, DeletePlanErrors, DeletePlanResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, DisconnectAppData, DisconnectAppErrors, DisconnectAppResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetConsentPromptData, GetConsentPromptErrors, GetConsentPromptResponses, GetContextData, GetContextErrors, GetContextResponses, GetExerciseStatsData, GetExerciseStatsErrors, GetExerciseStatsResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetPlanData, GetPlanErrors, GetPlannedSessionData, GetPlannedSessionErrors, GetPlannedSessionResponses, GetPlanResponses, GetQueueData, GetQueueErrors, GetQueueResponses, GetSessionComparisonData, GetSessionComparisonErrors, GetSessionComparisonResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListConnectedAppsData, ListConnectedAppsErrors, ListConnectedAppsResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListPlansData, ListPlansErrors, ListPlansResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogoutData, LogoutErrors, LogoutResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ReorderSessionsData, ReorderSessionsErrors, ReorderSessionsResponses, SetSessionStatusData, SetSessionStatusErrors, SetSessionStatusResponses, StartSessionData, StartSessionErrors, StartSessionResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdatePlanData, UpdatePlanErrors, UpdatePlanResponses, UpdateSessionData, UpdateSessionErrors, UpdateSessionResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
+import type { AddSessionsData, AddSessionsErrors, AddSessionsResponses, BeginAddPasskeyData, BeginAddPasskeyErrors, BeginAddPasskeyResponses, BeginLoginData, BeginLoginErrors, BeginLoginResponses, BeginRecoveryData, BeginRecoveryErrors, BeginRecoveryResponses, BeginSignupData, BeginSignupErrors, BeginSignupResponses, CreateExerciseData, CreateExerciseErrors, CreateExerciseResponses, CreateFoodData, CreateFoodErrors, CreateFoodResponses, CreatePlanData, CreatePlanErrors, CreatePlanResponses, CreateTemplateData, CreateTemplateErrors, CreateTemplateResponses, CreateWorkoutData, CreateWorkoutErrors, CreateWorkoutResponses, DecideConsentData, DecideConsentErrors, DecideConsentResponses, DeleteAccountData, DeleteAccountErrors, DeleteAccountResponses, DeleteActivityData, DeleteActivityErrors, DeleteActivityResponses, DeleteFoodData, DeleteFoodEntryData, DeleteFoodEntryErrors, DeleteFoodEntryResponses, DeleteFoodErrors, DeleteFoodResponses, DeletePasskeyData, DeletePasskeyErrors, DeletePasskeyResponses, DeletePlanData, DeletePlanErrors, DeletePlanResponses, DeletePortionData, DeletePortionErrors, DeletePortionResponses, DeleteTemplateData, DeleteTemplateErrors, DeleteTemplateResponses, DeleteWeightData, DeleteWeightErrors, DeleteWeightResponses, DeleteWorkoutData, DeleteWorkoutErrors, DeleteWorkoutResponses, DisconnectAppData, DisconnectAppErrors, DisconnectAppResponses, FinishAddPasskeyData, FinishAddPasskeyErrors, FinishAddPasskeyResponses, FinishLoginData, FinishLoginErrors, FinishLoginResponses, FinishRecoveryData, FinishRecoveryErrors, FinishRecoveryResponses, FinishSignupData, FinishSignupErrors, FinishSignupResponses, GetConsentPromptData, GetConsentPromptErrors, GetConsentPromptResponses, GetContextData, GetContextErrors, GetContextResponses, GetDiaryDayData, GetDiaryDayErrors, GetDiaryDayResponses, GetExerciseStatsData, GetExerciseStatsErrors, GetExerciseStatsResponses, GetHealthData, GetHealthErrors, GetHealthResponses, GetLatestWorkoutData, GetLatestWorkoutErrors, GetLatestWorkoutResponses, GetMeData, GetMeErrors, GetMeResponses, GetNutritionGoalData, GetNutritionGoalErrors, GetNutritionGoalResponses, GetPlanData, GetPlanErrors, GetPlannedSessionData, GetPlannedSessionErrors, GetPlannedSessionResponses, GetPlanResponses, GetQueueData, GetQueueErrors, GetQueueResponses, GetSessionComparisonData, GetSessionComparisonErrors, GetSessionComparisonResponses, GetSignupChallengeData, GetSignupChallengeErrors, GetSignupChallengeResponses, GetTemplateData, GetTemplateErrors, GetTemplateResponses, GetWorkoutData, GetWorkoutErrors, GetWorkoutResponses, ImportLegacyExportData, ImportLegacyExportErrors, ImportLegacyExportResponses, ListConnectedAppsData, ListConnectedAppsErrors, ListConnectedAppsResponses, ListExercisesData, ListExercisesErrors, ListExercisesResponses, ListFoodsData, ListFoodsErrors, ListFoodsResponses, ListPasskeysData, ListPasskeysErrors, ListPasskeysResponses, ListPlansData, ListPlansErrors, ListPlansResponses, ListSettingsData, ListSettingsErrors, ListSettingsResponses, ListTemplatesData, ListTemplatesErrors, ListTemplatesResponses, ListWorkoutsData, ListWorkoutsErrors, ListWorkoutsResponses, LogActivityData, LogActivityErrors, LogActivityResponses, LogFoodData, LogFoodErrors, LogFoodResponses, LogoutData, LogoutErrors, LogoutResponses, LogWeightData, LogWeightErrors, LogWeightResponses, PutSettingData, PutSettingErrors, PutSettingResponses, RegenerateRecoveryCodesData, RegenerateRecoveryCodesErrors, RegenerateRecoveryCodesResponses, RenamePasskeyData, RenamePasskeyErrors, RenamePasskeyResponses, ReorderSessionsData, ReorderSessionsErrors, ReorderSessionsResponses, SavePortionData, SavePortionErrors, SavePortionResponses, SearchFoodsData, SearchFoodsErrors, SearchFoodsResponses, SetNutritionGoalData, SetNutritionGoalErrors, SetNutritionGoalResponses, SetSessionStatusData, SetSessionStatusErrors, SetSessionStatusResponses, StartSessionData, StartSessionErrors, StartSessionResponses, SummarizeDiaryData, SummarizeDiaryErrors, SummarizeDiaryResponses, UpdateExerciseData, UpdateExerciseErrors, UpdateExerciseResponses, UpdateFoodData, UpdateFoodEntryData, UpdateFoodEntryErrors, UpdateFoodEntryResponses, UpdateFoodErrors, UpdateFoodResponses, UpdatePlanData, UpdatePlanErrors, UpdatePlanResponses, UpdateSessionData, UpdateSessionErrors, UpdateSessionResponses, UpdateTemplateData, UpdateTemplateErrors, UpdateTemplateResponses, UpdateWorkoutData, UpdateWorkoutErrors, UpdateWorkoutResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -163,6 +163,19 @@ export const regenerateRecoveryCodes = <ThrowOnError extends boolean = false>(op
 });
 
 /**
+ * Remove an activity from the diary
+ */
+export const deleteActivity = <ThrowOnError extends boolean = false>(options: Options<DeleteActivityData, ThrowOnError>): RequestResult<DeleteActivityResponses, DeleteActivityErrors, ThrowOnError> => (options.client ?? client).delete<DeleteActivityResponses, DeleteActivityErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/activities/{id}',
+    ...options
+});
+
+/**
  * Start signing in with a passkey
  */
 export const beginLogin = <ThrowOnError extends boolean = false>(options?: Options<BeginLoginData, ThrowOnError>): RequestResult<BeginLoginResponses, BeginLoginErrors, ThrowOnError> => (options?.client ?? client).post<BeginLoginResponses, BeginLoginErrors, ThrowOnError>({ url: '/api/auth/login/begin', ...options });
@@ -252,7 +265,7 @@ export const finishSignup = <ThrowOnError extends boolean = false>(options: Opti
 /**
  * Where the user is at
  *
- * Units, dominant arm, active plans with progress and the next session, and the latest workouts. Read this first: every weight elsewhere is in weightUnit.
+ * Units, dominant arm, active plans with progress and the next session, the latest workouts and the nutrition goal. Read this first: every weight elsewhere is in weightUnit.
  */
 export const getContext = <ThrowOnError extends boolean = false>(options?: Options<GetContextData, ThrowOnError>): RequestResult<GetContextResponses, GetContextErrors, ThrowOnError> => (options?.client ?? client).get<GetContextResponses, GetContextErrors, ThrowOnError>({
     security: [{
@@ -262,6 +275,104 @@ export const getContext = <ThrowOnError extends boolean = false>(options?: Optio
         }, { scheme: 'bearer', type: 'http' }],
     url: '/api/context',
     ...options
+});
+
+/**
+ * The food diary over a range of days
+ *
+ * Every day from from to to with what was eaten, burned and weighed, and the goal. For reviewing how a goal is going.
+ */
+export const summarizeDiary = <ThrowOnError extends boolean = false>(options: Options<SummarizeDiaryData, ThrowOnError>): RequestResult<SummarizeDiaryResponses, SummarizeDiaryErrors, ThrowOnError> => (options.client ?? client).get<SummarizeDiaryResponses, SummarizeDiaryErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/diary',
+    ...options
+});
+
+/**
+ * A day of the food diary
+ *
+ * What was eaten per meal with the meal's aim, activities, body weight, and the totals against the goal.
+ */
+export const getDiaryDay = <ThrowOnError extends boolean = false>(options: Options<GetDiaryDayData, ThrowOnError>): RequestResult<GetDiaryDayResponses, GetDiaryDayErrors, ThrowOnError> => (options.client ?? client).get<GetDiaryDayResponses, GetDiaryDayErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/diary/{day}',
+    ...options
+});
+
+/**
+ * Log energy burned by exercise
+ *
+ * The app cannot measure it, so it is entered by hand or estimated, e.g. from a logged workout's length and intensity and the user's body weight. Say it is an estimate.
+ */
+export const logActivity = <ThrowOnError extends boolean = false>(options: Options<LogActivityData, ThrowOnError>): RequestResult<LogActivityResponses, LogActivityErrors, ThrowOnError> => (options.client ?? client).post<LogActivityResponses, LogActivityErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/diary/{day}/activities',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Log what was eaten
+ *
+ * Every entry or none. Name each food by foodId or lmvNumber from search_foods and give the weight eaten in grams. A one off without a food, such as a restaurant dish, takes a name and per100g instead. Answers the day as it now stands.
+ */
+export const logFood = <ThrowOnError extends boolean = false>(options: Options<LogFoodData, ThrowOnError>): RequestResult<LogFoodResponses, LogFoodErrors, ThrowOnError> => (options.client ?? client).post<LogFoodResponses, LogFoodErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/diary/{day}/entries',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Remove a day's body weight
+ */
+export const deleteWeight = <ThrowOnError extends boolean = false>(options: Options<DeleteWeightData, ThrowOnError>): RequestResult<DeleteWeightResponses, DeleteWeightErrors, ThrowOnError> => (options.client ?? client).delete<DeleteWeightResponses, DeleteWeightErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/diary/{day}/weight',
+    ...options
+});
+
+/**
+ * Set a day's body weight
+ */
+export const logWeight = <ThrowOnError extends boolean = false>(options: Options<LogWeightData, ThrowOnError>): RequestResult<LogWeightResponses, LogWeightErrors, ThrowOnError> => (options.client ?? client).put<LogWeightResponses, LogWeightErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/diary/{day}/weight',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -331,6 +442,149 @@ export const updateExercise = <ThrowOnError extends boolean = false>(options: Op
 });
 
 /**
+ * Remove something eaten from the diary
+ */
+export const deleteFoodEntry = <ThrowOnError extends boolean = false>(options: Options<DeleteFoodEntryData, ThrowOnError>): RequestResult<DeleteFoodEntryResponses, DeleteFoodEntryErrors, ThrowOnError> => (options.client ?? client).delete<DeleteFoodEntryResponses, DeleteFoodEntryErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/food-entries/{id}',
+    ...options
+});
+
+/**
+ * Change the amount, meal or day of something eaten
+ */
+export const updateFoodEntry = <ThrowOnError extends boolean = false>(options: Options<UpdateFoodEntryData, ThrowOnError>): RequestResult<UpdateFoodEntryResponses, UpdateFoodEntryErrors, ThrowOnError> => (options.client ?? client).put<UpdateFoodEntryResponses, UpdateFoodEntryErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/food-entries/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Save a household measure of a food
+ *
+ * E.g. a tablespoon of pesto is 15 g. Saving a name again changes its weight. For a food of either kind, by foodId or lmvNumber.
+ */
+export const savePortion = <ThrowOnError extends boolean = false>(options: Options<SavePortionData, ThrowOnError>): RequestResult<SavePortionResponses, SavePortionErrors, ThrowOnError> => (options.client ?? client).post<SavePortionResponses, SavePortionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/food-portions',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Delete a household measure
+ */
+export const deletePortion = <ThrowOnError extends boolean = false>(options: Options<DeletePortionData, ThrowOnError>): RequestResult<DeletePortionResponses, DeletePortionErrors, ThrowOnError> => (options.client ?? client).delete<DeletePortionResponses, DeletePortionErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/food-portions/{id}',
+    ...options
+});
+
+/**
+ * The user's own foods
+ */
+export const listFoods = <ThrowOnError extends boolean = false>(options?: Options<ListFoodsData, ThrowOnError>): RequestResult<ListFoodsResponses, ListFoodsErrors, ThrowOnError> => (options?.client ?? client).get<ListFoodsResponses, ListFoodsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/foods',
+    ...options
+});
+
+/**
+ * Add a food of the user's own
+ *
+ * For a product Livsmedelsverket does not have, from the nutrition label per 100 g. Search first: the user may have added it before.
+ */
+export const createFood = <ThrowOnError extends boolean = false>(options: Options<CreateFoodData, ThrowOnError>): RequestResult<CreateFoodResponses, CreateFoodErrors, ThrowOnError> => (options.client ?? client).post<CreateFoodResponses, CreateFoodErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/foods',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Search foods by name
+ *
+ * The user's own foods and Livsmedelsverket's database in one list, best match first, with nutrients per 100 g and the user's portions. Livsmedelsverket names foods in Swedish and generically, e.g. "Pasta kokt u. salt" or "Korv falukorv kött 58%", and often lists a food both raw and cooked: pick the state it was eaten in. Inflections and most compounds are understood ("kokta potatisar", "kycklingfilé"). When a search finds nothing, try fewer or more general words. Foods the user logs often and names they used before come first, and a barcode finds the user's food with it.
+ */
+export const searchFoods = <ThrowOnError extends boolean = false>(options?: Options<SearchFoodsData, ThrowOnError>): RequestResult<SearchFoodsResponses, SearchFoodsErrors, ThrowOnError> => (options?.client ?? client).get<SearchFoodsResponses, SearchFoodsErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/foods/search',
+    ...options
+});
+
+/**
+ * Delete a food of the user's own
+ *
+ * Days it was logged on keep what they logged.
+ */
+export const deleteFood = <ThrowOnError extends boolean = false>(options: Options<DeleteFoodData, ThrowOnError>): RequestResult<DeleteFoodResponses, DeleteFoodErrors, ThrowOnError> => (options.client ?? client).delete<DeleteFoodResponses, DeleteFoodErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/foods/{id}',
+    ...options
+});
+
+/**
+ * Change a food of the user's own
+ *
+ * Days it was already logged on keep the values they were logged with.
+ */
+export const updateFood = <ThrowOnError extends boolean = false>(options: Options<UpdateFoodData, ThrowOnError>): RequestResult<UpdateFoodResponses, UpdateFoodErrors, ThrowOnError> => (options.client ?? client).put<UpdateFoodResponses, UpdateFoodErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/foods/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Report whether the server and its database are up
  */
 export const getHealth = <ThrowOnError extends boolean = false>(options?: Options<GetHealthData, ThrowOnError>): RequestResult<GetHealthResponses, GetHealthErrors, ThrowOnError> => (options?.client ?? client).get<GetHealthResponses, GetHealthErrors, ThrowOnError>({ url: '/api/health', ...options });
@@ -347,6 +601,38 @@ export const importLegacyExport = <ThrowOnError extends boolean = false>(options
             type: 'apiKey'
         }, { scheme: 'bearer', type: 'http' }],
     url: '/api/import/legacy',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * The daily calorie and macro goal
+ */
+export const getNutritionGoal = <ThrowOnError extends boolean = false>(options?: Options<GetNutritionGoalData, ThrowOnError>): RequestResult<GetNutritionGoalResponses, GetNutritionGoalErrors, ThrowOnError> => (options?.client ?? client).get<GetNutritionGoalResponses, GetNutritionGoalErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/nutrition-goal',
+    ...options
+});
+
+/**
+ * Set the daily calorie and macro goal
+ *
+ * The budget the diary counts against. Put how it was worked out in notes, so it can be revisited as the weight changes.
+ */
+export const setNutritionGoal = <ThrowOnError extends boolean = false>(options: Options<SetNutritionGoalData, ThrowOnError>): RequestResult<SetNutritionGoalResponses, SetNutritionGoalErrors, ThrowOnError> => (options.client ?? client).put<SetNutritionGoalResponses, SetNutritionGoalErrors, ThrowOnError>({
+    security: [{
+            in: 'cookie',
+            name: '__Host-plonkout_sid',
+            type: 'apiKey'
+        }, { scheme: 'bearer', type: 'http' }],
+    url: '/api/nutrition-goal',
     ...options,
     headers: {
         'Content-Type': 'application/json',

@@ -12,6 +12,7 @@ require (
 	github.com/jackc/pgx/v5 v5.10.0
 	github.com/modelcontextprotocol/go-sdk v1.8.0
 	github.com/peterldowns/pgtestdb v0.1.1
+	github.com/robfig/cron/v3 v3.0.1
 	github.com/zanmato/pgmigrate v1.3.1
 )
 

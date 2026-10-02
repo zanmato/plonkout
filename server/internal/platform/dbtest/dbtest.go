@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 	"testing"
 
 	"github.com/gofrs/uuid/v5"
@@ -143,14 +144,36 @@ func (d *DB) AssertIsolated(tb testing.TB, table string, a, b uuid.UUID) {
 	}
 
 	// The write side: copy one of A's own rows with B as the owner, the shape
-	// of the mistake a bug makes. WITH CHECK must reject it.
+	// of the mistake a bug makes. WITH CHECK must reject it. Generated columns
+	// are left for the database to compute, it refuses a value for them.
+	var columns []string
+	rows, err := d.Owner.Query(ctx, `
+		SELECT attname FROM pg_attribute
+		WHERE attrelid = $1::regclass AND attnum > 0 AND NOT attisdropped AND attgenerated = ''
+		ORDER BY attnum`, name)
+	if err != nil {
+		tb.Fatalf("list the columns of %s: %v", table, err)
+	}
+	for rows.Next() {
+		var column string
+		if err := rows.Scan(&column); err != nil {
+			tb.Fatalf("list the columns of %s: %v", table, err)
+		}
+		columns = append(columns, pgx.Identifier{column}.Sanitize())
+	}
+	if err := rows.Err(); err != nil {
+		tb.Fatalf("list the columns of %s: %v", table, err)
+	}
+	list := strings.Join(columns, ", ")
 	_, err = conn.Exec(ctx, fmt.Sprintf(`
-		INSERT INTO %[1]s
-		SELECT (jsonb_populate_record(NULL::%[1]s,
-			to_jsonb(existing) || jsonb_build_object('user_id', $1::uuid)
-				|| CASE WHEN to_jsonb(existing) ? 'id' THEN jsonb_build_object('id', uuidv7()) ELSE '{}' END
-				|| CASE WHEN to_jsonb(existing) ? 'key' THEN jsonb_build_object('key', 'copy') ELSE '{}' END)).*
-		FROM (SELECT * FROM %[1]s LIMIT 1) existing`, name), b)
+		INSERT INTO %[1]s (%[2]s)
+		SELECT %[2]s FROM (
+			SELECT (jsonb_populate_record(NULL::%[1]s,
+				to_jsonb(existing) || jsonb_build_object('user_id', $1::uuid)
+					|| CASE WHEN to_jsonb(existing) ? 'id' THEN jsonb_build_object('id', uuidv7()) ELSE '{}' END
+					|| CASE WHEN to_jsonb(existing) ? 'key' THEN jsonb_build_object('key', 'copy') ELSE '{}' END)).*
+			FROM (SELECT * FROM %[1]s LIMIT 1) existing
+		) copy`, name, list), b)
 	if err == nil {
 		tb.Fatalf("%s: user A inserted a row owned by user B", table)
 	}

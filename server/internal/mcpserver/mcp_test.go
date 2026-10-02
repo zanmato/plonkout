@@ -92,8 +92,11 @@ func TestToolsAndPrompts(t *testing.T) {
 		}
 	}
 	want := []string{
-		"add_sessions", "create_plan", "get_context", "get_exercise_stats", "get_plan", "get_workout_history",
-		"list_exercises", "list_plans", "reorder_sessions", "set_session_status", "update_plan", "update_session",
+		"add_sessions", "create_food", "create_plan", "delete_activity", "delete_food_entry", "get_context",
+		"get_diary", "get_exercise_stats", "get_plan", "get_workout_history", "list_exercises", "list_plans",
+		"log_activity", "log_food", "log_weight", "reorder_sessions", "save_portion", "search_foods",
+		"set_nutrition_goal", "set_session_status", "summarize_diary", "update_food", "update_food_entry",
+		"update_plan", "update_session",
 	}
 	if !slices.Equal(names, want) {
 		t.Fatalf("tools %v, want %v", names, want)
@@ -103,8 +106,8 @@ func TestToolsAndPrompts(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(prompts.Prompts) != 2 {
-		t.Fatalf("expected 2 prompts, got %d", len(prompts.Prompts))
+	if len(prompts.Prompts) != 3 {
+		t.Fatalf("expected 3 prompts, got %d", len(prompts.Prompts))
 	}
 	design, err := s.GetPrompt(t.Context(), &mcp.GetPromptParams{Name: "design_plan", Arguments: map[string]string{"goal": "180 kg bench"}})
 	if err != nil {
@@ -210,5 +213,57 @@ func TestToolsActAsTheirUser(t *testing.T) {
 	exercises, _ := call(t, s, "list_exercises", nil)
 	if len(exercises["items"].([]any)) != 0 {
 		t.Fatal("bob's assistant must not see alice's exercises")
+	}
+}
+
+func TestLoggingFoodThroughTools(t *testing.T) {
+	h := apitest.New(t)
+	if _, err := h.DB.Owner.Exec(t.Context(), `
+		INSERT INTO lmv.foods (number, name, kcal, protein, carbs, fat) VALUES
+			(4065, 'Pasta kokt u. salt', 128, 4.2, 25.8, 0.5),
+			(6201, 'Pesto hemlagad', 545, 10.6, 1.9, 55)`); err != nil {
+		t.Fatal(err)
+	}
+	user := h.NewUser()
+	ts := httptest.NewServer(h.Handler)
+	defer ts.Close()
+	s := connect(t, ts, h.NewAccessToken(user))
+
+	found, isErr := call(t, s, "search_foods", map[string]any{"q": "pasta kokt"})
+	if isErr {
+		t.Fatalf("search_foods failed: %v", found)
+	}
+	pasta := found["matches"].([]any)[0].(map[string]any)
+	if pasta["name"] != "Pasta kokt u. salt" || !strings.Contains(found["source"].(map[string]any)["attribution"].(string), "CC BY 4.0") {
+		t.Fatalf("unexpected search %v", found)
+	}
+
+	sausage, isErr := call(t, s, "create_food", map[string]any{
+		"name": "Ölkorv", "per100g": map[string]any{"kcal": 298, "protein": 14, "carbs": 2, "fat": 26},
+	})
+	if isErr {
+		t.Fatalf("create_food failed: %v", sausage)
+	}
+
+	day, isErr := call(t, s, "log_food", map[string]any{"day": "2026-10-02", "entries": []any{
+		map[string]any{"meal": "lunch", "lmvNumber": pasta["lmvNumber"], "grams": 100},
+		map[string]any{"meal": "lunch", "foodId": sausage["id"], "grams": 70},
+		map[string]any{"meal": "lunch", "lmvNumber": 6201, "grams": 30, "amount": "2 tbsp"},
+	}})
+	if isErr {
+		t.Fatalf("log_food failed: %v", day)
+	}
+	lunch := day["meals"].([]any)[1].(map[string]any)
+	entries := lunch["entries"].([]any)
+	if len(entries) != 3 || entries[0].(map[string]any)["loggedBy"] != "assistant" {
+		t.Fatalf("unexpected lunch %v", lunch)
+	}
+	if kcal := lunch["totals"].(map[string]any)["kcal"]; kcal != 500.1 {
+		t.Fatalf("unexpected lunch kcal %v", kcal)
+	}
+
+	activity, isErr := call(t, s, "log_activity", map[string]any{"day": "2026-10-02", "label": "Armwrestling, estimate", "kcal": 180})
+	if isErr || activity["loggedBy"] != "assistant" {
+		t.Fatalf("log_activity failed: %v", activity)
 	}
 }

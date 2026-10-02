@@ -16,10 +16,12 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/zanmato/plonkout/server/internal/food/lmv"
 	"github.com/zanmato/plonkout/server/internal/maintenance"
 	"github.com/zanmato/plonkout/server/internal/platform/config"
 	"github.com/zanmato/plonkout/server/internal/platform/db"
 	"github.com/zanmato/plonkout/server/internal/platform/migrate"
+	"github.com/zanmato/plonkout/server/internal/platform/schedule"
 	"github.com/zanmato/plonkout/server/internal/server"
 )
 
@@ -78,7 +80,24 @@ func run(configPath string, migrateFirst, migrateOnly bool) error {
 	if err != nil {
 		return err
 	}
-	go maintenance.Run(ctx, pool, logger)
+	jobs := schedule.New(logger)
+	if err := jobs.Add(maintenance.Job(pool, logger)); err != nil {
+		return err
+	}
+	if cfg.Foods.SyncSchedule != "off" {
+		source := cfg.Foods.SourceURL
+		if source == "" {
+			source = lmv.SourceURL
+		}
+		syncer := &lmv.Syncer{
+			Pool: pool, URL: source, Logger: logger,
+			Client: &http.Client{Timeout: 5 * time.Minute},
+		}
+		if err := jobs.Add(syncer.Job(cfg.Foods.SyncSchedule)); err != nil {
+			return err
+		}
+	}
+	go jobs.Run(ctx)
 
 	httpServer := &http.Server{
 		Addr:              cfg.Server.Addr,

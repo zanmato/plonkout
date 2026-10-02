@@ -1,6 +1,77 @@
 {
   "components": {
     "schemas": {
+      "Activity": {
+        "additionalProperties": false,
+        "properties": {
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kcal": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "label": {
+            "type": "string"
+          },
+          "loggedBy": {
+            "enum": [
+              "app",
+              "assistant"
+            ],
+            "type": "string"
+          },
+          "workoutId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "day",
+          "label",
+          "kcal",
+          "workoutId",
+          "loggedBy",
+          "created"
+        ],
+        "type": "object"
+      },
+      "ActivityInput": {
+        "additionalProperties": false,
+        "properties": {
+          "kcal": {
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "label": {
+            "examples": [
+              "Armwrestling, W3 A"
+            ],
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          },
+          "workoutId": {
+            "description": "The workout the energy was burned in, if one was logged.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "kcal"
+        ],
+        "type": "object"
+      },
       "ActualSet": {
         "additionalProperties": false,
         "properties": {
@@ -303,6 +374,10 @@
             "format": "date-time",
             "type": "string"
           },
+          "nutritionGoal": {
+            "$ref": "#/components/schemas/Goal",
+            "description": "The daily calorie and macro goal of the food diary, null until one is set."
+          },
           "recentWorkouts": {
             "description": "The latest workouts, newest first.",
             "items": {
@@ -334,7 +409,154 @@
           "dominantArm",
           "totalWorkouts",
           "activePlans",
-          "recentWorkouts"
+          "recentWorkouts",
+          "nutritionGoal"
+        ],
+        "type": "object"
+      },
+      "DataSource": {
+        "additionalProperties": false,
+        "properties": {
+          "attribution": {
+            "description": "Show this wherever its foods are shown.",
+            "type": "string"
+          },
+          "importedAt": {
+            "format": "date-time",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "license": {
+            "type": "string"
+          },
+          "licenseUrl": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "version": {
+            "description": "The release imported, empty until the first import.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "license",
+          "licenseUrl",
+          "url",
+          "version",
+          "attribution",
+          "importedAt"
+        ],
+        "type": "object"
+      },
+      "Day": {
+        "additionalProperties": false,
+        "properties": {
+          "activities": {
+            "items": {
+              "$ref": "#/components/schemas/Activity"
+            },
+            "type": "array"
+          },
+          "budget": {
+            "description": "The goal's kcal, plus what was burned when the goal adds activities.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "burned": {
+            "description": "Kcal burned by activities.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "eaten": {
+            "$ref": "#/components/schemas/Totals"
+          },
+          "goal": {
+            "$ref": "#/components/schemas/Goal",
+            "description": "Null until a goal is set."
+          },
+          "meals": {
+            "items": {
+              "$ref": "#/components/schemas/Meal"
+            },
+            "type": "array"
+          },
+          "remaining": {
+            "description": "Budget minus eaten. Negative when over.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "weight": {
+            "description": "Body weight that day, in the user's weight unit.",
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "day",
+          "goal",
+          "eaten",
+          "burned",
+          "budget",
+          "remaining",
+          "meals",
+          "activities",
+          "weight"
+        ],
+        "type": "object"
+      },
+      "DaySummary": {
+        "additionalProperties": false,
+        "properties": {
+          "burned": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "eaten": {
+            "$ref": "#/components/schemas/Totals"
+          },
+          "entries": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "weight": {
+            "format": "double",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "day",
+          "entries",
+          "eaten",
+          "burned",
+          "weight"
         ],
         "type": "object"
       },
@@ -363,6 +585,186 @@
         "required": [
           "params",
           "approve"
+        ],
+        "type": "object"
+      },
+      "Entry": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "description": "How the amount was put, e.g. 2 tbsp.",
+            "type": "string"
+          },
+          "carbs": {
+            "format": "double",
+            "type": "number"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "fat": {
+            "format": "double",
+            "type": "number"
+          },
+          "foodId": {
+            "type": "string"
+          },
+          "grams": {
+            "format": "double",
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "kcal": {
+            "format": "double",
+            "type": "number"
+          },
+          "lmvNumber": {
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "loggedBy": {
+            "enum": [
+              "app",
+              "assistant"
+            ],
+            "type": "string"
+          },
+          "meal": {
+            "enum": [
+              "breakfast",
+              "lunch",
+              "dinner",
+              "snack"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "The food's name when it was logged.",
+            "type": "string"
+          },
+          "per100g": {
+            "$ref": "#/components/schemas/Nutrients",
+            "description": "As logged. Later changes to the food leave this as it was."
+          },
+          "protein": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "day",
+          "meal",
+          "foodId",
+          "lmvNumber",
+          "name",
+          "grams",
+          "amount",
+          "per100g",
+          "kcal",
+          "protein",
+          "carbs",
+          "fat",
+          "loggedBy",
+          "created"
+        ],
+        "type": "object"
+      },
+      "EntryInput": {
+        "additionalProperties": false,
+        "properties": {
+          "alias": {
+            "description": "What the user called the food when it is not its name, e.g. ölkorv. Remembered, so searching for it finds this food first.",
+            "maxLength": 60,
+            "type": "string"
+          },
+          "amount": {
+            "description": "How the user put it, e.g. 2 tbsp or 1 package.",
+            "maxLength": 60,
+            "type": "string"
+          },
+          "foodId": {
+            "description": "One of the user's own foods, from search_foods.",
+            "type": "string"
+          },
+          "grams": {
+            "description": "The weight eaten. Convert household measures to grams.",
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 5000,
+            "type": "number"
+          },
+          "lmvNumber": {
+            "description": "A food of Livsmedelsverket's, from search_foods.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "meal": {
+            "enum": [
+              "breakfast",
+              "lunch",
+              "dinner",
+              "snack"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "description": "Only for a one off without a food, e.g. a restaurant dish.",
+            "maxLength": 120,
+            "type": "string"
+          },
+          "per100g": {
+            "$ref": "#/components/schemas/Nutrients",
+            "description": "Only for a one off without a food: its nutrients per 100 g."
+          }
+        },
+        "required": [
+          "meal",
+          "grams"
+        ],
+        "type": "object"
+      },
+      "EntryUpdate": {
+        "additionalProperties": false,
+        "properties": {
+          "amount": {
+            "maxLength": 60,
+            "type": "string"
+          },
+          "day": {
+            "format": "date",
+            "type": "string"
+          },
+          "grams": {
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 5000,
+            "type": "number"
+          },
+          "meal": {
+            "enum": [
+              "breakfast",
+              "lunch",
+              "dinner",
+              "snack"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "day",
+          "meal",
+          "grams"
         ],
         "type": "object"
       },
@@ -536,6 +938,261 @@
         ],
         "type": "object"
       },
+      "Food": {
+        "additionalProperties": false,
+        "properties": {
+          "brand": {
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "gtin": {
+            "description": "The barcode.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "per100g": {
+            "$ref": "#/components/schemas/Nutrients"
+          },
+          "portions": {
+            "items": {
+              "$ref": "#/components/schemas/Portion"
+            },
+            "type": "array"
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "brand",
+          "gtin",
+          "per100g",
+          "notes",
+          "portions",
+          "created",
+          "updated"
+        ],
+        "type": "object"
+      },
+      "FoodInput": {
+        "additionalProperties": false,
+        "properties": {
+          "brand": {
+            "maxLength": 80,
+            "type": "string"
+          },
+          "gtin": {
+            "description": "The barcode, 8 to 14 digits.",
+            "pattern": "^[0-9]{8,14}$",
+            "type": "string"
+          },
+          "name": {
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string"
+          },
+          "notes": {
+            "maxLength": 500,
+            "type": "string"
+          },
+          "per100g": {
+            "$ref": "#/components/schemas/Nutrients",
+            "description": "As on the label, per 100 g."
+          },
+          "portions": {
+            "items": {
+              "$ref": "#/components/schemas/PortionInput"
+            },
+            "maxItems": 20,
+            "type": "array"
+          }
+        },
+        "required": [
+          "name",
+          "per100g"
+        ],
+        "type": "object"
+      },
+      "Goal": {
+        "additionalProperties": false,
+        "properties": {
+          "addActivities": {
+            "description": "Whether energy burned by activities is added to the day's budget.",
+            "type": "boolean"
+          },
+          "carbs": {
+            "description": "Grams a day.",
+            "format": "int32",
+            "maximum": 2000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "direction": {
+            "enum": [
+              "lose",
+              "maintain",
+              "gain"
+            ],
+            "type": "string"
+          },
+          "fat": {
+            "description": "Grams a day.",
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "kcal": {
+            "description": "The daily budget.",
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 800,
+            "type": "integer"
+          },
+          "notes": {
+            "description": "How the goal was worked out, e.g. the maintenance estimate and the deficit.",
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "protein": {
+            "description": "Grams a day.",
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "targetWeight": {
+            "description": "In the user's weight unit.",
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 999,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "updated": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "weeklyChange": {
+            "description": "The pace aimed for, in the weight unit per week, negative to lose.",
+            "format": "double",
+            "maximum": 2,
+            "minimum": -2,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "updated",
+          "direction",
+          "kcal",
+          "protein",
+          "carbs",
+          "fat",
+          "addActivities"
+        ],
+        "type": "object"
+      },
+      "GoalInput": {
+        "additionalProperties": false,
+        "properties": {
+          "addActivities": {
+            "description": "Whether energy burned by activities is added to the day's budget.",
+            "type": "boolean"
+          },
+          "carbs": {
+            "description": "Grams a day.",
+            "format": "int32",
+            "maximum": 2000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "direction": {
+            "enum": [
+              "lose",
+              "maintain",
+              "gain"
+            ],
+            "type": "string"
+          },
+          "fat": {
+            "description": "Grams a day.",
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "kcal": {
+            "description": "The daily budget.",
+            "format": "int32",
+            "maximum": 10000,
+            "minimum": 800,
+            "type": "integer"
+          },
+          "notes": {
+            "description": "How the goal was worked out, e.g. the maintenance estimate and the deficit.",
+            "maxLength": 2000,
+            "type": "string"
+          },
+          "protein": {
+            "description": "Grams a day.",
+            "format": "int32",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          },
+          "targetWeight": {
+            "description": "In the user's weight unit.",
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 999,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "weeklyChange": {
+            "description": "The pace aimed for, in the weight unit per week, negative to lose.",
+            "format": "double",
+            "maximum": 2,
+            "minimum": -2,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "direction",
+          "kcal",
+          "protein",
+          "carbs",
+          "fat",
+          "addActivities"
+        ],
+        "type": "object"
+      },
       "Health": {
         "additionalProperties": false,
         "properties": {
@@ -561,6 +1218,85 @@
           "status",
           "version",
           "database"
+        ],
+        "type": "object"
+      },
+      "LogBody": {
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/EntryInput"
+            },
+            "maxItems": 50,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "entries"
+        ],
+        "type": "object"
+      },
+      "Match": {
+        "additionalProperties": false,
+        "properties": {
+          "brand": {
+            "type": "string"
+          },
+          "foodId": {
+            "description": "Set for the user's own foods.",
+            "type": "string"
+          },
+          "group": {
+            "description": "Livsmedelsverket's food group.",
+            "type": "string"
+          },
+          "lmvNumber": {
+            "description": "Set for Livsmedelsverket's foods.",
+            "format": "int32",
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "per100g": {
+            "$ref": "#/components/schemas/Nutrients"
+          },
+          "portions": {
+            "description": "The user's household measures of this food.",
+            "items": {
+              "$ref": "#/components/schemas/Portion"
+            },
+            "type": "array"
+          },
+          "source": {
+            "description": "mine for the user's own foods, lmv for Livsmedelsverket's.",
+            "enum": [
+              "mine",
+              "lmv"
+            ],
+            "type": "string"
+          },
+          "uses": {
+            "description": "How many times the user logged it in the last 90 days.",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "source",
+          "foodId",
+          "lmvNumber",
+          "name",
+          "brand",
+          "group",
+          "per100g",
+          "portions",
+          "uses"
         ],
         "type": "object"
       },
@@ -592,6 +1328,115 @@
           "id",
           "username",
           "created"
+        ],
+        "type": "object"
+      },
+      "Meal": {
+        "additionalProperties": false,
+        "properties": {
+          "aim": {
+            "$ref": "#/components/schemas/Range",
+            "description": "The kcal this meal aims for, a share of the goal. Null without a goal."
+          },
+          "entries": {
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            },
+            "type": "array"
+          },
+          "meal": {
+            "enum": [
+              "breakfast",
+              "lunch",
+              "dinner",
+              "snack"
+            ],
+            "type": "string"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/Totals"
+          }
+        },
+        "required": [
+          "meal",
+          "aim",
+          "totals",
+          "entries"
+        ],
+        "type": "object"
+      },
+      "Nutrients": {
+        "additionalProperties": false,
+        "properties": {
+          "carbs": {
+            "description": "Grams of available carbohydrates.",
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fat": {
+            "description": "Grams.",
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "fiber": {
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "kcal": {
+            "format": "double",
+            "maximum": 900,
+            "minimum": 0,
+            "type": "number"
+          },
+          "protein": {
+            "description": "Grams.",
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": "number"
+          },
+          "salt": {
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "saturatedFat": {
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "sugars": {
+            "format": "double",
+            "maximum": 100,
+            "minimum": 0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "kcal",
+          "protein",
+          "carbs",
+          "fat"
         ],
         "type": "object"
       },
@@ -917,6 +1762,87 @@
         ],
         "type": "object"
       },
+      "Portion": {
+        "additionalProperties": false,
+        "properties": {
+          "grams": {
+            "format": "double",
+            "type": "number"
+          },
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "examples": [
+              "tbsp"
+            ],
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "grams"
+        ],
+        "type": "object"
+      },
+      "PortionBody": {
+        "additionalProperties": false,
+        "properties": {
+          "foodId": {
+            "description": "One of the user's own foods.",
+            "type": "string"
+          },
+          "grams": {
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 5000,
+            "type": "number"
+          },
+          "lmvNumber": {
+            "description": "A food of Livsmedelsverket's database.",
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "examples": [
+              "slice"
+            ],
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "grams"
+        ],
+        "type": "object"
+      },
+      "PortionInput": {
+        "additionalProperties": false,
+        "properties": {
+          "grams": {
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 5000,
+            "type": "number"
+          },
+          "name": {
+            "examples": [
+              "slice"
+            ],
+            "maxLength": 40,
+            "minLength": 1,
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "grams"
+        ],
+        "type": "object"
+      },
       "PowChallenge": {
         "additionalProperties": false,
         "properties": {
@@ -1068,6 +1994,24 @@
         ],
         "type": "object"
       },
+      "Range": {
+        "additionalProperties": false,
+        "properties": {
+          "max": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "min": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "min",
+          "max"
+        ],
+        "type": "object"
+      },
       "RecentWorkout": {
         "additionalProperties": false,
         "properties": {
@@ -1158,6 +2102,25 @@
           "imported",
           "skipped",
           "exercisesCreated"
+        ],
+        "type": "object"
+      },
+      "SearchResult": {
+        "additionalProperties": false,
+        "properties": {
+          "matches": {
+            "items": {
+              "$ref": "#/components/schemas/Match"
+            },
+            "type": "array"
+          },
+          "source": {
+            "$ref": "#/components/schemas/DataSource"
+          }
+        },
+        "required": [
+          "matches",
+          "source"
         ],
         "type": "object"
       },
@@ -1503,6 +2466,36 @@
         },
         "type": "object"
       },
+      "Summary": {
+        "additionalProperties": false,
+        "properties": {
+          "days": {
+            "description": "Every day of the range, logged or not.",
+            "items": {
+              "$ref": "#/components/schemas/DaySummary"
+            },
+            "type": "array"
+          },
+          "from": {
+            "format": "date",
+            "type": "string"
+          },
+          "goal": {
+            "$ref": "#/components/schemas/Goal"
+          },
+          "to": {
+            "format": "date",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "goal",
+          "days"
+        ],
+        "type": "object"
+      },
       "Target": {
         "additionalProperties": false,
         "properties": {
@@ -1719,6 +2712,54 @@
         ],
         "type": "object"
       },
+      "Totals": {
+        "additionalProperties": false,
+        "properties": {
+          "carbs": {
+            "format": "double",
+            "type": "number"
+          },
+          "fat": {
+            "format": "double",
+            "type": "number"
+          },
+          "fiber": {
+            "format": "double",
+            "type": "number"
+          },
+          "kcal": {
+            "format": "double",
+            "type": "number"
+          },
+          "protein": {
+            "format": "double",
+            "type": "number"
+          },
+          "salt": {
+            "format": "double",
+            "type": "number"
+          },
+          "saturatedFat": {
+            "format": "double",
+            "type": "number"
+          },
+          "sugars": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "kcal",
+          "protein",
+          "carbs",
+          "fat",
+          "fiber",
+          "sugars",
+          "saturatedFat",
+          "salt"
+        ],
+        "type": "object"
+      },
       "User": {
         "additionalProperties": false,
         "properties": {
@@ -1767,6 +2808,22 @@
           "topSet",
           "volume",
           "workingSets"
+        ],
+        "type": "object"
+      },
+      "WeightBody": {
+        "additionalProperties": false,
+        "properties": {
+          "weight": {
+            "description": "In the user's weight unit.",
+            "exclusiveMinimum": 0,
+            "format": "double",
+            "maximum": 999,
+            "type": "number"
+          }
+        },
+        "required": [
+          "weight"
         ],
         "type": "object"
       },
@@ -2080,7 +3137,7 @@
     }
   },
   "info": {
-    "description": "Workout logging and training plans.",
+    "description": "Workout logging, training plans and a food diary.",
     "title": "Plonkout API",
     "version": "dev"
   },
@@ -2703,6 +3760,79 @@
         ]
       }
     },
+    "/api/activities/{id}": {
+      "delete": {
+        "operationId": "delete-activity",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an activity from the diary",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "delete_activity"
+      }
+    },
     "/api/auth/login/begin": {
       "post": {
         "operationId": "begin-login",
@@ -3164,7 +4294,7 @@
     },
     "/api/context": {
       "get": {
-        "description": "Units, dominant arm, active plans with progress and the next session, and the latest workouts. Read this first: every weight elsewhere is in weightUnit.",
+        "description": "Units, dominant arm, active plans with progress and the next session, the latest workouts and the nutrition goal. Read this first: every weight elsewhere is in weightUnit.",
         "operationId": "get-context",
         "responses": {
           "200": {
@@ -3211,6 +4341,480 @@
           "overview"
         ],
         "x-mcp-tool": "get_context"
+      }
+    },
+    "/api/diary": {
+      "get": {
+        "description": "Every day from from to to with what was eaten, burned and weighed, and the goal. For reviewing how a goal is going.",
+        "operationId": "summarize-diary",
+        "parameters": [
+          {
+            "explode": false,
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "to",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Summary"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The food diary over a range of days",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "summarize_diary"
+      }
+    },
+    "/api/diary/{day}": {
+      "get": {
+        "description": "What was eaten per meal with the meal's aim, activities, body weight, and the totals against the goal.",
+        "operationId": "get-diary-day",
+        "parameters": [
+          {
+            "description": "The user's own calendar day, e.g. 2026-10-02.",
+            "in": "path",
+            "name": "day",
+            "required": true,
+            "schema": {
+              "description": "The user's own calendar day, e.g. 2026-10-02.",
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Day"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "A day of the food diary",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "get_diary"
+      }
+    },
+    "/api/diary/{day}/activities": {
+      "post": {
+        "description": "The app cannot measure it, so it is entered by hand or estimated, e.g. from a logged workout's length and intensity and the user's body weight. Say it is an estimate.",
+        "operationId": "log-activity",
+        "parameters": [
+          {
+            "description": "The user's own calendar day, e.g. 2026-10-02.",
+            "in": "path",
+            "name": "day",
+            "required": true,
+            "schema": {
+              "description": "The user's own calendar day, e.g. 2026-10-02.",
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ActivityInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Activity"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Log energy burned by exercise",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "log_activity"
+      }
+    },
+    "/api/diary/{day}/entries": {
+      "post": {
+        "description": "Every entry or none. Name each food by foodId or lmvNumber from search_foods and give the weight eaten in grams. A one off without a food, such as a restaurant dish, takes a name and per100g instead. Answers the day as it now stands.",
+        "operationId": "log-food",
+        "parameters": [
+          {
+            "description": "The user's own calendar day, e.g. 2026-10-02.",
+            "in": "path",
+            "name": "day",
+            "required": true,
+            "schema": {
+              "description": "The user's own calendar day, e.g. 2026-10-02.",
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Day"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Log what was eaten",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "log_food"
+      }
+    },
+    "/api/diary/{day}/weight": {
+      "delete": {
+        "operationId": "delete-weight",
+        "parameters": [
+          {
+            "description": "The user's own calendar day, e.g. 2026-10-02.",
+            "in": "path",
+            "name": "day",
+            "required": true,
+            "schema": {
+              "description": "The user's own calendar day, e.g. 2026-10-02.",
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a day's body weight",
+        "tags": [
+          "diary"
+        ]
+      },
+      "put": {
+        "operationId": "log-weight",
+        "parameters": [
+          {
+            "description": "The user's own calendar day, e.g. 2026-10-02.",
+            "in": "path",
+            "name": "day",
+            "required": true,
+            "schema": {
+              "description": "The user's own calendar day, e.g. 2026-10-02.",
+              "format": "date",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WeightBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set a day's body weight",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "log_weight"
       }
     },
     "/api/exercises": {
@@ -3543,6 +5147,699 @@
         ]
       }
     },
+    "/api/food-entries/{id}": {
+      "delete": {
+        "operationId": "delete-food-entry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove something eaten from the diary",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "delete_food_entry"
+      },
+      "put": {
+        "operationId": "update-food-entry",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntryUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Entry"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change the amount, meal or day of something eaten",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "update_food_entry"
+      }
+    },
+    "/api/food-portions": {
+      "post": {
+        "description": "E.g. a tablespoon of pesto is 15 g. Saving a name again changes its weight. For a food of either kind, by foodId or lmvNumber.",
+        "operationId": "save-portion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PortionBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Portion"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Save a household measure of a food",
+        "tags": [
+          "foods"
+        ],
+        "x-mcp-tool": "save_portion"
+      }
+    },
+    "/api/food-portions/{id}": {
+      "delete": {
+        "operationId": "delete-portion",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a household measure",
+        "tags": [
+          "foods"
+        ]
+      }
+    },
+    "/api/foods": {
+      "get": {
+        "operationId": "list-foods",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Food"
+                  },
+                  "type": "array"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The user's own foods",
+        "tags": [
+          "foods"
+        ]
+      },
+      "post": {
+        "description": "For a product Livsmedelsverket does not have, from the nutrition label per 100 g. Search first: the user may have added it before.",
+        "operationId": "create-food",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Food"
+                }
+              }
+            },
+            "description": "Created"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a food of the user's own",
+        "tags": [
+          "foods"
+        ],
+        "x-mcp-tool": "create_food"
+      }
+    },
+    "/api/foods/search": {
+      "get": {
+        "description": "The user's own foods and Livsmedelsverket's database in one list, best match first, with nutrients per 100 g and the user's portions. Livsmedelsverket names foods in Swedish and generically, e.g. \"Pasta kokt u. salt\" or \"Korv falukorv kött 58%\", and often lists a food both raw and cooked: pick the state it was eaten in. Inflections and most compounds are understood (\"kokta potatisar\", \"kycklingfilé\"). When a search finds nothing, try fewer or more general words. Foods the user logs often and names they used before come first, and a barcode finds the user's food with it.",
+        "operationId": "search-foods",
+        "parameters": [
+          {
+            "description": "Part of a name, in Swedish for Livsmedelsverket's foods, or a barcode.",
+            "explode": false,
+            "in": "query",
+            "name": "q",
+            "schema": {
+              "description": "Part of a name, in Swedish for Livsmedelsverket's foods, or a barcode.",
+              "maxLength": 100,
+              "type": "string"
+            }
+          },
+          {
+            "explode": false,
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 20,
+              "format": "int32",
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SearchResult"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Search foods by name",
+        "tags": [
+          "foods"
+        ],
+        "x-mcp-tool": "search_foods"
+      }
+    },
+    "/api/foods/{id}": {
+      "delete": {
+        "description": "Days it was logged on keep what they logged.",
+        "operationId": "delete-food",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a food of the user's own",
+        "tags": [
+          "foods"
+        ]
+      },
+      "put": {
+        "description": "Days it was already logged on keep the values they were logged with.",
+        "operationId": "update-food",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FoodInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Food"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "409": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Conflict"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change a food of the user's own",
+        "tags": [
+          "foods"
+        ],
+        "x-mcp-tool": "update_food"
+      }
+    },
     "/api/health": {
       "get": {
         "operationId": "get-health",
@@ -3654,6 +5951,134 @@
         "tags": [
           "import"
         ]
+      }
+    },
+    "/api/nutrition-goal": {
+      "get": {
+        "operationId": "get-nutrition-goal",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Goal"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "404": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Not Found"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "The daily calorie and macro goal",
+        "tags": [
+          "diary"
+        ]
+      },
+      "put": {
+        "description": "The budget the diary counts against. Put how it was worked out in notes, so it can be revisited as the weight changes.",
+        "operationId": "set-nutrition-goal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoalInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Goal"
+                }
+              }
+            },
+            "description": "OK"
+          },
+          "401": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unauthorized"
+          },
+          "422": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Unprocessable Entity"
+          },
+          "500": {
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem"
+                }
+              }
+            },
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "session": []
+          },
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set the daily calorie and macro goal",
+        "tags": [
+          "diary"
+        ],
+        "x-mcp-tool": "set_nutrition_goal"
       }
     },
     "/api/oauth/consent": {

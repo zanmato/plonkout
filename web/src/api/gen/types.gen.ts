@@ -4,6 +4,25 @@ export type ClientOptions = {
     baseUrl: `${string}://${string}` | (string & {});
 };
 
+export type Activity = {
+    created: string;
+    day: string;
+    id: string;
+    kcal: number;
+    label: string;
+    loggedBy: 'app' | 'assistant';
+    workoutId: string;
+};
+
+export type ActivityInput = {
+    kcal: number;
+    label: string;
+    /**
+     * The workout the energy was burned in, if one was logged.
+     */
+    workoutId?: string;
+};
+
 export type ActualSet = {
     arm: string;
     reps: number | null;
@@ -107,6 +126,10 @@ export type Context = {
      */
     now: string;
     /**
+     * The daily calorie and macro goal of the food diary, null until one is set.
+     */
+    nutritionGoal: Goal;
+    /**
      * The latest workouts, newest first.
      */
     recentWorkouts: Array<RecentWorkout>;
@@ -118,6 +141,57 @@ export type Context = {
     weightUnit: 'kg' | 'lbs';
 };
 
+export type DataSource = {
+    /**
+     * Show this wherever its foods are shown.
+     */
+    attribution: string;
+    importedAt: string | null;
+    license: string;
+    licenseUrl: string;
+    name: string;
+    url: string;
+    /**
+     * The release imported, empty until the first import.
+     */
+    version: string;
+};
+
+export type Day = {
+    activities: Array<Activity>;
+    /**
+     * The goal's kcal, plus what was burned when the goal adds activities.
+     */
+    budget: number | null;
+    /**
+     * Kcal burned by activities.
+     */
+    burned: number;
+    day: string;
+    eaten: Totals;
+    /**
+     * Null until a goal is set.
+     */
+    goal: Goal;
+    meals: Array<Meal>;
+    /**
+     * Budget minus eaten. Negative when over.
+     */
+    remaining: number | null;
+    /**
+     * Body weight that day, in the user's weight unit.
+     */
+    weight: number | null;
+};
+
+export type DaySummary = {
+    burned: number;
+    day: string;
+    eaten: Totals;
+    entries: number;
+    weight: number | null;
+};
+
 export type DecideConsentResponse = {
     redirectTo: string;
 };
@@ -125,6 +199,72 @@ export type DecideConsentResponse = {
 export type Decision = {
     approve: boolean;
     params: AuthorizationParams;
+};
+
+export type Entry = {
+    /**
+     * How the amount was put, e.g. 2 tbsp.
+     */
+    amount: string;
+    carbs: number;
+    created: string;
+    day: string;
+    fat: number;
+    foodId: string;
+    grams: number;
+    id: string;
+    kcal: number;
+    lmvNumber: number | null;
+    loggedBy: 'app' | 'assistant';
+    meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    /**
+     * The food's name when it was logged.
+     */
+    name: string;
+    /**
+     * As logged. Later changes to the food leave this as it was.
+     */
+    per100g: Nutrients;
+    protein: number;
+};
+
+export type EntryInput = {
+    /**
+     * What the user called the food when it is not its name, e.g. ölkorv. Remembered, so searching for it finds this food first.
+     */
+    alias?: string;
+    /**
+     * How the user put it, e.g. 2 tbsp or 1 package.
+     */
+    amount?: string;
+    /**
+     * One of the user's own foods, from search_foods.
+     */
+    foodId?: string;
+    /**
+     * The weight eaten. Convert household measures to grams.
+     */
+    grams: number;
+    /**
+     * A food of Livsmedelsverket's, from search_foods.
+     */
+    lmvNumber?: number;
+    meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    /**
+     * Only for a one off without a food, e.g. a restaurant dish.
+     */
+    name?: string;
+    /**
+     * Only for a one off without a food: its nutrients per 100 g.
+     */
+    per100g?: Nutrients;
+};
+
+export type EntryUpdate = {
+    amount?: string;
+    day: string;
+    grams: number;
+    meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
 };
 
 export type Exercise = {
@@ -173,6 +313,109 @@ export type FinishWithName = {
     passkeyName?: string;
 };
 
+export type Food = {
+    brand: string;
+    created: string;
+    /**
+     * The barcode.
+     */
+    gtin: string | null;
+    id: string;
+    name: string;
+    notes: string;
+    per100g: Nutrients;
+    portions: Array<Portion>;
+    updated: string;
+};
+
+export type FoodInput = {
+    brand?: string;
+    /**
+     * The barcode, 8 to 14 digits.
+     */
+    gtin?: string;
+    name: string;
+    notes?: string;
+    /**
+     * As on the label, per 100 g.
+     */
+    per100g: Nutrients;
+    portions?: Array<PortionInput>;
+};
+
+export type Goal = {
+    /**
+     * Whether energy burned by activities is added to the day's budget.
+     */
+    addActivities: boolean;
+    /**
+     * Grams a day.
+     */
+    carbs: number;
+    direction: 'lose' | 'maintain' | 'gain';
+    /**
+     * Grams a day.
+     */
+    fat: number;
+    /**
+     * The daily budget.
+     */
+    kcal: number;
+    /**
+     * How the goal was worked out, e.g. the maintenance estimate and the deficit.
+     */
+    notes?: string;
+    /**
+     * Grams a day.
+     */
+    protein: number;
+    /**
+     * In the user's weight unit.
+     */
+    targetWeight?: number | null;
+    updated: string;
+    /**
+     * The pace aimed for, in the weight unit per week, negative to lose.
+     */
+    weeklyChange?: number | null;
+};
+
+export type GoalInput = {
+    /**
+     * Whether energy burned by activities is added to the day's budget.
+     */
+    addActivities: boolean;
+    /**
+     * Grams a day.
+     */
+    carbs: number;
+    direction: 'lose' | 'maintain' | 'gain';
+    /**
+     * Grams a day.
+     */
+    fat: number;
+    /**
+     * The daily budget.
+     */
+    kcal: number;
+    /**
+     * How the goal was worked out, e.g. the maintenance estimate and the deficit.
+     */
+    notes?: string;
+    /**
+     * Grams a day.
+     */
+    protein: number;
+    /**
+     * In the user's weight unit.
+     */
+    targetWeight?: number | null;
+    /**
+     * The pace aimed for, in the weight unit per week, negative to lose.
+     */
+    weeklyChange?: number | null;
+};
+
 export type Health = {
     /**
      * The database clock, which proves it answered.
@@ -182,12 +425,76 @@ export type Health = {
     version: string;
 };
 
+export type LogBody = {
+    entries: Array<EntryInput>;
+};
+
+export type Match = {
+    brand: string;
+    /**
+     * Set for the user's own foods.
+     */
+    foodId: string;
+    /**
+     * Livsmedelsverket's food group.
+     */
+    group: string;
+    /**
+     * Set for Livsmedelsverket's foods.
+     */
+    lmvNumber: number | null;
+    name: string;
+    per100g: Nutrients;
+    /**
+     * The user's household measures of this food.
+     */
+    portions: Array<Portion>;
+    /**
+     * mine for the user's own foods, lmv for Livsmedelsverket's.
+     */
+    source: 'mine' | 'lmv';
+    /**
+     * How many times the user logged it in the last 90 days.
+     */
+    uses: number;
+};
+
 export type Me = {
     created: string;
     id: string;
     passkeys: number;
     recoveryCodesLeft: number;
     username: string;
+};
+
+export type Meal = {
+    /**
+     * The kcal this meal aims for, a share of the goal. Null without a goal.
+     */
+    aim: Range;
+    entries: Array<Entry>;
+    meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    totals: Totals;
+};
+
+export type Nutrients = {
+    /**
+     * Grams of available carbohydrates.
+     */
+    carbs: number;
+    /**
+     * Grams.
+     */
+    fat: number;
+    fiber?: number | null;
+    kcal: number;
+    /**
+     * Grams.
+     */
+    protein: number;
+    salt?: number | null;
+    saturatedFat?: number | null;
+    sugars?: number | null;
 };
 
 export type Passkey = {
@@ -290,6 +597,30 @@ export type PlannedExerciseInput = {
     targets: Array<TargetInput>;
 };
 
+export type Portion = {
+    grams: number;
+    id: string;
+    name: string;
+};
+
+export type PortionBody = {
+    /**
+     * One of the user's own foods.
+     */
+    foodId?: string;
+    grams: number;
+    /**
+     * A food of Livsmedelsverket's database.
+     */
+    lmvNumber?: number;
+    name: string;
+};
+
+export type PortionInput = {
+    grams: number;
+    name: string;
+};
+
 export type PowChallenge = {
     algorithm: string;
     /**
@@ -338,6 +669,11 @@ export type QueueEntry = {
     session: Session;
 };
 
+export type Range = {
+    max: number;
+    min: number;
+};
+
 export type RecentWorkout = {
     ended: string | null;
     exercises: Array<string>;
@@ -365,6 +701,11 @@ export type Result = {
      * Workouts imported before, recognized by their old id.
      */
     skipped: number;
+};
+
+export type SearchResult = {
+    matches: Array<Match>;
+    source: DataSource;
 };
 
 export type Session = {
@@ -462,6 +803,16 @@ export type StatusOutputBody = {
     session?: Session;
 };
 
+export type Summary = {
+    /**
+     * Every day of the range, logged or not.
+     */
+    days: Array<DaySummary>;
+    from: string;
+    goal: Goal;
+    to: string;
+};
+
 export type Target = {
     id: string;
     notes: string;
@@ -523,6 +874,17 @@ export type TemplateInput = {
     notes: string;
 };
 
+export type Totals = {
+    carbs: number;
+    fat: number;
+    fiber: number;
+    kcal: number;
+    protein: number;
+    salt: number;
+    saturatedFat: number;
+    sugars: number;
+};
+
 export type User = {
     created: string;
     id: string;
@@ -543,6 +905,13 @@ export type WeekStats = {
      */
     weekStart: string;
     workingSets: number;
+};
+
+export type WeightBody = {
+    /**
+     * In the user's weight unit.
+     */
+    weight: number;
 };
 
 export type Workout = {
@@ -933,6 +1302,45 @@ export type RegenerateRecoveryCodesResponses = {
 
 export type RegenerateRecoveryCodesResponse = RegenerateRecoveryCodesResponses[keyof RegenerateRecoveryCodesResponses];
 
+export type DeleteActivityData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/activities/{id}';
+};
+
+export type DeleteActivityErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteActivityError = DeleteActivityErrors[keyof DeleteActivityErrors];
+
+export type DeleteActivityResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteActivityResponse = DeleteActivityResponses[keyof DeleteActivityResponses];
+
 export type BeginLoginData = {
     body?: never;
     path?: never;
@@ -1203,6 +1611,236 @@ export type GetContextResponses = {
 
 export type GetContextResponse = GetContextResponses[keyof GetContextResponses];
 
+export type SummarizeDiaryData = {
+    body?: never;
+    path?: never;
+    query: {
+        from: string;
+        to: string;
+    };
+    url: '/api/diary';
+};
+
+export type SummarizeDiaryErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SummarizeDiaryError = SummarizeDiaryErrors[keyof SummarizeDiaryErrors];
+
+export type SummarizeDiaryResponses = {
+    /**
+     * OK
+     */
+    200: Summary;
+};
+
+export type SummarizeDiaryResponse = SummarizeDiaryResponses[keyof SummarizeDiaryResponses];
+
+export type GetDiaryDayData = {
+    body?: never;
+    path: {
+        /**
+         * The user's own calendar day, e.g. 2026-10-02.
+         */
+        day: string;
+    };
+    query?: never;
+    url: '/api/diary/{day}';
+};
+
+export type GetDiaryDayErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetDiaryDayError = GetDiaryDayErrors[keyof GetDiaryDayErrors];
+
+export type GetDiaryDayResponses = {
+    /**
+     * OK
+     */
+    200: Day;
+};
+
+export type GetDiaryDayResponse = GetDiaryDayResponses[keyof GetDiaryDayResponses];
+
+export type LogActivityData = {
+    body: ActivityInput;
+    path: {
+        /**
+         * The user's own calendar day, e.g. 2026-10-02.
+         */
+        day: string;
+    };
+    query?: never;
+    url: '/api/diary/{day}/activities';
+};
+
+export type LogActivityErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type LogActivityError = LogActivityErrors[keyof LogActivityErrors];
+
+export type LogActivityResponses = {
+    /**
+     * Created
+     */
+    201: Activity;
+};
+
+export type LogActivityResponse = LogActivityResponses[keyof LogActivityResponses];
+
+export type LogFoodData = {
+    body: LogBody;
+    path: {
+        /**
+         * The user's own calendar day, e.g. 2026-10-02.
+         */
+        day: string;
+    };
+    query?: never;
+    url: '/api/diary/{day}/entries';
+};
+
+export type LogFoodErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type LogFoodError = LogFoodErrors[keyof LogFoodErrors];
+
+export type LogFoodResponses = {
+    /**
+     * Created
+     */
+    201: Day;
+};
+
+export type LogFoodResponse = LogFoodResponses[keyof LogFoodResponses];
+
+export type DeleteWeightData = {
+    body?: never;
+    path: {
+        /**
+         * The user's own calendar day, e.g. 2026-10-02.
+         */
+        day: string;
+    };
+    query?: never;
+    url: '/api/diary/{day}/weight';
+};
+
+export type DeleteWeightErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteWeightError = DeleteWeightErrors[keyof DeleteWeightErrors];
+
+export type DeleteWeightResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteWeightResponse = DeleteWeightResponses[keyof DeleteWeightResponses];
+
+export type LogWeightData = {
+    body: WeightBody;
+    path: {
+        /**
+         * The user's own calendar day, e.g. 2026-10-02.
+         */
+        day: string;
+    };
+    query?: never;
+    url: '/api/diary/{day}/weight';
+};
+
+export type LogWeightErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type LogWeightError = LogWeightErrors[keyof LogWeightErrors];
+
+export type LogWeightResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type LogWeightResponse = LogWeightResponses[keyof LogWeightResponses];
+
 export type ListExercisesData = {
     body?: never;
     path?: never;
@@ -1358,6 +1996,343 @@ export type UpdateExerciseResponses = {
 
 export type UpdateExerciseResponse = UpdateExerciseResponses[keyof UpdateExerciseResponses];
 
+export type DeleteFoodEntryData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/food-entries/{id}';
+};
+
+export type DeleteFoodEntryErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteFoodEntryError = DeleteFoodEntryErrors[keyof DeleteFoodEntryErrors];
+
+export type DeleteFoodEntryResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteFoodEntryResponse = DeleteFoodEntryResponses[keyof DeleteFoodEntryResponses];
+
+export type UpdateFoodEntryData = {
+    body: EntryUpdate;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/food-entries/{id}';
+};
+
+export type UpdateFoodEntryErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateFoodEntryError = UpdateFoodEntryErrors[keyof UpdateFoodEntryErrors];
+
+export type UpdateFoodEntryResponses = {
+    /**
+     * OK
+     */
+    200: Entry;
+};
+
+export type UpdateFoodEntryResponse = UpdateFoodEntryResponses[keyof UpdateFoodEntryResponses];
+
+export type SavePortionData = {
+    body: PortionBody;
+    path?: never;
+    query?: never;
+    url: '/api/food-portions';
+};
+
+export type SavePortionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SavePortionError = SavePortionErrors[keyof SavePortionErrors];
+
+export type SavePortionResponses = {
+    /**
+     * OK
+     */
+    200: Portion;
+};
+
+export type SavePortionResponse = SavePortionResponses[keyof SavePortionResponses];
+
+export type DeletePortionData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/food-portions/{id}';
+};
+
+export type DeletePortionErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeletePortionError = DeletePortionErrors[keyof DeletePortionErrors];
+
+export type DeletePortionResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeletePortionResponse = DeletePortionResponses[keyof DeletePortionResponses];
+
+export type ListFoodsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/foods';
+};
+
+export type ListFoodsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type ListFoodsError = ListFoodsErrors[keyof ListFoodsErrors];
+
+export type ListFoodsResponses = {
+    /**
+     * OK
+     */
+    200: Array<Food>;
+};
+
+export type ListFoodsResponse = ListFoodsResponses[keyof ListFoodsResponses];
+
+export type CreateFoodData = {
+    body: FoodInput;
+    path?: never;
+    query?: never;
+    url: '/api/foods';
+};
+
+export type CreateFoodErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type CreateFoodError = CreateFoodErrors[keyof CreateFoodErrors];
+
+export type CreateFoodResponses = {
+    /**
+     * Created
+     */
+    201: Food;
+};
+
+export type CreateFoodResponse = CreateFoodResponses[keyof CreateFoodResponses];
+
+export type SearchFoodsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Part of a name, in Swedish for Livsmedelsverket's foods, or a barcode.
+         */
+        q?: string;
+        limit?: number;
+    };
+    url: '/api/foods/search';
+};
+
+export type SearchFoodsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SearchFoodsError = SearchFoodsErrors[keyof SearchFoodsErrors];
+
+export type SearchFoodsResponses = {
+    /**
+     * OK
+     */
+    200: SearchResult;
+};
+
+export type SearchFoodsResponse = SearchFoodsResponses[keyof SearchFoodsResponses];
+
+export type DeleteFoodData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/foods/{id}';
+};
+
+export type DeleteFoodErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type DeleteFoodError = DeleteFoodErrors[keyof DeleteFoodErrors];
+
+export type DeleteFoodResponses = {
+    /**
+     * No Content
+     */
+    204: void;
+};
+
+export type DeleteFoodResponse = DeleteFoodResponses[keyof DeleteFoodResponses];
+
+export type UpdateFoodData = {
+    body: FoodInput;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/api/foods/{id}';
+};
+
+export type UpdateFoodErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Conflict
+     */
+    409: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type UpdateFoodError = UpdateFoodErrors[keyof UpdateFoodErrors];
+
+export type UpdateFoodResponses = {
+    /**
+     * OK
+     */
+    200: Food;
+};
+
+export type UpdateFoodResponse = UpdateFoodResponses[keyof UpdateFoodResponses];
+
 export type GetHealthData = {
     body?: never;
     path?: never;
@@ -1419,6 +2394,72 @@ export type ImportLegacyExportResponses = {
 };
 
 export type ImportLegacyExportResponse = ImportLegacyExportResponses[keyof ImportLegacyExportResponses];
+
+export type GetNutritionGoalData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/nutrition-goal';
+};
+
+export type GetNutritionGoalErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Not Found
+     */
+    404: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type GetNutritionGoalError = GetNutritionGoalErrors[keyof GetNutritionGoalErrors];
+
+export type GetNutritionGoalResponses = {
+    /**
+     * OK
+     */
+    200: Goal;
+};
+
+export type GetNutritionGoalResponse = GetNutritionGoalResponses[keyof GetNutritionGoalResponses];
+
+export type SetNutritionGoalData = {
+    body: GoalInput;
+    path?: never;
+    query?: never;
+    url: '/api/nutrition-goal';
+};
+
+export type SetNutritionGoalErrors = {
+    /**
+     * Unauthorized
+     */
+    401: Problem;
+    /**
+     * Unprocessable Entity
+     */
+    422: Problem;
+    /**
+     * Internal Server Error
+     */
+    500: Problem;
+};
+
+export type SetNutritionGoalError = SetNutritionGoalErrors[keyof SetNutritionGoalErrors];
+
+export type SetNutritionGoalResponses = {
+    /**
+     * OK
+     */
+    200: Goal;
+};
+
+export type SetNutritionGoalResponse = SetNutritionGoalResponses[keyof SetNutritionGoalResponses];
 
 export type GetConsentPromptData = {
     body?: never;

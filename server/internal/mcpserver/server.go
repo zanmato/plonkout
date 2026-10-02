@@ -77,7 +77,7 @@ func New(deps Deps) (*Server, error) {
 		readOnly := op.Method == http.MethodGet
 		annotations := &mcp.ToolAnnotations{ReadOnlyHint: readOnly, Title: op.Summary}
 		if !readOnly {
-			destructive := op.MCPTool == "set_session_status"
+			destructive := op.MCPTool == "set_session_status" || op.Method == http.MethodDelete
 			annotations.DestructiveHint = &destructive
 		}
 		tools = append(tools, tool{

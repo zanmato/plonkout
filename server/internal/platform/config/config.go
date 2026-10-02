@@ -33,6 +33,7 @@ type Config struct {
 	WebAuthn WebAuthn `toml:"webauthn"`
 	Frontend Frontend `toml:"frontend"`
 	OAuth    OAuth    `toml:"oauth"`
+	Foods    Foods    `toml:"foods"`
 }
 
 // Server is the listener and the public address.
@@ -87,6 +88,16 @@ type OAuth struct {
 	AccessTokenTTL           Duration `toml:"access_token_ttl"`
 	RefreshTokenTTL          Duration `toml:"refresh_token_ttl"`
 	AllowDynamicRegistration bool     `toml:"allow_dynamic_registration"`
+}
+
+// Foods configures the synchronization of Livsmedelsverket's food database.
+type Foods struct {
+	// SyncSchedule is when to look for a new release, a cron expression or a
+	// descriptor such as @monthly. "off" never synchronizes.
+	SyncSchedule string `toml:"sync_schedule"`
+	// SourceURL is where the database is downloaded from. Empty means
+	// Livsmedelsverket's own address.
+	SourceURL string `toml:"source_url"`
 }
 
 // Duration is a time.Duration written as a string, e.g. "720h". TOML has no
@@ -189,6 +200,9 @@ func (c *Config) applyDefaults() error {
 	}
 	if c.OAuth.RefreshTokenTTL == 0 {
 		c.OAuth.RefreshTokenTTL = Duration(30 * 24 * time.Hour)
+	}
+	if c.Foods.SyncSchedule == "" {
+		c.Foods.SyncSchedule = "@monthly"
 	}
 
 	base, err := url.Parse(c.Server.BaseURL)

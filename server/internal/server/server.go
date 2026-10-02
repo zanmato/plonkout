@@ -15,7 +15,9 @@ import (
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/zanmato/plonkout/server/internal/account"
+	"github.com/zanmato/plonkout/server/internal/diary"
 	"github.com/zanmato/plonkout/server/internal/exercise"
+	"github.com/zanmato/plonkout/server/internal/food"
 	"github.com/zanmato/plonkout/server/internal/importer"
 	"github.com/zanmato/plonkout/server/internal/mcpserver"
 	"github.com/zanmato/plonkout/server/internal/oauth"
@@ -60,7 +62,7 @@ func New(deps Deps) (*Server, error) {
 	mux := http.NewServeMux()
 
 	humaConfig := huma.DefaultConfig("Plonkout API", Version)
-	humaConfig.Info.Description = "Workout logging and training plans."
+	humaConfig.Info.Description = "Workout logging, training plans and a food diary."
 	humaConfig.Servers = []*huma.Server{{URL: "/"}}
 	// The $schema link Huma adds to every response is noise for the generated
 	// client, and the schemas endpoint it points at is not served.
@@ -109,7 +111,11 @@ func New(deps Deps) (*Server, error) {
 	importer.Register(reg, importer.NewService(deps.Pool))
 	plans := plan.NewService(deps.Pool)
 	plan.Register(reg, plans)
-	overview.Register(reg, deps.Pool, plans)
+	foods := food.NewService(deps.Pool)
+	food.Register(reg, foods)
+	diaries := diary.NewService(deps.Pool, foods)
+	diary.Register(reg, diaries)
+	overview.Register(reg, deps.Pool, plans, diaries)
 	oauth.RegisterAPI(reg, tokens)
 	tokens.Mount(mux, deps.Logger)
 	api.FixNullableEnums(humaAPI.OpenAPI())

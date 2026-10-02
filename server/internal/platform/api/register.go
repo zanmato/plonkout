@@ -203,7 +203,21 @@ func (r *Registry) requireUser(ctx huma.Context, next func(huma.Context)) {
 		return
 	}
 
-	next(huma.WithContext(ctx, userctx.With(ctx.Context(), userID)))
+	authed := userctx.With(ctx.Context(), userID)
+	if creds.BearerToken != "" {
+		authed = context.WithValue(authed, assistantKey{}, true)
+	}
+	next(huma.WithContext(ctx, authed))
+}
+
+type assistantKey struct{}
+
+// ViaAssistant reports whether the request carries an OAuth access token, as
+// an MCP client's do, rather than the app's session cookie. It labels what an
+// assistant wrote, and grants nothing.
+func ViaAssistant(ctx context.Context) bool {
+	via, _ := ctx.Value(assistantKey{}).(bool)
+	return via
 }
 
 func safeMethod(method string) bool {

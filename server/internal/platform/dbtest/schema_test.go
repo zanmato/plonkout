@@ -17,6 +17,7 @@ import (
 var userTables = []string{
 	"exercises", "plans", "planned_sessions", "planned_exercises", "planned_targets",
 	"workouts", "workout_exercises", "workout_sets", "templates", "settings",
+	"foods", "food_portions", "food_entries", "activities", "nutrition_goals", "body_weights", "food_aliases",
 }
 
 // seed creates one row in every user table, acting as the user through the
@@ -53,6 +54,21 @@ func seed(t *testing.T, d *dbtest.DB, userID uuid.UUID) map[string]uuid.UUID {
 
 	if _, err := d.App.Exec(ctx, `INSERT INTO settings (key, value) VALUES ('weightUnit', '"kg"')`); err != nil {
 		t.Fatalf("seed setting: %v", err)
+	}
+
+	insert("food", `INSERT INTO foods (name, kcal, protein, carbs, fat) VALUES ('Ölkorv', 298, 14, 2, 26) RETURNING id`)
+	insert("portion", `INSERT INTO food_portions (food_id, name, grams) VALUES ($1, 'slice', 10) RETURNING id`, ids["food"])
+	insert("alias", `INSERT INTO food_aliases (alias, food_id) VALUES ('korv', $1) RETURNING id`, ids["food"])
+	insert("entry", `INSERT INTO food_entries (day, meal, food_id, name, grams, kcal, protein, carbs, fat)
+		VALUES ('2026-10-02', 'lunch', $1, 'Ölkorv', 70, 298, 14, 2, 26) RETURNING id`, ids["food"])
+	insert("activity", `INSERT INTO activities (day, label, kcal, workout_id) VALUES ('2026-10-02', 'Arms', 180, $1) RETURNING id`, ids["workout"])
+	for _, sql := range []string{
+		`INSERT INTO nutrition_goals (direction, kcal, protein, carbs, fat) VALUES ('lose', 1900, 97, 242, 65)`,
+		`INSERT INTO body_weights (day, weight) VALUES ('2026-10-02', 91.4)`,
+	} {
+		if _, err := d.App.Exec(ctx, sql); err != nil {
+			t.Fatalf("seed %s: %v", sql, err)
+		}
 	}
 	return ids
 }

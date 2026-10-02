@@ -5,11 +5,13 @@ package overview
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"time"
 
 	"github.com/gofrs/uuid/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/zanmato/plonkout/server/internal/diary"
 	"github.com/zanmato/plonkout/server/internal/overview/overviewdb"
 	"github.com/zanmato/plonkout/server/internal/plan"
 	"github.com/zanmato/plonkout/server/internal/platform/api"
@@ -25,6 +27,7 @@ type Context struct {
 	TotalWorkouts int64           `json:"totalWorkouts"`
 	ActivePlans   []PlanSummary   `json:"activePlans"`
 	Recent        []RecentWorkout `json:"recentWorkouts" doc:"The latest workouts, newest first."`
+	NutritionGoal *diary.Goal     `json:"nutritionGoal" doc:"The daily calorie and macro goal of the food diary, null until one is set."`
 }
 
 // PlanSummary is an active plan in brief.
@@ -50,14 +53,14 @@ type RecentWorkout struct {
 }
 
 // Register declares the overview operation.
-func Register(reg *api.Registry, pool *pgxpool.Pool, plans *plan.Service) {
+func Register(reg *api.Registry, pool *pgxpool.Pool, plans *plan.Service, diaries *diary.Service) {
 	q := overviewdb.New(pool)
 
 	api.Register(reg, api.Op{
 		ID: "get-context", Method: http.MethodGet, Path: "/context",
 		Summary: "Where the user is at",
-		Description: "Units, dominant arm, active plans with progress and the next session, and the latest " +
-			"workouts. Read this first: every weight elsewhere is in weightUnit.",
+		Description: "Units, dominant arm, active plans with progress and the next session, the latest " +
+			"workouts and the nutrition goal. Read this first: every weight elsewhere is in weightUnit.",
 		Tags: []string{"overview"}, MCPTool: "get_context",
 	}, func(ctx context.Context, _ *struct{}) (*struct{ Body Context }, error) {
 		out := Context{
@@ -124,6 +127,12 @@ func Register(reg *api.Registry, pool *pgxpool.Pool, plans *plan.Service) {
 				}
 			}
 			out.ActivePlans = append(out.ActivePlans, summary)
+		}
+		goal, err := diaries.Goal(ctx)
+		if err == nil {
+			out.NutritionGoal = &goal
+		} else if !errors.Is(err, api.ErrNotFound) {
+			return nil, err
 		}
 		return &struct{ Body Context }{Body: out}, nil
 	})
