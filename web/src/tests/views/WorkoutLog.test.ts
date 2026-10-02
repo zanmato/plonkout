@@ -42,7 +42,12 @@ describe("WorkoutLog.vue", () => {
     });
 
     it("renders the workout log header", () => {
-      expect(wrapper.find("button .material-icons").text()).toBe("add");
+      expect(wrapper.find('[data-testid="add-workout"] .material-icons').text()).toBe("add");
+    });
+
+    it("opens the statistics from the header", async () => {
+      await wrapper.find('[data-testid="open-statistics"]').trigger("click");
+      expect(mockPush).toHaveBeenCalledWith({ name: "statistics" });
     });
 
     it("shows loading state initially", () => {
@@ -52,7 +57,7 @@ describe("WorkoutLog.vue", () => {
     });
 
     it("navigates to new workout when add button is clicked", async () => {
-      const addButton = wrapper.find("button");
+      const addButton = wrapper.find('[data-testid="add-workout"]');
       await addButton.trigger("click");
 
       expect(mockPush).toHaveBeenCalledWith({ name: "workout-edit" });

@@ -51,7 +51,7 @@ type Entry struct {
 	ID        uuid.UUID      `json:"id"`
 	Day       string         `json:"day" format:"date"`
 	Meal      string         `json:"meal" enum:"breakfast,lunch,dinner,snack"`
-	FoodID    *uuid.UUID     `json:"foodId"`
+	FoodID    *uuid.UUID     `nullable:"true" json:"foodId"`
 	LMVNumber *int32         `json:"lmvNumber"`
 	Name      string         `json:"name" doc:"The food's name when it was logged."`
 	Grams     float64        `json:"grams"`
@@ -74,7 +74,7 @@ type Range struct {
 // Meal is a meal of a day.
 type Meal struct {
 	Meal    string  `json:"meal" enum:"breakfast,lunch,dinner,snack"`
-	Aim     *Range  `json:"aim" doc:"The kcal this meal aims for, a share of the goal. Null without a goal."`
+	Aim     *Range  `json:"aim,omitempty" doc:"The kcal this meal aims for, a share of the goal. Absent without a goal."`
 	Totals  Totals  `json:"totals"`
 	Entries []Entry `json:"entries"`
 }
@@ -85,7 +85,7 @@ type Activity struct {
 	Day       string     `json:"day" format:"date"`
 	Label     string     `json:"label"`
 	Kcal      int32      `json:"kcal"`
-	WorkoutID *uuid.UUID `json:"workoutId"`
+	WorkoutID *uuid.UUID `nullable:"true" json:"workoutId"`
 	LoggedBy  string     `json:"loggedBy" enum:"app,assistant"`
 	Created   time.Time  `json:"created"`
 }
@@ -112,7 +112,7 @@ type Goal struct {
 // Day is one day of the diary.
 type Day struct {
 	Day        string     `json:"day" format:"date"`
-	Goal       *Goal      `json:"goal" doc:"Null until a goal is set."`
+	Goal       *Goal      `json:"goal,omitempty" doc:"Absent until a goal is set."`
 	Eaten      Totals     `json:"eaten"`
 	Burned     int32      `json:"burned" doc:"Kcal burned by activities."`
 	Budget     *int32     `json:"budget" doc:"The goal's kcal, plus what was burned when the goal adds activities."`
@@ -135,7 +135,7 @@ type DaySummary struct {
 type Summary struct {
 	From string       `json:"from" format:"date"`
 	To   string       `json:"to" format:"date"`
-	Goal *Goal        `json:"goal"`
+	Goal *Goal        `json:"goal,omitempty"`
 	Days []DaySummary `json:"days" doc:"Every day of the range, logged or not."`
 }
 

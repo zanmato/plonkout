@@ -57,7 +57,7 @@ type PortionInput struct {
 // Match is a search result.
 type Match struct {
 	Source    string     `json:"source" enum:"mine,lmv" doc:"mine for the user's own foods, lmv for Livsmedelsverket's."`
-	FoodID    *uuid.UUID `json:"foodId" doc:"Set for the user's own foods."`
+	FoodID    *uuid.UUID `nullable:"true" json:"foodId" doc:"Set for the user's own foods."`
 	LMVNumber *int32     `json:"lmvNumber" doc:"Set for Livsmedelsverket's foods."`
 	Name      string     `json:"name"`
 	Brand     string     `json:"brand"`
@@ -75,7 +75,7 @@ type DataSource struct {
 	URL         string     `json:"url"`
 	Version     string     `json:"version" doc:"The release imported, empty until the first import."`
 	Attribution string     `json:"attribution" doc:"Show this wherever its foods are shown."`
-	ImportedAt  *time.Time `json:"importedAt"`
+	ImportedAt  *time.Time `nullable:"true" json:"importedAt"`
 }
 
 // SearchResult is a search.

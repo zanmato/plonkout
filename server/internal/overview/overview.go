@@ -27,7 +27,7 @@ type Context struct {
 	TotalWorkouts int64           `json:"totalWorkouts"`
 	ActivePlans   []PlanSummary   `json:"activePlans"`
 	Recent        []RecentWorkout `json:"recentWorkouts" doc:"The latest workouts, newest first."`
-	NutritionGoal *diary.Goal     `json:"nutritionGoal" doc:"The daily calorie and macro goal of the food diary, null until one is set."`
+	NutritionGoal *diary.Goal     `json:"nutritionGoal,omitempty" doc:"The daily calorie and macro goal of the food diary, absent until one is set."`
 }
 
 // PlanSummary is an active plan in brief.

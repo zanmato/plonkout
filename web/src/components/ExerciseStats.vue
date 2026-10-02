@@ -158,6 +158,7 @@ import zoomPlugin from "chartjs-plugin-zoom";
 import { getWorkouts } from "@/api/data";
 import { useUnits } from "@/composables/useUnits";
 import { isWorkingSet } from "@/utils/exerciseHistory";
+import { lockScroll } from "@/utils/scrollLock";
 import NeoPanel from "@/components/NeoPanel.vue";
 import type {
   DateLike,
@@ -516,17 +517,17 @@ const createChart = async () => {
 };
 
 // Keep the page behind the modal still, panning the chart would drag it along
-function lockScroll(locked: boolean) {
-  const overflow = locked ? "hidden" : "";
-  document.documentElement.style.overflow = overflow;
-  document.body.style.overflow = overflow;
+let releaseScroll: (() => void) | null = null;
+function holdScroll(locked: boolean) {
+  releaseScroll?.();
+  releaseScroll = locked ? lockScroll() : null;
 }
 
 // Watch for modal open/close
 watch(
   () => props.isOpen,
   async (isOpen) => {
-    lockScroll(isOpen);
+    holdScroll(isOpen);
     if (isOpen) {
       await nextTick(); // Ensure DOM is updated
       await loadData();
@@ -550,7 +551,7 @@ watch(chartData, () => {
 });
 
 onUnmounted(() => {
-  lockScroll(false);
+  holdScroll(false);
   if (chart.value) {
     chart.value.destroy();
   }

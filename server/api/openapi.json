@@ -30,7 +30,10 @@
             "type": "string"
           },
           "workoutId": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           }
         },
         "required": [
@@ -376,7 +379,7 @@
           },
           "nutritionGoal": {
             "$ref": "#/components/schemas/Goal",
-            "description": "The daily calorie and macro goal of the food diary, null until one is set."
+            "description": "The daily calorie and macro goal of the food diary, absent until one is set."
           },
           "recentWorkouts": {
             "description": "The latest workouts, newest first.",
@@ -409,8 +412,7 @@
           "dominantArm",
           "totalWorkouts",
           "activePlans",
-          "recentWorkouts",
-          "nutritionGoal"
+          "recentWorkouts"
         ],
         "type": "object"
       },
@@ -487,7 +489,7 @@
           },
           "goal": {
             "$ref": "#/components/schemas/Goal",
-            "description": "Null until a goal is set."
+            "description": "Absent until a goal is set."
           },
           "meals": {
             "items": {
@@ -514,7 +516,6 @@
         },
         "required": [
           "day",
-          "goal",
           "eaten",
           "burned",
           "budget",
@@ -612,7 +613,10 @@
             "type": "number"
           },
           "foodId": {
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "grams": {
             "format": "double",
@@ -1246,7 +1250,10 @@
           },
           "foodId": {
             "description": "Set for the user's own foods.",
-            "type": "string"
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "group": {
             "description": "Livsmedelsverket's food group.",
@@ -1336,7 +1343,7 @@
         "properties": {
           "aim": {
             "$ref": "#/components/schemas/Range",
-            "description": "The kcal this meal aims for, a share of the goal. Null without a goal."
+            "description": "The kcal this meal aims for, a share of the goal. Absent without a goal."
           },
           "entries": {
             "items": {
@@ -1359,7 +1366,6 @@
         },
         "required": [
           "meal",
-          "aim",
           "totals",
           "entries"
         ],
@@ -2491,7 +2497,6 @@
         "required": [
           "from",
           "to",
-          "goal",
           "days"
         ],
         "type": "object"

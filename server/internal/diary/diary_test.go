@@ -104,9 +104,10 @@ func TestADayOfEating(t *testing.T) {
 
 	// Another user sees none of it.
 	other := h.NewUser()
-	h.Expect(h.Do(http.MethodGet, "/diary/2026-10-02", nil, other.Session), http.StatusOK).Decode(t, &day)
-	if day.Eaten.Kcal != 0 || day.Goal != nil || day.Budget != nil || len(day.Activities) != 0 {
-		t.Fatalf("another user sees %+v", day)
+	var theirs diary.Day
+	h.Expect(h.Do(http.MethodGet, "/diary/2026-10-02", nil, other.Session), http.StatusOK).Decode(t, &theirs)
+	if theirs.Eaten.Kcal != 0 || theirs.Goal != nil || theirs.Budget != nil || len(theirs.Activities) != 0 || theirs.Meals[0].Aim != nil {
+		t.Fatalf("another user sees %+v", theirs)
 	}
 	h.Expect(h.Do(http.MethodDelete, "/food-entries/"+moved.ID.String(), nil, other.Session), http.StatusNotFound)
 }

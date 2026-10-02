@@ -73,3 +73,45 @@ export type QueueEntry = api.QueueEntry;
 
 /** What a session planned against what its workout logged. */
 export type Comparison = api.Comparison;
+
+/** A calendar day of the food diary, the user's own, e.g. 2026-10-02. */
+export type DayKey = string;
+
+export type Meal = api.Meal["meal"];
+
+/** Nutrients per 100 g. */
+export type Nutrients = api.Nutrients;
+
+/** One of the user's own foods. */
+export type Food = api.Food;
+
+export type FoodDraft = api.FoodInput;
+
+/** A household measure of a food, e.g. a slice is 10 g. */
+export type Portion = api.Portion;
+
+/** A search result, one of the user's foods or Livsmedelsverket's. */
+export type FoodMatch = api.Match;
+
+export type FoodSearch = api.SearchResult;
+
+/** A day of the food diary. */
+export type Day = api.Day;
+
+export type DayMeal = api.Meal;
+
+/** Something eaten. */
+export type FoodEntry = api.Entry;
+
+export type EntryDraft = api.EntryInput;
+
+/** Energy burned by exercise. */
+export type Activity = api.Activity;
+
+export type ActivityDraft = api.ActivityInput;
+
+export type NutritionGoal = api.Goal;
+
+export type NutritionGoalDraft = api.GoalInput;
+
+export type DiarySummary = api.Summary;

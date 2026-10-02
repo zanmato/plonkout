@@ -126,14 +126,14 @@ const tabs = [
     icon: "event_note",
   },
   {
+    name: "food",
+    path: "/food",
+    icon: "restaurant",
+  },
+  {
     name: "templates",
     path: "/templates",
     icon: "fitness_center",
-  },
-  {
-    name: "statistics",
-    path: "/statistics",
-    icon: "bar_chart",
   },
   {
     name: "settings",
@@ -153,7 +153,10 @@ const isActiveTab = (tabName: string): boolean => {
     return routeName === "templates";
   }
   if (tabName === "log") {
-    return routeName === "log" || routeName === "workout-edit";
+    return routeName === "log" || routeName === "workout-edit" || routeName === "statistics";
+  }
+  if (tabName === "food") {
+    return routeName === "food" || routeName === "food-goal";
   }
   return routeName === tabName;
 };

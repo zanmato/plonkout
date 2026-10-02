@@ -1,7 +1,15 @@
 <template>
   <div class="statistics h-full flex flex-col">
     <!-- Header -->
-    <NeoHeader :title="t('statistics.title')" />
+    <NeoHeader :title="t('statistics.title')">
+      <template #left>
+        <NeoButton variant="primary" size="sm" data-testid="back-button" @click="router.push({ name: 'log' })">
+          <template #icon>
+            <span class="material-icons">arrow_back</span>
+          </template>
+        </NeoButton>
+      </template>
+    </NeoHeader>
 
     <!-- Content -->
     <div class="flex-1 overflow-auto hide-scrollbar">
@@ -135,12 +143,14 @@ import {
   watch,
 } from "vue";
 import { useI18n } from "vue-i18n";
+import { useRouter } from "vue-router";
 import { useHead } from "@unhead/vue";
 import { Chart, registerables } from "chart.js";
 import { getWorkouts } from "@/api/data";
 import type { DateLike, Workout } from "@/types/domain";
 import NeoHeader from "@/components/NeoHeader.vue";
 import NeoPanel from "@/components/NeoPanel.vue";
+import NeoButton from "@/components/NeoButton.vue";
 import "chartjs-adapter-date-fns";
 
 Chart.register(...registerables);
@@ -154,6 +164,7 @@ interface ExerciseUsage {
 type EndedWorkout = Workout & { ended: DateLike };
 
 const { t, d } = useI18n();
+const router = useRouter();
 const workouts = ref<Workout[]>([]);
 const loading = ref(true);
 

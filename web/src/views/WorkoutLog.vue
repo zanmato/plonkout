@@ -2,11 +2,27 @@
   <div class="workout-log h-full flex flex-col">
     <!-- Header -->
     <NeoHeader :title="t('workout.title')">
+      <template #left>
+        <NeoButton
+          variant="secondary"
+          size="sm"
+          class="rounded-full w-10 h-10 !px-0 !py-0"
+          :aria-label="t('statistics.open')"
+          data-testid="open-statistics"
+          @click="router.push({ name: 'statistics' })"
+        >
+          <template #icon>
+            <span class="material-icons">bar_chart</span>
+          </template>
+        </NeoButton>
+      </template>
       <template #right>
         <NeoButton
           variant="primary"
           size="sm"
           class="rounded-full w-10 h-10 !px-0 !py-0"
+          :aria-label="t('workout.new')"
+          data-testid="add-workout"
           @click="addWorkout"
         >
           <template #icon>

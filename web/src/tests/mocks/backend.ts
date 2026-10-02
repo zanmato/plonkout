@@ -26,6 +26,7 @@ import type {
   WorkoutSet,
 } from "@/api/gen/types.gen";
 import type { DateLike } from "@/types/domain";
+import { foodBackend, foodHandlers, type FoodBackendSeed } from "./foodBackend";
 
 /** Origin the API is served from in tests. Node's fetch needs absolute URLs. */
 export const API = "http://localhost";
@@ -94,6 +95,8 @@ export interface Seed {
   templates?: TemplateSeed[];
   plans?: PlanSeed[];
   settings?: Record<string, unknown>;
+  /** The food diary: foods, Livsmedelsverket's foods, entries and the goal. */
+  food?: FoodBackendSeed;
 }
 
 const defaultMe = (): Me => ({
@@ -800,6 +803,8 @@ export const handlers: HttpHandler[] = [
   // Account
 
   http.get(url("/account"), () => HttpResponse.json(clone(state.me))),
+
+  ...foodHandlers,
 ];
 
 export const backend = {
@@ -824,6 +829,8 @@ export const backend = {
   get me(): Me {
     return state.me;
   },
+  /** The food diary's stores. */
+  food: foodBackend,
   set me(me: Me) {
     state.me = me;
   },
@@ -853,6 +860,7 @@ export const backend = {
     const plans = (seed.plans ?? []).map(toPlan);
     state.plans.push(...plans);
     Object.assign(state.settings, seed.settings ?? {});
+    if (seed.food) foodBackend.seed(seed.food);
     return { workouts, exercises, templates, plans };
   },
 
@@ -864,5 +872,6 @@ export const backend = {
     state.plans = [];
     state.settings = {};
     state.me = defaultMe();
+    foodBackend.reset();
   },
 };

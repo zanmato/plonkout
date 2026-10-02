@@ -154,7 +154,8 @@
       "duration": "Duration (minutes)",
       "minutes": "Minutes"
     },
-    "loadError": "Error loading workouts"
+    "loadError": "Error loading workouts",
+    "open": "Statistics"
   },
   "settings": {
     "title": "Settings",
@@ -275,7 +276,8 @@
     "log": "Log",
     "plan": "Plan",
     "statistics": "Statistics",
-    "settings": "Settings"
+    "settings": "Settings",
+    "food": "Food"
   },
   "common": {
     "cancel": "Cancel",
@@ -287,7 +289,8 @@
     "duration": {
       "hours": "h",
       "minutes": "m"
-    }
+    },
+    "close": "Close"
   },
   "calendar": {
     "days": {
@@ -391,5 +394,116 @@
     "allow": "Allow",
     "deny": "Deny",
     "invalid": "This request is not valid, so nothing was shared."
+  },
+  "food": {
+    "title": "Food",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "goToToday": "Go to today",
+    "eaten": "Eaten",
+    "left": "kcal left",
+    "over": "kcal over",
+    "burned": "Exercise",
+    "kcal": "kcal",
+    "grams": "g",
+    "macros": {
+      "carbs": "Carbs",
+      "protein": "Protein",
+      "fat": "Fat"
+    },
+    "meals": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snacks"
+    },
+    "mealAim": "{kcal} kcal · aim {min}–{max}",
+    "mealAimEmpty": "Aim {min}–{max} kcal",
+    "mealKcal": "{kcal} kcal",
+    "addTo": "Add food to {meal}",
+    "byAssistant": "Logged by your assistant",
+    "loadError": "Could not load the day",
+    "saveError": "Could not save",
+    "noGoal": "No daily goal yet",
+    "noGoalDescription": "Set one here, or ask your assistant to work one out with you.",
+    "setGoal": "Set goal",
+    "goalButton": "Goal",
+    "activities": {
+      "title": "Exercise",
+      "add": "Add exercise",
+      "burned": "{kcal} kcal burned",
+      "none": "Nothing logged",
+      "label": "What you did",
+      "kcal": "Kcal burned",
+      "hint": "Plonkout cannot measure this. Enter it from a watch, or ask your assistant for an estimate.",
+      "byAssistant": "estimate by your assistant",
+      "delete": "Remove"
+    },
+    "weight": {
+      "title": "Morning weight",
+      "log": "Log weight",
+      "label": "Weight",
+      "save": "Save",
+      "delete": "Remove"
+    },
+    "search": {
+      "title": "Add to {meal}",
+      "label": "Search foods",
+      "yourFoods": "Your foods",
+      "noFoods": "Search by name, in Swedish for general foods.",
+      "nothing": "Nothing found. Try fewer or more general words.",
+      "create": "Create a food from the label",
+      "per100": "{kcal} kcal per 100 g",
+      "mine": "Your food",
+      "uses": "Logged once lately | Logged {count} times lately",
+      "kcalPer100": "kcal/100 g"
+    },
+    "amount": {
+      "label": "Amount in grams",
+      "add": "Add {grams} g · {kcal} kcal",
+      "macros": "C {carbs} · P {protein} · F {fat}",
+      "portionName": "Name {grams} g, e.g. tbsp",
+      "savePortion": "Save"
+    },
+    "entry": {
+      "title": "Change entry",
+      "meal": "Meal",
+      "grams": "Grams",
+      "save": "Save",
+      "delete": "Remove from the day"
+    },
+    "form": {
+      "title": "New food",
+      "name": "Name",
+      "brand": "Brand",
+      "barcode": "Barcode",
+      "per100": "Per 100 g, as on the label",
+      "kcal": "Kcal",
+      "protein": "Protein (g)",
+      "carbs": "Carbs (g)",
+      "fat": "Fat (g)",
+      "save": "Save food",
+      "exists": "You already have a food with that name"
+    },
+    "goal": {
+      "title": "Goal",
+      "direction": {
+        "lose": "Lose",
+        "maintain": "Maintain",
+        "gain": "Gain"
+      },
+      "kcal": "Daily kcal",
+      "protein": "Protein (g)",
+      "carbs": "Carbs (g)",
+      "fat": "Fat (g)",
+      "macroSum": "The macros add up to {kcal} kcal",
+      "targetWeight": "Target weight ({unit})",
+      "weeklyChange": "Pace ({unit} per week)",
+      "addActivities": "Add exercise calories to the budget",
+      "notes": "Notes",
+      "save": "Save goal",
+      "saved": "Goal saved",
+      "assistantHint": "Your assistant can work out a goal from your weight, height and training. Ask it to set one."
+    }
   }
 }

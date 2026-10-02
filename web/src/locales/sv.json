@@ -149,7 +149,8 @@
       "duration": "Varaktighet (minuter)",
       "minutes": "Minuter"
     },
-    "loadError": "Fel vid laddning av träningspass"
+    "loadError": "Fel vid laddning av träningspass",
+    "open": "Statistik"
   },
   "settings": {
     "title": "Inställningar",
@@ -270,7 +271,8 @@
     "log": "Logg",
     "plan": "Program",
     "statistics": "Statistik",
-    "settings": "Inställningar"
+    "settings": "Inställningar",
+    "food": "Mat"
   },
   "common": {
     "cancel": "Avbryt",
@@ -282,7 +284,8 @@
     "duration": {
       "hours": "t",
       "minutes": "m"
-    }
+    },
+    "close": "Stäng"
   },
   "calendar": {
     "days": {
@@ -386,5 +389,116 @@
     "allow": "Tillåt",
     "deny": "Neka",
     "invalid": "Förfrågan är inte giltig, så inget delades."
+  },
+  "food": {
+    "title": "Mat",
+    "previousDay": "Föregående dag",
+    "nextDay": "Nästa dag",
+    "goToToday": "Gå till idag",
+    "eaten": "Ätit",
+    "left": "kcal kvar",
+    "over": "kcal över",
+    "burned": "Träning",
+    "kcal": "kcal",
+    "grams": "g",
+    "macros": {
+      "carbs": "Kolhydrater",
+      "protein": "Protein",
+      "fat": "Fett"
+    },
+    "meals": {
+      "breakfast": "Frukost",
+      "lunch": "Lunch",
+      "dinner": "Middag",
+      "snack": "Mellanmål"
+    },
+    "mealAim": "{kcal} kcal · mål {min}–{max}",
+    "mealAimEmpty": "Mål {min}–{max} kcal",
+    "mealKcal": "{kcal} kcal",
+    "addTo": "Lägg till mat i {meal}",
+    "byAssistant": "Loggat av din assistent",
+    "loadError": "Kunde inte ladda dagen",
+    "saveError": "Kunde inte spara",
+    "noGoal": "Inget dagsmål än",
+    "noGoalDescription": "Sätt ett här, eller be din assistent räkna fram ett med dig.",
+    "setGoal": "Sätt mål",
+    "goalButton": "Mål",
+    "activities": {
+      "title": "Träning",
+      "add": "Lägg till träning",
+      "burned": "{kcal} kcal förbränt",
+      "none": "Inget loggat",
+      "label": "Vad du gjorde",
+      "kcal": "Förbrända kcal",
+      "hint": "Plonkout kan inte mäta detta. Fyll i från en klocka, eller be din assistent uppskatta.",
+      "byAssistant": "uppskattat av din assistent",
+      "delete": "Ta bort"
+    },
+    "weight": {
+      "title": "Morgonvikt",
+      "log": "Logga vikt",
+      "label": "Vikt",
+      "save": "Spara",
+      "delete": "Ta bort"
+    },
+    "search": {
+      "title": "Lägg till i {meal}",
+      "label": "Sök livsmedel",
+      "yourFoods": "Dina livsmedel",
+      "noFoods": "Sök på namn.",
+      "nothing": "Inget hittades. Prova färre eller mer allmänna ord.",
+      "create": "Skapa ett livsmedel från etiketten",
+      "per100": "{kcal} kcal per 100 g",
+      "mine": "Ditt livsmedel",
+      "uses": "Loggat en gång nyligen | Loggat {count} gånger nyligen",
+      "kcalPer100": "kcal/100 g"
+    },
+    "amount": {
+      "label": "Mängd i gram",
+      "add": "Lägg till {grams} g · {kcal} kcal",
+      "macros": "K {carbs} · P {protein} · F {fat}",
+      "portionName": "Namnge {grams} g, t.ex. msk",
+      "savePortion": "Spara"
+    },
+    "entry": {
+      "title": "Ändra",
+      "meal": "Måltid",
+      "grams": "Gram",
+      "save": "Spara",
+      "delete": "Ta bort från dagen"
+    },
+    "form": {
+      "title": "Nytt livsmedel",
+      "name": "Namn",
+      "brand": "Märke",
+      "barcode": "Streckkod",
+      "per100": "Per 100 g, som på etiketten",
+      "kcal": "Kcal",
+      "protein": "Protein (g)",
+      "carbs": "Kolhydrater (g)",
+      "fat": "Fett (g)",
+      "save": "Spara livsmedel",
+      "exists": "Du har redan ett livsmedel med det namnet"
+    },
+    "goal": {
+      "title": "Mål",
+      "direction": {
+        "lose": "Gå ner",
+        "maintain": "Behålla",
+        "gain": "Gå upp"
+      },
+      "kcal": "Kcal per dag",
+      "protein": "Protein (g)",
+      "carbs": "Kolhydrater (g)",
+      "fat": "Fett (g)",
+      "macroSum": "Makrona blir {kcal} kcal",
+      "targetWeight": "Målvikt ({unit})",
+      "weeklyChange": "Takt ({unit} per vecka)",
+      "addActivities": "Lägg till träningens kalorier i budgeten",
+      "notes": "Anteckningar",
+      "save": "Spara mål",
+      "saved": "Målet sparat",
+      "assistantHint": "Din assistent kan räkna fram ett mål utifrån vikt, längd och träning. Be den sätta ett."
+    }
   }
 }

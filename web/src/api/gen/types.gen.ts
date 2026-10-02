@@ -11,7 +11,7 @@ export type Activity = {
     kcal: number;
     label: string;
     loggedBy: 'app' | 'assistant';
-    workoutId: string;
+    workoutId: string | null;
 };
 
 export type ActivityInput = {
@@ -126,9 +126,9 @@ export type Context = {
      */
     now: string;
     /**
-     * The daily calorie and macro goal of the food diary, null until one is set.
+     * The daily calorie and macro goal of the food diary, absent until one is set.
      */
-    nutritionGoal: Goal;
+    nutritionGoal?: Goal;
     /**
      * The latest workouts, newest first.
      */
@@ -170,9 +170,9 @@ export type Day = {
     day: string;
     eaten: Totals;
     /**
-     * Null until a goal is set.
+     * Absent until a goal is set.
      */
-    goal: Goal;
+    goal?: Goal;
     meals: Array<Meal>;
     /**
      * Budget minus eaten. Negative when over.
@@ -210,7 +210,7 @@ export type Entry = {
     created: string;
     day: string;
     fat: number;
-    foodId: string;
+    foodId: string | null;
     grams: number;
     id: string;
     kcal: number;
@@ -434,7 +434,7 @@ export type Match = {
     /**
      * Set for the user's own foods.
      */
-    foodId: string;
+    foodId: string | null;
     /**
      * Livsmedelsverket's food group.
      */
@@ -469,9 +469,9 @@ export type Me = {
 
 export type Meal = {
     /**
-     * The kcal this meal aims for, a share of the goal. Null without a goal.
+     * The kcal this meal aims for, a share of the goal. Absent without a goal.
      */
-    aim: Range;
+    aim?: Range;
     entries: Array<Entry>;
     meal: 'breakfast' | 'lunch' | 'dinner' | 'snack';
     totals: Totals;
@@ -809,7 +809,7 @@ export type Summary = {
      */
     days: Array<DaySummary>;
     from: string;
-    goal: Goal;
+    goal?: Goal;
     to: string;
 };
 
