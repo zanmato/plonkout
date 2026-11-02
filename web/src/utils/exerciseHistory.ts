@@ -52,6 +52,21 @@ export function isWorkingSet(set: Pick<WorkoutSet, "type">): boolean {
 }
 
 /**
+ * Whether anything was logged in a set. Skipped sets keep their arm and type
+ * but no weight, reps, time or distance, and should not show as 0×0.
+ */
+export function isLoggedSet(
+  set: Pick<WorkoutSet, "weight" | "reps" | "time" | "distance">,
+): boolean {
+  return (
+    (Number(set.weight) || 0) > 0 ||
+    (Number(set.reps) || 0) > 0 ||
+    (Number(set.distance) || 0) > 0 ||
+    /[1-9]/.test(set.time || "")
+  );
+}
+
+/**
  * Build an index of exercise name -> history entries, newest first.
  */
 export function buildExerciseHistory(
@@ -185,13 +200,23 @@ export function getBestEstimated1RM(
 }
 
 /**
- * The most recent history entry within the scope
+ * The most recent history entry within the scope with a logged working set.
+ * Times the exercise was skipped are passed over.
  */
 export function getLastEntry(
   entries: HistoryEntry[] | null | undefined,
   scope: HistoryScope = {},
 ): HistoryEntry | null {
-  return filterEntries(entries, scope)[0] || null;
+  return (
+    filterEntries(entries, scope).find((entry) =>
+      entry.sets.some(
+        (set) =>
+          isWorkingSet(set) &&
+          isArmCompatible(scope.arm, set.arm) &&
+          isLoggedSet(set),
+      ),
+    ) || null
+  );
 }
 
 /**
@@ -203,7 +228,10 @@ export function formatEntrySets(
 ): string {
   if (!entry) return "";
   return entry.sets
-    .filter((set) => isWorkingSet(set) && isArmCompatible(arm, set.arm))
+    .filter(
+      (set) =>
+        isWorkingSet(set) && isArmCompatible(arm, set.arm) && isLoggedSet(set),
+    )
     .map((set) => {
       const armSuffix =
         set.arm === "left" ? "L" : set.arm === "right" ? "R" : "";

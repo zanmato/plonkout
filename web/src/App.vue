@@ -5,9 +5,11 @@
       draws its own fading blur over the top of a home screen web app unless a
       fixed element sits at the edge, in which case it extends that element's
       solid color instead. The header scrolls with its view, so it cannot be it.
+      See .status-bar-backdrop for its height. It only covers the status bar
+      and the header's top padding, where nothing is tappable.
     -->
     <div
-      class="status-bar-backdrop fixed top-0 inset-x-0 z-40 pointer-events-none bg-white dark:bg-header"
+      class="status-bar-backdrop fixed top-0 inset-x-0 z-40 bg-white dark:bg-header"
       aria-hidden="true"
     ></div>
 

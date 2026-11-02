@@ -6,6 +6,7 @@ import {
   getBestEstimated1RM,
   getLastEntry,
   formatEntrySets,
+  isLoggedSet,
   type HistoryEntry,
 } from "@/utils/exerciseHistory";
 import type { Intensity, Workout } from "@/types/domain";
@@ -145,5 +146,38 @@ describe("getLastEntry and formatEntrySets", () => {
     const entry = getLastEntry(history.get("Wrist Curl"));
     expect(formatEntrySets(entry)).toBe("20×12L, 25×8R");
     expect(formatEntrySets(entry, { arm: "left" })).toBe("20×12L");
+  });
+
+  it("passes over skipped sets and sessions", () => {
+    const entries = partial<HistoryEntry[]>([
+      {
+        workoutId: "skipped",
+        sets: [
+          { type: "regular", arm: "left", weight: null, reps: null, time: "" },
+          { type: "regular", arm: "right", weight: 0, reps: 0, time: "0:00" },
+        ],
+      },
+      {
+        workoutId: "done",
+        sets: [
+          { type: "regular", arm: "left", weight: 20, reps: 12 },
+          { type: "regular", arm: "right", weight: null, reps: null },
+          { type: "regular", weight: 0, reps: 10 },
+        ],
+      },
+    ]);
+    const entry = getLastEntry(entries);
+    expect(entry!.workoutId).toBe("done");
+    expect(formatEntrySets(entry)).toBe("20×12L, 0×10");
+    expect(getLastEntry(entries, { arm: "right" })!.workoutId).toBe("done");
+  });
+});
+
+describe("isLoggedSet", () => {
+  it("needs weight, reps, time or distance", () => {
+    expect(isLoggedSet({ weight: null, reps: null, time: "", distance: null })).toBe(false);
+    expect(isLoggedSet({ weight: 0, reps: 0, time: "00:00", distance: 0 })).toBe(false);
+    expect(isLoggedSet({ weight: null, reps: null, time: "0:30", distance: null })).toBe(true);
+    expect(isLoggedSet({ weight: null, reps: null, time: "", distance: 1.5 })).toBe(true);
   });
 });

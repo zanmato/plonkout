@@ -94,9 +94,15 @@
             :size-dependencies="[item.type]"
             :data-index="index"
             class="px-4"
+            :class="item.type === 'header' ? 'pb-5' : 'pb-4'"
           >
+            <!--
+              Spacing is padding on the item, not margins on its content: the
+              scroller measures items both with and without collapsed margins,
+              which left some cards touching.
+            -->
             <!-- Month header -->
-            <div v-if="item.type === 'header'" class="mb-5">
+            <div v-if="item.type === 'header'">
               <!-- Clickable month header -->
               <div
                 class="flex justify-between items-center bg-nb-overlay p-4 border-3 border-nb-border rounded-xl shadow-brutal dark:bg-zinc-600 cursor-pointer transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
@@ -134,7 +140,7 @@
             <!-- Workout item -->
             <div
               v-else
-              class="bg-white border-3 border-black dark:bg-zinc-700 dark:text-white rounded-xl p-5 mb-4 cursor-pointer shadow-brutal transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
+              class="bg-white border-3 border-black dark:bg-zinc-700 dark:text-white rounded-xl p-5 cursor-pointer shadow-brutal transition-all duration-200 hover:shadow-none hover:translate-x-1 hover:translate-y-1 active:shadow-none active:translate-x-1 active:translate-y-1"
               @click="editWorkout(item.id!)"
             >
               <div class="flex justify-between items-start mb-4">

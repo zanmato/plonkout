@@ -157,7 +157,7 @@ import { Chart, registerables, type ChartDataset } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
 import { getWorkouts } from "@/api/data";
 import { useUnits } from "@/composables/useUnits";
-import { isWorkingSet } from "@/utils/exerciseHistory";
+import { isLoggedSet, isWorkingSet } from "@/utils/exerciseHistory";
 import { lockScroll } from "@/utils/scrollLock";
 import NeoPanel from "@/components/NeoPanel.vue";
 import type {
@@ -281,7 +281,7 @@ const recentSets = computed(() => {
         .filter((ex) => ex.name === props.exercise.name)
         .forEach((ex) => {
           ex.sets
-            .filter((s) => s.type !== "warmup")
+            .filter((s) => s.type !== "warmup" && isLoggedSet(s))
             .forEach((set, index) => {
               sets.push({
                 ...set,

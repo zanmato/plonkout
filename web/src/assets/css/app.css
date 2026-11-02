@@ -181,9 +181,20 @@
         calc(env(safe-area-inset-top, 0px) + min(env(safe-area-inset-top, 0px) * 1000, 10px)));
   }
 
-  /* Zero tall outside a home screen web app, where there is no inset. */
+  /* Zero tall in a browser tab, where there is no inset. */
   .status-bar-backdrop {
     height: env(safe-area-inset-top, 0px);
+  }
+
+  /*
+    Newer iOS can report no inset in a home screen web app, which left the
+    strip 0px tall and let the blur back in. iOS only uses a fixed element at
+    least 6px tall, so keep it as tall as the header's top padding.
+  */
+  @media (display-mode: standalone) {
+    .status-bar-backdrop {
+      height: max(env(safe-area-inset-top, 0px), 0.5rem);
+    }
   }
 
   /* Hide scrollbars but keep functionality */
